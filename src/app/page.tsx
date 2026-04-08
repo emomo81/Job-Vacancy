@@ -68,16 +68,6 @@ export default function LandingPage() {
           <div className="relative z-20 w-full max-w-7xl mx-auto px-6 pt-28 pb-24 flex flex-col lg:flex-row items-center gap-16">
             {/* Left content */}
             <div className="flex-1 max-w-xl">
-              <motion.div
-                className="inline-flex items-center gap-2 bg-blue-600/10 border border-blue-500/20 rounded-full px-4 py-1.5 mb-7"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.1, duration: 0.5 }}
-              >
-                <Zap size={12} className="text-blue-400" />
-                <span className="text-blue-400 text-xs font-medium">AI-Powered Screening</span>
-              </motion.div>
-
               <h1 className="text-5xl lg:text-[3.75rem] font-bold text-white leading-[1.05] mb-2 tracking-tight">
                 <TextReveal text="Hire Smarter." delay={0.2} />
               </h1>
