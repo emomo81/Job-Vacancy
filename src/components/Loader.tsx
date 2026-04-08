@@ -1,0 +1,64 @@
+"use client";
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
+export default function Loader() {
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    // Hide after 1.8s
+    const t = setTimeout(() => setVisible(false), 1800);
+    return () => clearTimeout(t);
+  }, []);
+
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          key="loader"
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#0A0A0F]"
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0, transition: { duration: 0.7, ease: "easeInOut" } }}
+        >
+          {/* Logo */}
+          <motion.div
+            className="flex items-center gap-3 mb-8"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          >
+            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30">
+              <span className="text-white font-bold text-lg">R</span>
+            </div>
+            <span className="text-white font-bold text-2xl tracking-tight">Rankr</span>
+          </motion.div>
+
+          {/* Progress bar */}
+          <motion.div
+            className="w-40 h-0.5 bg-white/10 rounded-full overflow-hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            <motion.div
+              className="h-full bg-blue-500 rounded-full"
+              initial={{ width: "0%" }}
+              animate={{ width: "100%" }}
+              transition={{ duration: 1.2, ease: "easeInOut", delay: 0.3 }}
+            />
+          </motion.div>
+
+          {/* Tagline */}
+          <motion.p
+            className="text-gray-500 text-xs mt-4 tracking-widest uppercase"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+          >
+            Hire Smarter. Screen Faster.
+          </motion.p>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
