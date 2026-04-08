@@ -27,8 +27,8 @@ function TextReveal({ text, className, delay = 0 }: { text: string; className?: 
         <motion.span
           key={i}
           className="inline-block mr-[0.25em]"
-          initial={{ opacity: 0, y: 22, filter: "blur(4px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{
             delay: delay + i * 0.08,
             duration: 0.55,
@@ -130,7 +130,7 @@ export default function LandingPage() {
               {candidateCards.map((c, i) => (
                 <motion.div
                   key={c.name}
-                  className={`bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-4 ${
+                  className={`bg-white/5 border border-white/10 rounded-2xl p-4 ${
                     i === 1 ? "translate-x-6" : i === 2 ? "translate-x-3" : ""
                   }`}
                   initial={{ opacity: 0, x: 40 }}
@@ -349,7 +349,7 @@ export default function LandingPage() {
           {/* CTA */}
           <section className="relative z-[2] pb-24 px-6">
             <ScrollReveal>
-              <div className="max-w-3xl mx-auto bg-blue-600/90 backdrop-blur-sm border border-blue-500/30 rounded-3xl p-14 text-center">
+              <div className="max-w-3xl mx-auto bg-blue-600 border border-blue-500/30 rounded-3xl p-14 text-center">
                 <motion.span
                   className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full mb-6"
                   initial={{ opacity: 0, y: 10 }}
