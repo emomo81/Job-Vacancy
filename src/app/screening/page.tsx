@@ -24,10 +24,8 @@ export default function ScreeningPage() {
       {/* Dark hero banner */}
       <div className="bg-[#0A0A0F] px-6 py-10">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold text-white mb-2">
-            AI Screening in Progress <span className="text-2xl">🔥</span>
-          </h1>
-          <p className="text-gray-400 text-sm">Rankr is analysing your candidates</p>
+          <h1 className="text-3xl font-bold text-white mb-1">AI Screening</h1>
+          <p className="text-gray-400 text-sm">Review your setup and run the AI screening when ready</p>
         </div>
       </div>
 
