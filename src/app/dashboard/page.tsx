@@ -1,244 +1,335 @@
-"use client";
-import Link from "next/link";
-import { useState } from "react";
-import { Minus, Plus, ArrowRight, Save } from "lucide-react";
-import RecruiterNav from "@/components/RecruiterNav";
-import Toast from "@/components/Toast";
-import Stepper from "@/components/Stepper";
+'use client'
 
-const STEPS = [
-  { label: "Create Job" },
-  { label: "Add Candidates" },
-  { label: "AI Screening" },
-];
+import React, { useState } from 'react'
+import { Poppins } from 'next/font/google'
+import { Bell, Sparkles, X, ChevronDown, Plus, Minus, User } from 'lucide-react'
+import Link from 'next/link'
 
-const departments = ["Engineering", "Design", "Product", "Marketing", "Sales", "Operations", "Finance", "HR"];
-const educationOptions = ["Any", "High School", "Bachelor's Degree", "Master's Degree", "PhD"];
-const skillOptions = ["React", "TypeScript", "Node.js", "Python", "AWS", "GraphQL", "PostgreSQL", "Docker", "Figma", "TailwindCSS"];
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-poppins',
+})
 
-type Tag = string;
+const DEPARTMENTS = ['Engineering', 'Design', 'Marketing', 'Operations', 'Sales', 'Other']
+const EDUCATION_OPTIONS = ["High School", "Bachelor's", "Master's", "PhD", "Any"]
+const EXPERIENCE_LEVELS = ['Entry Level', 'Intermediate', 'Expert']
+const EMPLOYMENT_TYPES = ['Full-Time', 'Part-Time', 'Contract', 'Remote']
+const NAV_LINKS = ['Jobs', 'Candidates', 'Shortlists', 'Settings']
 
-export default function DashboardPage() {
-  const [expLevel, setExpLevel] = useState<string>("Intermediate");
-  const [empType, setEmpType] = useState<string>("Full-Time");
-  const [skills, setSkills] = useState<Tag[]>(["React", "TypeScript"]);
-  const [skillInput, setSkillInput] = useState("");
-  const [showSkillDrop, setShowSkillDrop] = useState(false);
-  const [yearsMin, setYearsMin] = useState(3);
-  const [yearsMax, setYearsMax] = useState(7);
-  const [toast, setToast] = useState("");
+export default function RankrDashboard() {
+  const [activeNav, setActiveNav] = useState('Jobs')
+  const [jobTitle, setJobTitle] = useState('')
+  const [department, setDepartment] = useState('')
+  const [expLevel, setExpLevel] = useState('Intermediate')
+  const [empType, setEmpType] = useState('Full-Time')
+  const [skills, setSkills] = useState<string[]>(['React', 'TypeScript'])
+  const [skillInput, setSkillInput] = useState('')
+  const [yearsExp, setYearsExp] = useState(3)
+  const [education, setEducation] = useState('')
+  const [jobDesc, setJobDesc] = useState('')
+  const [niceToHave, setNiceToHave] = useState('')
 
-  function addSkill(s: string) {
-    if (s && !skills.includes(s)) setSkills([...skills, s]);
-    setSkillInput("");
-    setShowSkillDrop(false);
+  const handleSkillKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && skillInput.trim()) {
+      e.preventDefault()
+      if (!skills.includes(skillInput.trim())) {
+        setSkills([...skills, skillInput.trim()])
+      }
+      setSkillInput('')
+    }
   }
 
-  function removeSkill(s: string) {
-    setSkills(skills.filter((x) => x !== s));
+  const removeSkill = (skill: string) => {
+    setSkills(skills.filter(s => s !== skill))
   }
 
-  const filtered = skillOptions.filter(
-    (s) => s.toLowerCase().includes(skillInput.toLowerCase()) && !skills.includes(s)
-  );
+  const incrementYears = () => setYearsExp(prev => Math.min(prev + 1, 20))
+  const decrementYears = () => setYearsExp(prev => Math.max(prev - 1, 0))
 
   return (
-    <div className="min-h-screen bg-[#F0F4F8] dark:bg-[#0f1117]">
-      <RecruiterNav />
-      <Toast message={toast} onDone={() => setToast("")} />
+    <div className={`${poppins.className} min-h-screen bg-[#f0f5fa]`}>
 
-      {/* Dark hero banner */}
-      <div className="bg-[#0A0A0F] px-4 sm:px-6 py-8 sm:py-10">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">Post a New Job</h1>
-          <p className="text-gray-400 text-sm">Define requirements and let AI find the best candidates</p>
+      {/* Navbar + Hero (seamless dark block) */}
+      <div className="bg-[#070707]">
+
+        {/* Navbar */}
+        <header className="max-w-[1280px] mx-auto px-6 flex items-center justify-between h-16">
+          {/* Logo */}
+          <div className="flex items-center gap-2 select-none">
+            <div className="w-8 h-8 rounded-lg bg-[#2a85ff] flex items-center justify-center">
+              <Sparkles size={17} color="white" strokeWidth={2.2} />
+            </div>
+            <span className="text-white text-xl font-bold tracking-tight">Rankr</span>
+          </div>
+
+          {/* Nav links */}
+          <nav className="flex items-center gap-8">
+            {NAV_LINKS.map(link => (
+              <button
+                key={link}
+                onClick={() => setActiveNav(link)}
+                className={`text-sm font-medium pb-1 transition-colors cursor-pointer ${
+                  activeNav === link
+                    ? 'text-white border-b-2 border-[#2a85ff]'
+                    : 'text-white/50 hover:text-white/80 border-b-2 border-transparent'
+                }`}
+              >
+                {link}
+              </button>
+            ))}
+          </nav>
+
+          {/* Right side */}
+          <div className="flex items-center gap-4">
+            <button className="relative text-white/60 hover:text-white transition-colors cursor-pointer" aria-label="Notifications">
+              <Bell size={20} />
+              <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#2a85ff] rounded-full"></span>
+            </button>
+            <div className="flex items-center gap-2 cursor-pointer group">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#2a85ff] to-[#6eb3ff] flex items-center justify-center">
+                <User size={15} color="white" strokeWidth={2} />
+              </div>
+              <span className="text-white/80 text-sm font-medium group-hover:text-white transition-colors">Recruiter name</span>
+            </div>
+          </div>
+        </header>
+
+        {/* Hero Banner */}
+        <div className="relative overflow-hidden min-h-[220px]">
+          <div className="max-w-[1280px] mx-auto px-6 py-12 flex items-center justify-between relative z-10">
+            {/* Left text */}
+            <div className="flex-1 max-w-2xl">
+              <h1 className="text-white font-extrabold text-5xl lg:text-6xl leading-[1.08] tracking-tight mb-4">
+                Find the Right<br />Talent, Faster{' '}
+                <span className="text-[#2a85ff]">✦</span>
+              </h1>
+              <p className="text-white/50 text-base font-normal">
+                Let AI screen your candidates in seconds
+              </p>
+            </div>
+
+            {/* Right: grayscale image cutout */}
+            <div className="hidden md:block relative w-[380px] h-[220px] flex-shrink-0 self-end">
+              <img
+                src="https://uxcanvas.ai/api/generated-images/a41dbe01-2ec5-4de6-bde6-a96289ed1c5f/9bf07167-e189-46c3-9b0b-84e832c5a707"
+                alt="Team collaborating"
+                className="w-full h-full object-cover object-top grayscale-[100%] brightness-[0.7] contrast-[1.1]"
+                style={{
+                  maskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 70%, transparent 100%), linear-gradient(to left, black 55%, transparent 100%)',
+                  WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 70%, transparent 100%), linear-gradient(to left, black 55%, transparent 100%)',
+                  maskComposite: 'intersect',
+                  WebkitMaskComposite: 'source-in',
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Subtle background decoration */}
+          <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-[#2a85ff]/5 blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-1/3 w-64 h-64 rounded-full bg-[#2a85ff]/5 blur-3xl pointer-events-none" />
         </div>
       </div>
 
-      {/* Stepper */}
-      <div className="bg-white border-b border-gray-100 px-6 py-4">
-        <div className="max-w-7xl mx-auto">
-          <Stepper steps={STEPS} current={0} />
-        </div>
-      </div>
+      {/* Main content */}
+      <main className="max-w-[860px] mx-auto px-6 py-12">
 
-      {/* Form */}
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Job Details</h2>
+        {/* Section heading */}
+        <h2 className="text-[#070707] text-2xl font-bold mb-6">Create a New Job</h2>
 
-        <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm p-5 sm:p-8 space-y-6 sm:space-y-7">
+        {/* Form Card */}
+        <div className="bg-white rounded-2xl shadow-[0_4px_32px_rgba(0,0,0,0.07)] p-8 flex flex-col gap-7">
+
           {/* Job Title */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Job Title</label>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-[#070707]">Job Title</label>
             <input
               type="text"
+              value={jobTitle}
+              onChange={e => setJobTitle(e.target.value)}
               placeholder="e.g. Senior Frontend Engineer"
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="w-full border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm text-[#070707] placeholder-[#b0bac6] focus:outline-none focus:border-[#2a85ff] focus:ring-2 focus:ring-[#2a85ff]/10 transition-all"
             />
           </div>
 
           {/* Department */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Department</label>
-            <select className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition appearance-none bg-white">
-              <option value="">Select department</option>
-              {departments.map((d) => <option key={d}>{d}</option>)}
-            </select>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-[#070707]">Department</label>
+            <div className="relative">
+              <select
+                value={department}
+                onChange={e => setDepartment(e.target.value)}
+                aria-label="Department"
+                className="w-full appearance-none border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm text-[#070707] bg-white focus:outline-none focus:border-[#2a85ff] focus:ring-2 focus:ring-[#2a85ff]/10 transition-all cursor-pointer"
+              >
+                <option value="" disabled>Select department</option>
+                {DEPARTMENTS.map(d => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
+              <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#b0bac6] pointer-events-none" />
+            </div>
           </div>
 
           {/* Experience Level */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Experience Level</label>
-            <div className="flex gap-2">
-              {["Entry Level", "Intermediate", "Expert"].map((l) => (
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-[#070707]">Experience Level</label>
+            <div className="flex flex-wrap gap-3">
+              {EXPERIENCE_LEVELS.map(level => (
                 <button
-                  key={l}
-                  onClick={() => setExpLevel(l)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
-                    expLevel === l
-                      ? "bg-blue-600 border-blue-600 text-white"
-                      : "border-gray-200 text-gray-600 hover:border-gray-300 bg-white"
+                  key={level}
+                  onClick={() => setExpLevel(level)}
+                  className={`px-5 py-2 rounded-full text-sm font-medium transition-all cursor-pointer border ${
+                    expLevel === level
+                      ? 'bg-[#2a85ff] text-white border-[#2a85ff] shadow-sm'
+                      : 'bg-[#f0f5fa] text-[#5a6a7a] border-transparent hover:border-[#2a85ff]/30 hover:text-[#2a85ff]'
                   }`}
                 >
-                  {l}
+                  {level}
                 </button>
               ))}
             </div>
           </div>
 
           {/* Employment Type */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Employment Type</label>
-            <div className="flex gap-2 flex-wrap">
-              {["Full-Time", "Part-Time", "Contract", "Remote"].map((t) => (
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-[#070707]">Employment Type</label>
+            <div className="flex flex-wrap gap-3">
+              {EMPLOYMENT_TYPES.map(type => (
                 <button
-                  key={t}
-                  onClick={() => setEmpType(t)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
-                    empType === t
-                      ? "bg-blue-600 border-blue-600 text-white"
-                      : "border-gray-200 text-gray-600 hover:border-gray-300 bg-white"
+                  key={type}
+                  onClick={() => setEmpType(type)}
+                  className={`px-5 py-2 rounded-full text-sm font-medium transition-all cursor-pointer border ${
+                    empType === type
+                      ? 'bg-[#2a85ff] text-white border-[#2a85ff] shadow-sm'
+                      : 'bg-[#f0f5fa] text-[#5a6a7a] border-transparent hover:border-[#2a85ff]/30 hover:text-[#2a85ff]'
                   }`}
                 >
-                  {t}
+                  {type}
                 </button>
               ))}
             </div>
           </div>
 
           {/* Required Skills */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Required Skills</label>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {skills.map((s) => (
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-[#070707]">Required Skills</label>
+            <div className="min-h-[52px] w-full border border-[#e2eaf2] rounded-xl px-4 py-3 flex flex-wrap gap-2 focus-within:border-[#2a85ff] focus-within:ring-2 focus-within:ring-[#2a85ff]/10 transition-all">
+              {skills.map(skill => (
                 <span
-                  key={s}
-                  className="flex items-center gap-1.5 bg-blue-50 text-blue-700 text-xs font-medium px-3 py-1.5 rounded-full"
+                  key={skill}
+                  className="flex items-center gap-1.5 bg-[#e8f1ff] text-[#2a85ff] text-xs font-semibold px-3 py-1.5 rounded-full"
                 >
-                  {s}
-                  <button onClick={() => removeSkill(s)} className="text-blue-400 hover:text-blue-600 leading-none">×</button>
+                  {skill}
+                  <button
+                    onClick={() => removeSkill(skill)}
+                    className="hover:text-[#1a65df] transition-colors cursor-pointer"
+                    aria-label={`Remove ${skill}`}
+                  >
+                    <X size={12} strokeWidth={2.5} />
+                  </button>
                 </span>
               ))}
-            </div>
-            <div className="relative">
               <input
                 type="text"
                 value={skillInput}
-                onChange={(e) => { setSkillInput(e.target.value); setShowSkillDrop(true); }}
-                onFocus={() => setShowSkillDrop(true)}
-                onBlur={() => setTimeout(() => setShowSkillDrop(false), 150)}
-                onKeyDown={(e) => { if (e.key === "Enter") addSkill(skillInput); }}
-                placeholder="Add a skill..."
-                className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                onChange={e => setSkillInput(e.target.value)}
+                onKeyDown={handleSkillKeyDown}
+                placeholder={skills.length === 0 ? 'Type a skill and press Enter…' : ''}
+                className="flex-1 min-w-[140px] text-sm text-[#070707] placeholder-[#b0bac6] bg-transparent focus:outline-none"
               />
-              {showSkillDrop && filtered.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl border border-gray-200 shadow-lg z-10 overflow-hidden">
-                  {filtered.slice(0, 6).map((s) => (
-                    <button
-                      key={s}
-                      onMouseDown={() => addSkill(s)}
-                      className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                    >
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
+            <p className="text-xs text-[#b0bac6]">Press Enter to add each skill as a tag</p>
           </div>
 
-          {/* Years of Experience + Education */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Years of Experience</label>
-              <div className="flex items-center gap-3">
+          {/* Two col: Years of Experience + Education */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+            {/* Years of Experience stepper */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-[#070707]">Years of Experience</label>
+              <div className="flex items-center gap-4">
                 <button
-                  onClick={() => setYearsMin(Math.max(0, yearsMin - 1))}
-                  className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"
+                  onClick={decrementYears}
+                  className="w-10 h-10 rounded-full border border-[#e2eaf2] flex items-center justify-center text-[#5a6a7a] hover:border-[#2a85ff] hover:text-[#2a85ff] transition-all cursor-pointer"
+                  aria-label="Decrease years"
                 >
-                  <Minus size={13} />
+                  <Minus size={16} />
                 </button>
-                <span className="text-lg font-bold text-gray-900 min-w-[1.5rem] text-center">{yearsMin}</span>
-                <span className="text-gray-400 text-sm">to</span>
-                <span className="text-lg font-bold text-gray-900 min-w-[1.5rem] text-center">{yearsMax}</span>
+                <span className="text-[#070707] font-bold text-xl w-12 text-center">
+                  {yearsExp === 20 ? '20+' : yearsExp}
+                </span>
                 <button
-                  onClick={() => setYearsMax(yearsMax + 1)}
-                  className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors"
+                  onClick={incrementYears}
+                  className="w-10 h-10 rounded-full border border-[#e2eaf2] flex items-center justify-center text-[#5a6a7a] hover:border-[#2a85ff] hover:text-[#2a85ff] transition-all cursor-pointer"
+                  aria-label="Increase years"
                 >
-                  <Plus size={13} />
+                  <Plus size={16} />
                 </button>
-                <span className="text-gray-400 text-xs ml-1">years</span>
+                <span className="text-[#b0bac6] text-xs">years min.</span>
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Education Requirement</label>
-              <select className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition appearance-none bg-white">
-                {educationOptions.map((e) => <option key={e}>{e}</option>)}
-              </select>
+
+            {/* Education Requirement */}
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-semibold text-[#070707]">Education Requirement</label>
+              <div className="relative">
+                <select
+                  value={education}
+                  onChange={e => setEducation(e.target.value)}
+                  aria-label="Education Requirement"
+                  className="w-full appearance-none border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm text-[#070707] bg-white focus:outline-none focus:border-[#2a85ff] focus:ring-2 focus:ring-[#2a85ff]/10 transition-all cursor-pointer"
+                >
+                  <option value="" disabled>Select education</option>
+                  {EDUCATION_OPTIONS.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+                <ChevronDown size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#b0bac6] pointer-events-none" />
+              </div>
             </div>
           </div>
 
           {/* Job Description */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Job Description</label>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-[#070707]">Job Description</label>
             <textarea
-              rows={4}
-              placeholder="Describe the role, responsibilities, and team environment..."
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"
+              value={jobDesc}
+              onChange={e => setJobDesc(e.target.value)}
+              rows={6}
+              placeholder="Describe the role, responsibilities, and ideal candidate..."
+              className="w-full border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm text-[#070707] placeholder-[#b0bac6] focus:outline-none focus:border-[#2a85ff] focus:ring-2 focus:ring-[#2a85ff]/10 transition-all resize-none"
             />
           </div>
 
           {/* Nice to Have */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Nice to Have <span className="text-gray-400 font-normal">(optional)</span>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-[#070707]">
+              Nice to Have{' '}
+              <span className="text-[#b0bac6] font-normal">(optional)</span>
             </label>
             <textarea
-              rows={2}
-              placeholder="Bonus skills, certifications or experiences..."
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"
+              value={niceToHave}
+              onChange={e => setNiceToHave(e.target.value)}
+              rows={3}
+              placeholder="Any bonus skills, certifications, or experiences…"
+              className="w-full border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm text-[#070707] placeholder-[#b0bac6] focus:outline-none focus:border-[#2a85ff] focus:ring-2 focus:ring-[#2a85ff]/10 transition-all resize-none"
             />
           </div>
 
-          {/* Actions */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
-            <button
-              onClick={() => setToast("Draft saved successfully")}
-              className="flex items-center gap-2 border border-gray-200 text-gray-600 hover:border-gray-300 hover:text-gray-700 font-medium px-5 py-2.5 rounded-full text-sm transition-colors"
-            >
-              <Save size={14} />
+          {/* Form Actions */}
+          <div className="flex items-center justify-end gap-4 pt-2 border-t border-[#f0f5fa]">
+            <button className="px-6 py-2.5 rounded-full text-sm font-semibold text-[#5a6a7a] border border-[#e2eaf2] hover:border-[#2a85ff]/40 hover:text-[#2a85ff] transition-all cursor-pointer bg-white">
               Save Draft
             </button>
-            <Link
-              href="/candidates"
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-full text-sm transition-colors"
-            >
+            <Link href="/candidates" className="px-7 py-2.5 rounded-full text-sm font-semibold text-white bg-[#2a85ff] hover:bg-[#1a75ef] shadow-[0_4px_16px_rgba(42,133,255,0.35)] hover:shadow-[0_4px_20px_rgba(42,133,255,0.5)] transition-all cursor-pointer flex items-center gap-2">
               Next: Add Candidates
-              <ArrowRight size={14} />
+              <span className="text-base leading-none">→</span>
             </Link>
           </div>
+
         </div>
-      </div>
+      </main>
     </div>
-  );
+  )
 }

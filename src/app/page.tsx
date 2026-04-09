@@ -1,323 +1,299 @@
-"use client";
-import Link from "next/link";
-import Image from "next/image";
-import { ArrowRight, Check, Upload, Zap, Users } from "lucide-react";
-import { motion } from "framer-motion";
-import LandingNav from "@/components/LandingNav";
-import UnicornHero from "@/components/UnicornHero";
-import SplineBottom from "@/components/SplineBottom";
-import Loader from "@/components/Loader";
+'use client'
 
-/* Word-by-word text reveal — hero only */
-function TextReveal({ text, className, delay = 0 }: { text: string; className?: string; delay?: number }) {
-  const words = text.split(" ");
+import React, { useState, useEffect } from 'react'
+import { 
+  Sparkles, Briefcase, Users, Star, 
+  CheckCircle2, ArrowRight, Upload, 
+  Building2, User, Clock, ShieldCheck,
+  Zap, ChevronRight, Play, Globe
+} from 'lucide-react'
+import Link from 'next/link'
+import { motion, useScroll, useTransform } from 'motion/react'
+
+export default function EnhancedLandingPage() {
+  const { scrollY } = useScroll()
+  const y1 = useTransform(scrollY, [0, 500], [0, 200])
+  const opacity = useTransform(scrollY, [0, 200], [1, 0])
+
   return (
-    <span className={className} aria-label={text}>
-      {words.map((word, i) => (
-        <motion.span
-          key={i}
-          className="inline-block mr-[0.25em]"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: delay + i * 0.08, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+    <div className="min-h-screen bg-[#070707] text-white selection:bg-[#2a85ff]/30 overflow-x-hidden">
+      
+      {/* ── AMBIENT GLASS BACKGROUND ── */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-[#2a85ff]/10 blur-[120px]" />
+        <div className="absolute bottom-[20%] right-[-5%] w-[40%] h-[60%] rounded-full bg-[#9f6ef5]/5 blur-[100px]" />
+        <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-[#2a85ff]/5 blur-[80px]" />
+      </div>
+
+      {/* ── NAVBAR ── */}
+      <nav className="fixed top-0 w-full z-50 px-6 py-6 flex justify-center">
+        <motion.div 
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="max-w-7xl w-full h-16 bg-white/5 backdrop-blur-xl border border-white/10 rounded-full px-8 flex items-center justify-between shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
         >
-          {word}
-        </motion.span>
-      ))}
-    </span>
-  );
-}
+          <div className="flex items-center gap-2.5 group cursor-pointer">
+            <div className="w-8 h-8 rounded-lg bg-[#2a85ff] flex items-center justify-center group-hover:rotate-12 transition-transform">
+              <Sparkles size={16} className="text-white" />
+            </div>
+            <span className="text-xl font-black tracking-tight text-white">Rankr</span>
+          </div>
 
-const candidateCards = [
-  { name: "Amanda Bell", role: "Senior UX Designer", score: 94, tags: ["Design", "Research"], color: "bg-purple-500" },
-  { name: "Leon Miller", role: "Backend Engineer", score: 88, tags: ["Node.js", "AWS"], color: "bg-blue-500" },
-  { name: "Jessica Park", role: "Product Manager", score: 81, tags: ["Strategy", "Analytics"], color: "bg-green-500" },
-];
+          <div className="hidden md:flex items-center gap-8">
+            {['Product', 'Pricing', 'Company', 'Careers'].map(item => (
+              <Link key={item} href="#" className="text-sm font-bold text-white/50 hover:text-white transition-colors">{item}</Link>
+            ))}
+          </div>
 
-export default function LandingPage() {
-  return (
-    <>
-      <Loader />
+          <div className="flex items-center gap-4">
+            <Link href="/auth" className="text-sm font-bold text-white/70 hover:text-white transition-colors px-4 py-2">Login</Link>
+            <Link 
+              href="/auth" 
+              className="px-6 py-2.5 rounded-full bg-white text-[#070707] text-sm font-black hover:bg-[#2a85ff] hover:text-white transition-all shadow-lg hover:shadow-[#2a85ff]/30 active:scale-95"
+            >
+              Sign Up
+            </Link>
+          </div>
+        </motion.div>
+      </nav>
 
-      <div className="min-h-screen bg-[#0A0A0F]">
-        <LandingNav />
+      {/* ── HERO SECTION ── */}
+      <section className="relative pt-48 pb-32 px-6 flex flex-col items-center text-center overflow-hidden">
+        
+        {/* Floating elements visual background */}
+        <motion.div style={{ y: y1 }} className="absolute inset-0 z-0">
+          <div className="absolute top-40 left-20 w-32 h-32 rounded-3xl bg-[#2a85ff]/10 border border-white/5 rotate-12 flex items-center justify-center backdrop-blur-sm">
+            <div className="w-12 h-1.5 bg-[#2a85ff]/40 rounded-full" />
+          </div>
+          <div className="absolute bottom-40 right-20 w-40 h-40 rounded-[2.5rem] bg-[#9f6ef5]/10 border border-white/5 -rotate-12 flex flex-col gap-2 p-6 backdrop-blur-md">
+            <div className="w-full h-2 bg-white/10 rounded-full" />
+            <div className="w-2/3 h-2 bg-white/10 rounded-full" />
+            <div className="w-1/2 h-2 bg-white/10 rounded-full" />
+          </div>
+        </motion.div>
 
-        {/* -- Hero --------------------------------------------- */}
-        <section className="relative min-h-screen flex items-center overflow-hidden">
-          <UnicornHero />
+        <div className="max-w-4xl relative z-10 scale-100 sm:scale-110">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#2a85ff]/15 border border-[#2a85ff]/30 text-[#2a85ff] text-[10px] font-black uppercase tracking-widest mb-10"
+          >
+            <Zap size={10} strokeWidth={3} />
+            The Future of Recruitment is Here
+          </motion.div>
 
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0F] via-[#0A0A0F]/75 to-transparent z-10" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0F]/60 via-transparent to-transparent z-10" />
+          <motion.h1 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="text-6xl md:text-8xl font-black leading-[0.95] tracking-tight mb-8"
+          >
+            Hire top 1% talent<br/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2a85ff] to-[#9f6ef5]">with AI Precision.</span>
+          </motion.h1>
 
-          <div className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 pt-24 sm:pt-28 pb-16 sm:pb-24 flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
-            {/* Left content */}
-            <div className="flex-1 max-w-xl">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[3.75rem] font-bold text-white leading-[1.05] mb-2 tracking-tight">
-                <TextReveal text="Hire Smarter." delay={0.2} />
-              </h1>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[3.75rem] font-bold leading-[1.1] mb-6 tracking-tight">
-                <TextReveal text="Screen Faster." delay={0.5} className="text-blue-500" />
-              </h1>
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="text-white/40 text-lg md:text-xl font-medium max-w-2xl mx-auto leading-relaxed mb-12"
+          >
+            Rankr automates candidate screening, ranking your pipeline in seconds using Gemini AI. Stop reading CVs, start hiring people.
+          </motion.p>
 
-              <motion.p
-                className="text-gray-400 text-lg leading-relaxed mb-8 max-w-md"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.9, duration: 0.6 }}
-              >
-                Rankr uses AI to screen hundreds of candidates in seconds — scoring, ranking, and explaining every decision so recruiters can focus on people, not paperwork.
-              </motion.p>
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          >
+            <Link 
+              href="/auth" 
+              className="px-12 py-5 rounded-[2rem] bg-[#2a85ff] text-white text-lg font-black flex items-center justify-center gap-3 hover:bg-[#1a75ef] transition-all hover:scale-105 shadow-[0_12px_40px_rgba(42,133,255,0.4)] active:scale-95 group"
+            >
+              Get Started Free
+              <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" strokeWidth={3} />
+            </Link>
+          </motion.div>
 
-              <motion.div
-                className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.05, duration: 0.6 }}
-              >
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-full transition-colors text-sm"
-                >
-                  Post a Job <ArrowRight size={15} />
-                </Link>
-                <Link
-                  href="/auth"
-                  className="flex items-center gap-2 text-gray-400 hover:text-white text-sm transition-colors"
-                >
-                  <Upload size={14} /> Upload Your CV
-                </Link>
-              </motion.div>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1, delay: 1 }}
+            className="mt-20 flex flex-wrap items-center justify-center gap-10 opacity-30 grayscale contrast-125"
+          >
+            <div className="flex items-center gap-2 font-black text-2xl uppercase tracking-tighter italic lg:scale-110">Microsoft</div>
+            <div className="flex items-center gap-2 font-black text-2xl uppercase tracking-tighter italic lg:scale-110">Airbnb</div>
+            <div className="flex items-center gap-2 font-black text-2xl uppercase tracking-tighter italic lg:scale-110">Uber</div>
+            <div className="flex items-center gap-2 font-black text-2xl uppercase tracking-tighter italic lg:scale-110">Stripe</div>
+          </motion.div>
+        </div>
 
-              <motion.div
-                className="flex items-center gap-4"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 1.2, duration: 0.6 }}
-              >
-                <div className="flex -space-x-2">
-                  {["bg-purple-500", "bg-blue-500", "bg-green-500", "bg-yellow-500"].map((c, i) => (
-                    <div key={i} className={`w-8 h-8 rounded-full border-2 border-[#0A0A0F] ${c}`} />
+      </section>
+
+      {/* ── INTERACTIVE FEATURES SECTION ── */}
+      <section className="py-32 px-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+          
+          <div className="relative">
+            <motion.div 
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="space-y-6"
+            >
+              <h2 className="text-4xl md:text-6xl font-black leading-tight tracking-tight">
+                AI that understands<br/>
+                <span className="text-[#2a85ff]">human expertise.</span>
+              </h2>
+              <p className="text-white/40 text-lg leading-relaxed max-w-md">
+                Our Gemini-powered engine doesn&apos;t just keyword match. It understands context, experience depth, and cultural fit.
+              </p>
+              
+              <div className="space-y-4 pt-6">
+                {[
+                  { icon: <ShieldCheck className="text-[#16a34a]" />, title: 'Bias-Free Screening', desc: 'Objective ranking based on skills and merit.' },
+                  { icon: <Zap className="text-[#f07830]" />, title: 'Instant Processing', desc: 'Process 1,000+ CVs in less than a minute.' },
+                  { icon: <Globe className="text-[#2a85ff]" />, title: 'Universal Support', desc: 'Works with any major global CV format.' },
+                ].map((item, i) => (
+                  <motion.div 
+                    key={item.title}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                    className="flex items-start gap-4 p-4 rounded-2xl hover:bg-white/5 transition-all group"
+                  >
+                    <div className="p-3 rounded-xl bg-white/5 border border-white/10 group-hover:scale-110 transition-transform">
+                      {item.icon}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white">{item.title}</h4>
+                      <p className="text-white/30 text-sm mt-1">{item.desc}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+
+          <div className="relative">
+             {/* Mock Dashboard Visual */}
+             <motion.div 
+                initial={{ opacity: 0, scale: 0.9, rotateY: -10 }}
+                whileInView={{ opacity: 1, scale: 1, rotateY: 0 }}
+                viewport={{ once: true }}
+                className="relative bg-[#1a1a1a] rounded-[2.5rem] border border-white/10 p-8 shadow-[0_32px_120px_rgba(42,133,255,0.15)] overflow-hidden group hover:scale-[1.02] transition-all duration-700"
+             >
+                <div className="absolute top-0 right-0 w-64 h-64 bg-[#2a85ff]/10 blur-[60px] group-hover:bg-[#2a85ff]/20 transition-all" />
+                
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
+                    <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
+                    <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
+                  </div>
+                  <div className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold text-white/40">
+                    Live Score Tracking
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {[
+                    { name: 'Amara Osei', score: 98, role: 'Backend Expert', color: '#2a85ff' },
+                    { name: 'John Doe', score: 85, role: 'Full Stack', color: '#9f6ef5' },
+                    { name: 'Lena Müller', score: 72, role: 'DevOps', color: '#f07830' },
+                  ].map((c, i) => (
+                    <motion.div 
+                      key={c.name}
+                      initial={{ width: 0 }}
+                      whileInView={{ width: '100%' }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.5 + i * 0.2, duration: 1 }}
+                      className="bg-white/5 rounded-2xl p-5 border border-white/5 flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full bg-white/10" />
+                        <div>
+                          <p className="text-sm font-bold text-white">{c.name}</p>
+                          <p className="text-[10px] text-white/30 font-medium">{c.role}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-black" style={{ color: c.color }}>{c.score}%</p>
+                        <p className="text-[8px] uppercase font-bold text-white/20 tracking-widest">Match</p>
+                      </div>
+                    </motion.div>
                   ))}
                 </div>
-                <span className="text-gray-500 text-xs">
-                  Trusted by <span className="text-gray-300 font-medium">500+</span> companies worldwide
-                </span>
-              </motion.div>
-            </div>
 
-            {/* Right — candidate cards */}
-            <div className="flex-1 hidden lg:flex flex-col gap-3 max-w-xs">
-              {candidateCards.map((c, i) => (
-                <motion.div
-                  key={c.name}
-                  className={`bg-white/5 border border-white/10 rounded-2xl p-4 ${
-                    i === 1 ? "translate-x-6" : i === 2 ? "translate-x-3" : ""
-                  }`}
-                  initial={{ opacity: 0, x: 40 }}
-                  animate={{ opacity: 1, x: i === 1 ? 24 : i === 2 ? 12 : 0 }}
-                  transition={{ delay: 1.1 + i * 0.15, duration: 0.65, ease: [0.25, 0.1, 0.25, 1] }}
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-9 h-9 rounded-full ${c.color} flex items-center justify-center text-white text-sm font-semibold`}>
-                        {c.name[0]}
-                      </div>
-                      <div>
-                        <p className="text-white text-sm font-medium">{c.name}</p>
-                        <p className="text-gray-400 text-xs">{c.role}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-blue-400 text-lg font-bold">{c.score}</p>
-                      <p className="text-gray-500 text-xs">match</p>
-                    </div>
-                  </div>
-                  <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <motion.div
-                      className="h-full bg-blue-500 rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${c.score}%` }}
-                      transition={{ delay: 1.3 + i * 0.15, duration: 0.9, ease: "easeOut" }}
-                    />
-                  </div>
-                  <div className="flex gap-1.5 mt-2">
-                    {c.tags.map((t) => (
-                      <span key={t} className="text-xs text-gray-400 bg-white/5 px-2 py-0.5 rounded-md">{t}</span>
-                    ))}
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-
-          {/* Scroll indicator */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 opacity-50">
-            <span className="text-gray-500 text-xs tracking-widest uppercase">Scroll</span>
-            <div className="w-px h-10 bg-gradient-to-b from-gray-500 to-transparent" />
-          </div>
-        </section>
-
-        {/* -- How it Works ------------------------------------ */}
-        <section id="how-it-works" className="bg-[#F0F4F8] dark:bg-[#0f1117] py-16 md:py-28">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
-            <p className="text-blue-600 text-xs font-semibold uppercase tracking-widest mb-3">How it works</p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              Three steps to your<br />perfect shortlist
-            </h2>
-            <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg max-w-xl mx-auto mb-10 sm:mb-16">
-              From job post to shortlist in minutes — no spreadsheets, no guesswork.
-            </p>
-
-            <div className="grid md:grid-cols-3 gap-6">
-              {[
-                { step: "01", title: "Create a Job", desc: "Define the role, required skills, experience level and employment type in under 2 minutes.", icon: "📝" },
-                { step: "02", title: "Add Candidates", desc: "Import from Rankr's talent pool or upload CVs directly. Supports bulk PDF uploads.", icon: "👥" },
-                { step: "03", title: "Let AI Screen", desc: "Rankr scores every candidate, explains its reasoning, and delivers a ranked shortlist instantly.", icon: "⚡" },
-              ].map((s) => (
-                <div
-                  key={s.step}
-                  className="bg-white rounded-2xl p-8 text-left border border-gray-100 shadow-sm h-full"
-                >
-                  <span className="text-blue-600 text-xs font-bold uppercase tracking-widest">{s.step}</span>
-                  <div className="text-4xl my-4">{s.icon}</div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{s.title}</h3>
-                  <p className="text-gray-500 text-sm leading-relaxed">{s.desc}</p>
+                <div className="mt-8 pt-8 border-t border-white/5 flex items-center justify-between text-[#2a85ff]">
+                   <span className="text-xs font-bold">GEMINI SCREENING ACTIVE</span>
+                   <motion.div 
+                    animate={{ scale: [1, 1.2, 1] }} 
+                    transition={{ repeat: Infinity, duration: 1.5 }}
+                    className="w-2 h-2 rounded-full bg-[#4ade80]" 
+                  />
                 </div>
-              ))}
-            </div>
+             </motion.div>
+
+             {/* Background glow for the visual */}
+             <div className="absolute -inset-4 bg-gradient-to-r from-[#2a85ff]/30 to-[#9f6ef5]/30 blur-3xl opacity-20 -z-10" />
           </div>
-        </section>
 
-        {/* -- Feature Cards ---------------------------------- */}
-        <section className="bg-[#F0F4F8] dark:bg-[#0f1117] pb-16 md:pb-28">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 grid md:grid-cols-2 gap-6" id="companies">
-            {/* Companies card */}
-            <div className="bg-white rounded-3xl p-6 sm:p-10 border border-gray-100 shadow-sm h-full">
-              <span className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-600 text-xs font-semibold px-3 py-1 rounded-full mb-6">
-                <Zap size={11} /> For Companies
-              </span>
-              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 leading-tight">
-                Screen 100 candidates<br />in 30 seconds
-              </h3>
-              <ul className="space-y-3 mb-8">
-                {[
-                  "AI evaluates candidates against your job criteria",
-                  "Ranked match scores with transparent reasoning",
-                  "Shortlist the best without reading every CV",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-sm text-gray-600">
-                    <Check size={16} className="text-blue-600 mt-0.5 flex-shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-2.5 rounded-full text-sm transition-colors"
-              >
-                Post a Job <ArrowRight size={14} />
-              </Link>
-            </div>
-
-            {/* Candidates card */}
-            <div id="candidates" className="bg-white rounded-3xl p-6 sm:p-10 border border-gray-100 shadow-sm h-full">
-              <span className="inline-flex items-center gap-1.5 bg-green-50 text-green-600 text-xs font-semibold px-3 py-1 rounded-full mb-6">
-                <Users size={11} /> For Candidates
-              </span>
-              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 leading-tight">
-                Let your profile<br />speak for itself
-              </h3>
-              <ul className="space-y-3 mb-8">
-                {[
-                  "Upload your CV once, apply everywhere",
-                  "AI-generated match scores and reasoning",
-                  "Works with Unicorn profiles and external uploads",
-                ].map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-sm text-gray-600">
-                    <Check size={16} className="text-green-600 mt-0.5 flex-shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                href="/auth"
-                className="inline-flex items-center gap-2 border border-gray-300 hover:border-gray-400 text-gray-700 font-semibold px-5 py-2.5 rounded-full text-sm transition-colors"
-              >
-                Create Profile <ArrowRight size={14} />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* -- Stats + CTA + Footer -- */}
-        <div className="relative">
-          <SplineBottom />
-          <div className="absolute inset-0 bg-[#0A0A0F]/60 z-[1]" />
-
-          {/* Stats */}
-          <section className="relative z-[2] py-16 sm:py-24">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-0 sm:divide-x divide-white/10">
-                {[
-                  { value: "10,000+", label: "Candidates screened" },
-                  { value: "500+", label: "Companies hiring" },
-                  { value: "30 sec", label: "Average screen time" },
-                ].map((stat) => (
-                  <div key={stat.label} className="px-4 sm:px-8 text-center">
-                    <p className="text-3xl sm:text-4xl font-bold text-white mb-2">{stat.value}</p>
-                    <p className="text-gray-400 text-sm">{stat.label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          {/* CTA */}
-          <section className="relative z-[2] pb-16 sm:pb-24 px-4 sm:px-6">
-            <div className="max-w-3xl mx-auto bg-blue-600 border border-blue-500/30 rounded-3xl p-8 sm:p-14 text-center">
-              <span className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full mb-6">
-                <Zap size={11} /> Available today
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Ready to hire smarter?</h2>
-              <p className="text-blue-100 text-base sm:text-lg mb-8 max-w-md mx-auto">
-                Join hundreds of companies already using Rankr to find the best talent faster.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link
-                  href="/dashboard"
-                  className="bg-white dark:!bg-white text-blue-600 dark:!text-blue-600 hover:bg-blue-50 font-semibold px-6 py-3 rounded-full text-sm transition-colors flex items-center gap-2"
-                >
-                  Post a Job <ArrowRight size={14} />
-                </Link>
-                <Link href="/auth" className="text-white/80 hover:text-white text-sm transition-colors">
-                  View Demo
-                </Link>
-              </div>
-            </div>
-          </section>
-
-          {/* Footer */}
-          <footer className="relative z-[2] border-t border-white/5 py-10 px-6">
-            <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="flex items-center">
-                <Image src="/logo.png" alt="Job RW" width={100} height={40} className="h-8 w-auto object-contain" />
-              </div>
-              <div className="flex gap-6 text-sm text-gray-500">
-                {["Privacy", "Terms", "Contact", "Blog"].map((l) => (
-                  <a key={l} href="#" className="hover:text-gray-300 transition-colors">{l}</a>
-                ))}
-              </div>
-              <div className="flex gap-4 text-xs font-medium text-gray-500">
-                {["X", "LinkedIn", "GitHub"].map((name) => (
-                  <a key={name} href="#" className="hover:text-gray-300 transition-colors">{name}</a>
-                ))}
-              </div>
-            </div>
-            <p className="text-center text-gray-600 text-xs mt-6">© 2026 Rankr. All rights reserved.</p>
-          </footer>
         </div>
-      </div>
-    </>
-  );
+      </section>
+
+      {/* ── CALL TO ACTION ── */}
+      <section className="py-40 px-6 relative overflow-hidden">
+        <div className="max-w-5xl mx-auto bg-gradient-to-br from-[#2a85ff] to-[#9f6ef5] rounded-[3rem] p-16 md:p-24 text-center relative overflow-hidden shadow-[0_32px_120px_rgba(42,133,255,0.3)]">
+          <div className="absolute inset-0 bg-[#070707]/10" />
+          <div className="absolute -top-20 -right-20 w-80 h-80 bg-white/10 blur-[80px] rounded-full" />
+          
+          <div className="relative z-10">
+            <h2 className="text-5xl md:text-7xl font-black tracking-tight text-white mb-8">
+              Ready to hire your<br className="hidden md:block"/> next superstar?
+            </h2>
+            <p className="text-white/80 text-lg md:text-xl font-medium max-w-xl mx-auto mb-12">
+              Join 2,000+ modern companies already using Rankr to transform their talent pipeline.
+            </p>
+            <Link 
+              href="/auth" 
+              className="inline-flex items-center gap-3 px-10 py-5 rounded-full bg-white text-[#070707] text-xl font-black hover:bg-[#070707] hover:text-white transition-all hover:scale-105 active:scale-95 shadow-2xl"
+            >
+              Start Your Free Trial
+              <ArrowRight size={22} strokeWidth={3} />
+            </Link>
+            <p className="mt-8 text-white/60 text-sm font-bold tracking-wide">
+              NO CREDIT CARD REQUIRED · 14-DAY FREE TRIAL
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── FOOTER ── */}
+      <footer className="py-20 px-6 border-t border-white/5">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-[#2a85ff] flex items-center justify-center">
+              <Sparkles size={16} className="text-white" />
+            </div>
+            <span className="text-xl font-black tracking-tight text-white">Rankr</span>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-8">
+            {['Privacy', 'Terms', 'Security', 'Legal', 'Contact'].map(link => (
+              <Link key={link} href="#" className="text-sm font-bold text-white/40 hover:text-white transition-colors">{link}</Link>
+            ))}
+          </div>
+
+          <p className="text-white/20 text-xs font-bold uppercase tracking-widest">
+            © 2024 Rankr AI. Built with Gemini.
+          </p>
+        </div>
+      </footer>
+
+    </div>
+  )
 }
