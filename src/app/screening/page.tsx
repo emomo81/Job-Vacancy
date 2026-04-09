@@ -22,9 +22,9 @@ export default function ScreeningPage() {
       <RecruiterNav />
 
       {/* Dark hero banner */}
-      <div className="bg-[#0A0A0F] px-6 py-10">
+      <div className="bg-[#0A0A0F] px-4 sm:px-6 py-8 sm:py-10">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold text-white mb-1">AI Screening</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">AI Screening</h1>
           <p className="text-gray-400 text-sm">Review your setup and run the AI screening when ready</p>
         </div>
       </div>
@@ -36,7 +36,7 @@ export default function ScreeningPage() {
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-6 py-8">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Job info card */}
         <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm p-6 mb-6">
           <div className="flex items-start justify-between">
@@ -73,7 +73,7 @@ export default function ScreeningPage() {
         </div>
 
         {/* Start screening CTA */}
-        <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm p-12 text-center">
+        <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm p-8 sm:p-12 text-center">
           <div className="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
               <Zap size={24} className="text-blue-600" />
