@@ -1,18 +1,17 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function LandingNav() {
   const [open, setOpen] = useState(false);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-[#0A0A0F] border-b border-white/5">
-      <Link href="/" className="flex items-center gap-2">
-        <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
-          <span className="text-white text-xs font-bold">R</span>
-        </div>
-        <span className="text-white font-bold text-lg tracking-tight">Rankr</span>
+      <Link href="/" className="flex items-center">
+        <Image src="/logo.png" alt="Job RW" width={160} height={64} className="h-12 w-auto object-contain" priority />
       </Link>
 
       {/* Desktop links */}
@@ -23,6 +22,7 @@ export default function LandingNav() {
       </div>
 
       <div className="hidden md:flex items-center gap-3">
+        <ThemeToggle />
         <Link href="/auth" className="text-sm text-gray-300 hover:text-white px-4 py-2 transition-colors">
           Sign In
         </Link>
@@ -32,9 +32,12 @@ export default function LandingNav() {
       </div>
 
       {/* Mobile menu button */}
-      <button className="md:hidden text-gray-400 hover:text-white" onClick={() => setOpen(!open)}>
-        {open ? <X size={20} /> : <Menu size={20} />}
-      </button>
+      <div className="md:hidden flex items-center gap-2">
+        <ThemeToggle />
+        <button className="text-gray-400 hover:text-white" onClick={() => setOpen(!open)}>
+          {open ? <X size={20} /> : <Menu size={20} />}
+        </button>
+      </div>
 
       {open && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-[#0A0A0F] border-b border-white/10 px-6 py-4 flex flex-col gap-4">
