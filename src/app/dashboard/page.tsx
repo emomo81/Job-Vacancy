@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Minus, Plus, ArrowRight, Save } from "lucide-react";
 import RecruiterNav from "@/components/RecruiterNav";
+import Toast from "@/components/Toast";
 import Stepper from "@/components/Stepper";
 
 const STEPS = [
@@ -25,6 +26,7 @@ export default function DashboardPage() {
   const [showSkillDrop, setShowSkillDrop] = useState(false);
   const [yearsMin, setYearsMin] = useState(3);
   const [yearsMax, setYearsMax] = useState(7);
+  const [toast, setToast] = useState("");
 
   function addSkill(s: string) {
     if (s && !skills.includes(s)) setSkills([...skills, s]);
@@ -41,8 +43,9 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F0F4F8]">
+    <div className="min-h-screen bg-[#F0F4F8] dark:bg-[#0f1117]">
       <RecruiterNav />
+      <Toast message={toast} onDone={() => setToast("")} />
 
       {/* Dark hero banner */}
       <div className="bg-[#0A0A0F] px-6 py-10">
@@ -63,9 +66,9 @@ export default function DashboardPage() {
 
       {/* Form */}
       <div className="max-w-3xl mx-auto px-6 py-10">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">Job Details</h2>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Job Details</h2>
 
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 space-y-7">
+        <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm p-8 space-y-7">
           {/* Job Title */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Job Title</label>
@@ -221,7 +224,10 @@ export default function DashboardPage() {
 
           {/* Actions */}
           <div className="flex items-center justify-between pt-2">
-            <button className="flex items-center gap-2 border border-gray-200 text-gray-600 hover:border-gray-300 hover:text-gray-700 font-medium px-5 py-2.5 rounded-full text-sm transition-colors">
+            <button
+              onClick={() => setToast("Draft saved successfully")}
+              className="flex items-center gap-2 border border-gray-200 text-gray-600 hover:border-gray-300 hover:text-gray-700 font-medium px-5 py-2.5 rounded-full text-sm transition-colors"
+            >
               <Save size={14} />
               Save Draft
             </button>
