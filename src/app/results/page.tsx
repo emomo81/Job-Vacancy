@@ -1,8 +1,9 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Download, ArrowLeft, ExternalLink, Plus, Check, ChevronDown } from "lucide-react";
 import RecruiterNav from "@/components/RecruiterNav";
+import Toast from "@/components/Toast";
 
 type Tab = "all" | "rankr" | "external";
 
@@ -133,35 +134,43 @@ export default function ResultsPage() {
   const [tab, setTab] = useState<Tab>("all");
   const [shortlisted, setShortlisted] = useState<number[]>([1]);
   const [recFilter, setRecFilter] = useState<string[]>(["Hire", "Consider", "Pass"]);
+  const [sourceFilter, setSourceFilter] = useState<string[]>(["rankr", "external"]);
   const [scoreRange, setScoreRange] = useState(50);
+  const [sortDesc, setSortDesc] = useState(true);
   const [selected, setSelected] = useState<number | null>(1);
+  const [toast, setToast] = useState("");
+  const showToast = useCallback((msg: string) => { setToast(""); setTimeout(() => setToast(msg), 10); }, []);
 
   function toggleShortlist(id: number) {
     setShortlisted((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
   }
 
-  const filtered = candidates.filter((c) => {
-    if (tab === "rankr" && c.source !== "rankr") return false;
-    if (tab === "external" && c.source !== "external") return false;
-    if (!recFilter.includes(c.recommendation)) return false;
-    if (c.score < scoreRange) return false;
-    return true;
-  });
+  const filtered = candidates
+    .filter((c) => {
+      if (tab === "rankr" && c.source !== "rankr") return false;
+      if (tab === "external" && c.source !== "external") return false;
+      if (!recFilter.includes(c.recommendation)) return false;
+      if (!sourceFilter.includes(c.source)) return false;
+      if (c.score < scoreRange) return false;
+      return true;
+    })
+    .sort((a, b) => sortDesc ? b.score - a.score : a.score - b.score);
 
   const selectedCandidate = candidates.find((c) => c.id === selected);
   const shortlistedCandidates = candidates.filter((c) => shortlisted.includes(c.id));
 
   return (
-    <div className="min-h-screen bg-[#F0F4F8]">
+    <div className="min-h-screen bg-[#F0F4F8] dark:bg-[#0f1117]">
       <RecruiterNav />
+      <Toast message={toast} onDone={() => setToast("")} />
 
       {/* Header */}
-      <div className="bg-white border-b border-gray-100 px-6 py-5">
+      <div className="bg-white dark:bg-[#0f1117] border-b border-gray-100 dark:border-white/5 px-6 py-5">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <div className="w-2 h-2 bg-green-500 rounded-full" />
-              <h1 className="text-3xl font-bold text-gray-900">Screening Results</h1>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Screening Results</h1>
             </div>
             <p className="text-gray-400 text-sm">9 candidates ranked from 34 applicants</p>
           </div>
@@ -179,7 +188,7 @@ export default function ResultsPage() {
       <div className="max-w-7xl mx-auto px-6 py-6 flex gap-6">
         {/* ── Sidebar filters ──────────────────────────── */}
         <aside className="hidden xl:block w-48 flex-shrink-0">
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 sticky top-6">
+          <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm p-5 sticky top-6">
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">Match Score</h3>
             <div className="mb-1">
               <input
@@ -210,18 +219,15 @@ export default function ResultsPage() {
             ))}
 
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mt-5 mb-3">Source</h3>
-            {["Rankr Platform", "External Upload"].map((s) => (
-              <label key={s} className="flex items-center gap-2 mb-2 cursor-pointer">
-                <input type="checkbox" defaultChecked className="accent-blue-600 w-3.5 h-3.5" />
-                <span className="text-xs text-gray-600">{s}</span>
-              </label>
-            ))}
-
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mt-5 mb-3">Experience Level</h3>
-            {["Entry Level", "Intermediate", "Expert"].map((e) => (
-              <label key={e} className="flex items-center gap-2 mb-2 cursor-pointer">
-                <input type="checkbox" defaultChecked className="accent-blue-600 w-3.5 h-3.5" />
-                <span className="text-xs text-gray-600">{e}</span>
+            {[{ label: "Rankr Platform", value: "rankr" }, { label: "External Upload", value: "external" }].map((s) => (
+              <label key={s.value} className="flex items-center gap-2 mb-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={sourceFilter.includes(s.value)}
+                  onChange={() => setSourceFilter((prev) => prev.includes(s.value) ? prev.filter((x) => x !== s.value) : [...prev, s.value])}
+                  className="accent-blue-600 w-3.5 h-3.5"
+                />
+                <span className="text-xs text-gray-600">{s.label}</span>
               </label>
             ))}
           </div>
@@ -248,11 +254,17 @@ export default function ResultsPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <button className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 border border-gray-200 px-3 py-1.5 rounded-lg transition-colors">
+              <button
+                onClick={() => showToast("Exporting PDF…")}
+                className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 border border-gray-200 px-3 py-1.5 rounded-lg transition-colors"
+              >
                 <Download size={12} /> Export PDF
               </button>
-              <button className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 border border-gray-200 px-3 py-1.5 rounded-lg transition-colors">
-                Most Recent <ChevronDown size={12} />
+              <button
+                onClick={() => setSortDesc((v) => !v)}
+                className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 border border-gray-200 px-3 py-1.5 rounded-lg transition-colors"
+              >
+                {sortDesc ? "Highest first" : "Lowest first"} <ChevronDown size={12} className={sortDesc ? "" : "rotate-180"} />
               </button>
             </div>
           </div>
@@ -262,8 +274,8 @@ export default function ResultsPage() {
               <div
                 key={c.id}
                 onClick={() => setSelected(c.id)}
-                className={`bg-white rounded-2xl border p-5 cursor-pointer transition-all ${
-                  selected === c.id ? "border-blue-300 shadow-md" : "border-gray-100 shadow-sm hover:border-gray-200"
+                className={`bg-white dark:bg-[#1a1d27] rounded-2xl border p-5 cursor-pointer transition-all ${
+                  selected === c.id ? "border-blue-300 dark:border-blue-500 shadow-md" : "border-gray-100 dark:border-white/5 shadow-sm hover:border-gray-200 dark:hover:border-white/10"
                 }`}
               >
                 <div className="flex items-start justify-between mb-3">
@@ -313,7 +325,10 @@ export default function ResultsPage() {
                     {shortlisted.includes(c.id) ? <Check size={11} /> : <Plus size={11} />}
                     {shortlisted.includes(c.id) ? "Shortlisted" : "Shortlist"}
                   </button>
-                  <button className="flex items-center gap-1.5 text-xs font-medium border border-gray-200 text-gray-600 hover:border-gray-300 px-3 py-1.5 rounded-full transition-colors">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setSelected(c.id); }}
+                    className="flex items-center gap-1.5 text-xs font-medium border border-gray-200 text-gray-600 hover:border-gray-300 px-3 py-1.5 rounded-full transition-colors"
+                  >
                     <ExternalLink size={11} /> View Details
                   </button>
                 </div>
@@ -326,7 +341,10 @@ export default function ResultsPage() {
             <Link href="/screening" className="flex items-center gap-2 text-gray-500 hover:text-gray-700 text-sm transition-colors">
               <ArrowLeft size={14} /> Back to Screening
             </Link>
-            <button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-full text-sm transition-colors">
+            <button
+              onClick={() => showToast(`Exporting ${shortlisted.length} shortlisted candidates…`)}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-full text-sm transition-colors"
+            >
               <Download size={14} />
               Export Shortlist Report
             </button>
@@ -336,7 +354,7 @@ export default function ResultsPage() {
         {/* ── Detail panel ─────────────────────────────── */}
         {selectedCandidate && (
           <aside className="hidden 2xl:block w-72 flex-shrink-0">
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sticky top-6">
+            <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm p-6 sticky top-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className={`w-12 h-12 rounded-full ${selectedCandidate.color} flex items-center justify-center text-white font-semibold`}>
                   {selectedCandidate.name.split(" ").map((n) => n[0]).join("")}
