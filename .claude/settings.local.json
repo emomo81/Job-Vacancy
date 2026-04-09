@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npm install:*)",
       "mcp__Desktop_Commander__read_file",
-      "mcp__Desktop_Commander__read_multiple_files"
+      "mcp__Desktop_Commander__read_multiple_files",
+      "Bash(python -c \"from PIL import Image; print\\('Pillow OK'\\)\")"
     ]
   }
 }
