@@ -143,10 +143,10 @@ export default function ApplicationsPage() {
       <Toast message={toast} onDone={() => setToast("")} />
 
       {/* Header */}
-      <div className="bg-[#0A0A0F] px-6 py-10">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <div className="bg-[#0A0A0F] px-4 sm:px-6 py-8 sm:py-10">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-1">My Applications</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">My Applications</h1>
             <p className="text-gray-400 text-sm">Track every role you've applied to and its current status</p>
           </div>
           <div className="hidden lg:flex items-center gap-3">
@@ -166,7 +166,7 @@ export default function ApplicationsPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8 flex gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex gap-6">
         {/* -- Left: list -- */}
         <div className="flex-1 min-w-0">
           {/* Toolbar */}
