@@ -285,7 +285,7 @@ export default function LandingPage() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Link
                   href="/dashboard"
-                  className="bg-white text-blue-600 hover:bg-blue-50 font-semibold px-6 py-3 rounded-full text-sm transition-colors flex items-center gap-2"
+                  className="bg-white dark:!bg-white text-blue-600 dark:!text-blue-600 hover:bg-blue-50 font-semibold px-6 py-3 rounded-full text-sm transition-colors flex items-center gap-2"
                 >
                   Post a Job <ArrowRight size={14} />
                 </Link>
