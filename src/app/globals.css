@@ -31,6 +31,14 @@ body {
   will-change: transform, opacity;
 }
 
+/* Skip rendering offscreen sections — big scroll perf win */
+#how-it-works,
+#companies,
+#candidates {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 600px;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

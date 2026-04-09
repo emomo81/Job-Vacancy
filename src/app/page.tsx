@@ -151,19 +151,10 @@ export default function LandingPage() {
           </div>
 
           {/* Scroll indicator */}
-          <motion.div
-            className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 2, duration: 0.8 }}
-          >
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 opacity-50">
             <span className="text-gray-500 text-xs tracking-widest uppercase">Scroll</span>
-            <motion.div
-              className="w-px h-10 bg-gradient-to-b from-gray-500 to-transparent"
-              animate={{ scaleY: [1, 0.4, 1], opacity: [0.6, 0.2, 0.6] }}
-              transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-            />
-          </motion.div>
+            <div className="w-px h-10 bg-gradient-to-b from-gray-500 to-transparent" />
+          </div>
         </section>
 
         {/* ── How it Works ───────────────────────────────── */}
