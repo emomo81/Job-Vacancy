@@ -48,12 +48,10 @@ export default function DashboardPage() {
       <Toast message={toast} onDone={() => setToast("")} />
 
       {/* Dark hero banner */}
-      <div className="bg-[#0A0A0F] px-6 py-10">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-1">Post a New Job</h1>
-            <p className="text-gray-400 text-sm">Define requirements and let AI find the best candidates</p>
-          </div>
+      <div className="bg-[#0A0A0F] px-4 sm:px-6 py-8 sm:py-10">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">Post a New Job</h1>
+          <p className="text-gray-400 text-sm">Define requirements and let AI find the best candidates</p>
         </div>
       </div>
 
@@ -65,10 +63,10 @@ export default function DashboardPage() {
       </div>
 
       {/* Form */}
-      <div className="max-w-3xl mx-auto px-6 py-10">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Job Details</h2>
 
-        <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm p-8 space-y-7">
+        <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm p-5 sm:p-8 space-y-6 sm:space-y-7">
           {/* Job Title */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Job Title</label>
@@ -170,7 +168,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Years of Experience + Education */}
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Years of Experience</label>
               <div className="flex items-center gap-3">
@@ -223,7 +221,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-between pt-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
             <button
               onClick={() => setToast("Draft saved successfully")}
               className="flex items-center gap-2 border border-gray-200 text-gray-600 hover:border-gray-300 hover:text-gray-700 font-medium px-5 py-2.5 rounded-full text-sm transition-colors"
