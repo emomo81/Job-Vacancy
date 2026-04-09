@@ -39,7 +39,7 @@ export default function CandidatesPage() {
   const totalCandidates = imported.length + uploadedFiles.length * 5; // mock count
 
   return (
-    <div className="min-h-screen bg-[#F0F4F8]">
+    <div className="min-h-screen bg-[#F0F4F8] dark:bg-[#0f1117]">
       <RecruiterNav />
 
       {/* Dark hero banner */}
@@ -51,7 +51,7 @@ export default function CandidatesPage() {
       </div>
 
       {/* Stepper */}
-      <div className="bg-white border-b border-gray-100 px-6 py-4">
+      <div className="bg-white dark:bg-[#0f1117] border-b border-gray-100 dark:border-white/5 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Stepper steps={STEPS} current={1} />
           <div className="hidden md:flex items-center gap-1.5 text-xs text-gray-500">
@@ -68,10 +68,10 @@ export default function CandidatesPage() {
 
         <div className="grid lg:grid-cols-2 gap-6 mb-6">
           {/* Import Talent Profiles */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm p-6">
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h3 className="font-semibold text-gray-900 text-sm">Import Talent Profiles</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white text-sm">Import Talent Profiles</h3>
                 <p className="text-xs text-gray-400 mt-0.5">Choose candidates from Rankr&apos;s talent pool</p>
               </div>
               <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">Rankr Database</span>
@@ -109,16 +109,14 @@ export default function CandidatesPage() {
               })}
             </div>
 
-            <button className="mt-4 flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 font-medium">
-              <Plus size={13} /> 12 profiles loaded
-            </button>
+            <p className="mt-4 text-xs text-gray-400">{imported.length} of 12 profiles selected</p>
           </div>
 
           {/* Upload Applicants */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm p-6">
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h3 className="font-semibold text-gray-900 text-sm">Upload Applicants</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white text-sm">Upload Applicants</h3>
                 <p className="text-xs text-gray-400 mt-0.5">Drag and drop or upload PDF resumes from external job boards</p>
               </div>
               <span className="text-xs font-medium text-gray-600 bg-gray-100 px-2.5 py-1 rounded-full">External Upload</span>
@@ -169,14 +167,12 @@ export default function CandidatesPage() {
               ))}
             </div>
 
-            <button className="mt-4 flex items-center gap-1.5 text-xs text-blue-600 hover:text-blue-700 font-medium">
-              <Plus size={13} /> 32 applicants loaded
-            </button>
+            <p className="mt-4 text-xs text-gray-400">{uploadedFiles.length} file{uploadedFiles.length !== 1 ? "s" : ""} uploaded</p>
           </div>
         </div>
 
         {/* Bottom bar */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-6 py-4 flex items-center justify-between">
+        <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-500">Total candidates for this role:</span>
             <span className="text-2xl font-bold text-gray-900">{totalCandidates}</span>
