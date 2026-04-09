@@ -160,12 +160,10 @@ export default function ResultsPage() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <h1 className="text-3xl font-bold text-gray-900">
-                Screening Complete <span className="text-2xl">🔥</span>
-              </h1>
+              <div className="w-2 h-2 bg-green-500 rounded-full" />
+              <h1 className="text-3xl font-bold text-gray-900">Screening Results</h1>
             </div>
-            <p className="text-gray-400 text-sm">Top 20 candidates shortlisted from 34 applicants</p>
+            <p className="text-gray-400 text-sm">9 candidates ranked from 34 applicants</p>
           </div>
           <div className="flex items-center gap-3">
             <button className="flex items-center gap-2 border border-gray-200 text-gray-600 hover:border-gray-300 font-medium px-4 py-2 rounded-full text-sm transition-colors">
