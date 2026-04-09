@@ -48,9 +48,18 @@ export default function AuthPage() {
             ))}
           </ul>
 
-          {/* Office photo placeholder */}
-          <div className="mt-10 rounded-2xl overflow-hidden bg-white/5 border border-white/10 h-40 flex items-center justify-center">
-            <span className="text-gray-600 text-sm">Team workspace</span>
+          {/* Stats */}
+          <div className="mt-10 grid grid-cols-3 gap-4">
+            {[
+              { value: "10k+", label: "Candidates screened" },
+              { value: "500+", label: "Companies hiring" },
+              { value: "30s", label: "Avg. screen time" },
+            ].map((stat) => (
+              <div key={stat.label} className="bg-white/5 border border-white/10 rounded-xl p-4 text-center">
+                <p className="text-white font-bold text-lg">{stat.value}</p>
+                <p className="text-gray-500 text-xs mt-0.5">{stat.label}</p>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -125,7 +134,7 @@ export default function AuthPage() {
               )}
 
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">EMAIL</label>
+                <label className="block text-xs font-medium text-gray-600 mb-1.5">Email</label>
                 <input
                   type="email"
                   value={email}
@@ -137,7 +146,7 @@ export default function AuthPage() {
 
               <div>
                 <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-medium text-gray-600">PASSWORD</label>
+                  <label className="block text-xs font-medium text-gray-600">Password</label>
                   {mode === "signin" && (
                     <a href="#" className="text-xs text-blue-600 hover:text-blue-700">Forgot password?</a>
                   )}
