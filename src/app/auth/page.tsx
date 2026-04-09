@@ -1,212 +1,406 @@
-"use client";
-import Link from "next/link";
-import Image from "next/image";
-import { useState, useCallback } from "react";
-import { Check, ArrowRight } from "lucide-react";
-import Toast from "@/components/Toast";
+'use client'
 
-type Mode = "signin" | "signup";
-type Role = "company" | "candidate";
+import React, { useState } from 'react'
+import { Poppins } from 'next/font/google'
+import { Sparkles, Eye, EyeOff, CheckCircle, ArrowRight } from 'lucide-react'
+import Link from 'next/link'
+import { motion, AnimatePresence } from 'motion/react'
 
-export default function AuthPage() {
-  const [role, setRole] = useState<Role>("company");
-  const [mode, setMode] = useState<Mode>("signin");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [toast, setToast] = useState("");
-  const [forgotSent, setForgotSent] = useState(false);
-  const showToast = useCallback((msg: string) => { setToast(""); setTimeout(() => setToast(msg), 10); }, []);
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-poppins',
+})
+
+type Role = 'company' | 'candidate'
+type Tab = 'signin' | 'create'
+
+const FEATURES = [
+  'Screen hundreds of CVs in seconds',
+  'AI-generated match scores and reasoning',
+  'Works with Umurava profiles and external uploads',
+]
+
+function GoogleIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.64 9.20456C17.64 8.56637 17.5827 7.95274 17.4764 7.36365H9V10.845H13.8436C13.635 11.9699 13.0009 12.9231 12.0477 13.5613V15.8194H14.9564C16.6582 14.2526 17.64 11.9453 17.64 9.20456Z" fill="#4285F4"/>
+      <path d="M9 18C11.43 18 13.4673 17.1941 14.9564 15.8195L12.0477 13.5613C11.2418 14.1013 10.2109 14.4204 9 14.4204C6.65591 14.4204 4.67182 12.8372 3.96409 10.71H0.957275V13.0418C2.43818 15.9831 5.48182 18 9 18Z" fill="#34A853"/>
+      <path d="M3.96409 10.71C3.78409 10.17 3.68182 9.59319 3.68182 9.00001C3.68182 8.40683 3.78409 7.83001 3.96409 7.29001V4.95819H0.957275C0.347727 6.17319 0 7.54774 0 9.00001C0 10.4523 0.347727 11.8268 0.957275 13.0418L3.96409 10.71Z" fill="#FBBC05"/>
+      <path d="M9 3.57955C10.3214 3.57955 11.5077 4.03364 12.4405 4.92545L15.0218 2.34409C13.4632 0.891818 11.4259 0 9 0C5.48182 0 2.43818 2.01682 0.957275 4.95818L3.96409 7.29C4.67182 5.16273 6.65591 3.57955 9 3.57955Z" fill="#EA4335"/>
+    </svg>
+  )
+}
+
+function InputField({
+  type = 'text',
+  placeholder,
+  label,
+  value,
+  onChange,
+  rightElement,
+}: {
+  type?: string
+  placeholder: string
+  label?: string
+  value: string
+  onChange: (v: string) => void
+  rightElement?: React.ReactNode
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      {label && <label className="text-xs font-semibold text-[#5a6a7a] tracking-wide uppercase">{label}</label>}
+      <div className="relative">
+        <input
+          type={type}
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="w-full border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm text-[#070707] placeholder-[#b0bac6] focus:outline-none focus:border-[#2a85ff] focus:ring-2 focus:ring-[#2a85ff]/10 transition-all bg-white pr-10"
+        />
+        {rightElement && (
+          <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
+            {rightElement}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default function RankrAuth() {
+  const [role, setRole] = useState<Role>('company')
+  const [tab, setTab] = useState<Tab>('signin')
+
+  const [showPw, setShowPw] = useState(false)
+  const [showConfirmPw, setShowConfirmPw] = useState(false)
+
+  const [signInEmail, setSignInEmail] = useState('')
+  const [signInPw, setSignInPw] = useState('')
+
+  const [companyName, setCompanyName] = useState('')
+  const [workEmail, setWorkEmail] = useState('')
+  const [fullName, setFullName] = useState('')
+  const [createEmail, setCreateEmail] = useState('')
+  const [createPw, setCreatePw] = useState('')
+  const [confirmPw, setConfirmPw] = useState('')
 
   return (
-    <div className="min-h-screen flex">
-      <Toast message={toast} onDone={() => setToast("")} />
-      {/* -- Left: dark panel -------- */}
-      <div className="hidden lg:flex flex-1 bg-[#0A0A0F] flex-col justify-between p-8 xl:p-12 relative overflow-hidden">
-        {/* Subtle radial glow */}
-        <div className="absolute top-0 left-0 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+    <div className={`${poppins.className} min-h-screen flex`}>
 
-        <Link href="/" className="relative z-10">
-          <Image src="/logo.png" alt="Job RW" width={140} height={56} className="h-11 w-auto object-contain" priority />
-        </Link>
+      {/* ── LEFT COLUMN ── */}
+      <div className="hidden lg:flex flex-col w-1/2 bg-[#070707] relative overflow-hidden">
 
-        <div className="relative z-10">
-          <h1 className="text-4xl font-bold text-white leading-tight mb-6">
-            The smarter way<br />to hire.
-          </h1>
-          <p className="text-gray-400 text-sm mb-8 leading-relaxed max-w-xs">
-            AI screening that ranks every candidate and explains every decision.
-          </p>
-          <ul className="space-y-4">
-            {[
-              "Screen hundreds of CVs in seconds",
-              "AI-generated match scores and reasoning",
-              "Works with Unicorn profiles and external uploads",
-            ].map((item) => (
-              <li key={item} className="flex items-start gap-3 text-sm text-gray-400">
-                <div className="w-5 h-5 rounded-full bg-blue-600/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <Check size={11} className="text-blue-400" />
-                </div>
-                {item}
-              </li>
-            ))}
-          </ul>
+        {/* Ambient glows */}
+        <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-[#2a85ff]/6 blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-1/3 left-0 w-64 h-64 rounded-full bg-[#2a85ff]/4 blur-[80px] pointer-events-none" />
 
-          {/* Stats */}
-          <div className="mt-10 grid grid-cols-3 gap-4">
-            {[
-              { value: "10k+", label: "Candidates screened" },
-              { value: "500+", label: "Companies hiring" },
-              { value: "30s", label: "Avg. screen time" },
-            ].map((stat) => (
-              <div key={stat.label} className="bg-white/5 border border-white/10 rounded-xl p-4 text-center">
-                <p className="text-white font-bold text-lg">{stat.value}</p>
-                <p className="text-gray-500 text-xs mt-0.5">{stat.label}</p>
-              </div>
-            ))}
-          </div>
+        {/* Wordmark */}
+        <div className="px-10 pt-10 flex-shrink-0">
+          <Link href="/" className="inline-flex items-center gap-2.5 select-none">
+            <div className="w-9 h-9 rounded-xl bg-[#2a85ff] flex items-center justify-center flex-shrink-0 shadow-[0_4px_16px_rgba(42,133,255,0.4)]">
+              <Sparkles size={18} color="white" strokeWidth={2.2} />
+            </div>
+            <span className="text-white text-2xl font-bold tracking-tight">Rankr</span>
+          </Link>
         </div>
 
-        <p className="text-gray-600 text-xs relative z-10">© 2026 Rankr. All rights reserved.</p>
+        {/* Center content */}
+        <div className="flex-1 flex flex-col justify-center px-10 py-10 relative z-10">
+
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55 }}
+          >
+            <h1 className="text-white font-extrabold text-4xl xl:text-5xl leading-[1.1] tracking-tight mb-4">
+              The smarter way<br />to hire.
+            </h1>
+            <p className="text-white/45 text-sm xl:text-base leading-relaxed mb-10 max-w-[380px]">
+              AI screening that ranks every candidate and explains every decision.
+            </p>
+
+            <div className="flex flex-col gap-5">
+              {FEATURES.map((feat, i) => (
+                <motion.div
+                  key={feat}
+                  initial={{ opacity: 0, x: -16 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.45, delay: 0.15 + i * 0.1 }}
+                  className="flex items-start gap-3.5"
+                >
+                  <div className="w-5 h-5 rounded-full bg-[#2a85ff]/15 border border-[#2a85ff]/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <CheckCircle size={11} color="#2a85ff" strokeWidth={2.5} />
+                  </div>
+                  <span className="text-white/70 text-sm leading-relaxed">{feat}</span>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Decorative grayscale image at bottom */}
+        <div className="flex-shrink-0 h-56 relative overflow-hidden">
+          <img
+            src="https://uxcanvas.ai/api/generated-images/a41dbe01-2ec5-4de6-bde6-a96289ed1c5f/9bf07167-e189-46c3-9b0b-84e832c5a707"
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover object-top grayscale-[100%] brightness-[0.55] contrast-[1.1]"
+            style={{
+              maskImage: 'linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%)',
+            }}
+          />
+        </div>
       </div>
 
-      {/* -- Right: form panel -------- */}
-      <div className="flex-1 flex items-center justify-center bg-[#F0F4F8] dark:bg-[#0f1117] p-4 sm:p-6">
-        <div className="w-full max-w-sm">
-          {/* Role toggle */}
-          <div className="flex bg-white rounded-xl p-1 gap-1 mb-8 shadow-sm border border-gray-100">
-            <button
-              onClick={() => setRole("company")}
-              className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                role === "company" ? "bg-blue-600 text-white shadow-sm" : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              I&apos;m a Company
-            </button>
-            <button
-              onClick={() => setRole("candidate")}
-              className={`flex-1 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                role === "candidate" ? "bg-blue-600 text-white shadow-sm" : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              I&apos;m a Candidate
-            </button>
+      {/* ── RIGHT COLUMN ── */}
+      <div className="flex-1 lg:w-1/2 bg-white flex flex-col items-center justify-center min-h-screen px-6 py-12">
+
+        {/* Mobile wordmark */}
+        <div className="lg:hidden mb-8">
+          <Link href="/" className="inline-flex items-center gap-2 select-none">
+            <div className="w-8 h-8 rounded-xl bg-[#2a85ff] flex items-center justify-center">
+              <Sparkles size={16} color="white" strokeWidth={2.2} />
+            </div>
+            <span className="text-[#070707] text-xl font-bold tracking-tight">Rankr</span>
+          </Link>
+        </div>
+
+        <div className="w-full max-w-[420px] flex flex-col gap-7">
+
+          {/* Role selector pills */}
+          <div className="flex rounded-full border border-[#e2eaf2] p-1 gap-1 bg-[#f0f5fa]">
+            {(['company', 'candidate'] as Role[]).map(r => (
+              <button
+                key={r}
+                onClick={() => setRole(r)}
+                className={`flex-1 py-2.5 rounded-full text-sm font-semibold transition-all cursor-pointer ${
+                  role === r
+                    ? 'bg-[#2a85ff] text-white shadow-[0_4px_14px_rgba(42,133,255,0.35)]'
+                    : 'text-[#8a9ab0] hover:text-[#5a6a7a]'
+                }`}
+              >
+                {r === 'company' ? "I'm a Company" : "I'm a Candidate"}
+              </button>
+            ))}
           </div>
 
-          <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
-            {/* Mode toggle */}
-            <div className="flex border-b border-gray-100 mb-6 -mt-1">
+          {/* Tabs */}
+          <div className="flex border-b border-[#e2eaf2]">
+            {(['signin', 'create'] as Tab[]).map(t => (
               <button
-                onClick={() => setMode("signin")}
-                className={`pb-3 mr-6 text-sm font-semibold border-b-2 transition-colors ${
-                  mode === "signin" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-400 hover:text-gray-600"
+                key={t}
+                onClick={() => setTab(t)}
+                className={`flex-1 pb-3 text-sm font-semibold transition-all cursor-pointer relative ${
+                  tab === t ? 'text-[#070707]' : 'text-[#8a9ab0] hover:text-[#5a6a7a]'
                 }`}
               >
-                Sign In
-              </button>
-              <button
-                onClick={() => setMode("signup")}
-                className={`pb-3 text-sm font-semibold border-b-2 transition-colors ${
-                  mode === "signup" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-400 hover:text-gray-600"
-                }`}
-              >
-                Create Account
-              </button>
-            </div>
-
-            <h2 className="text-xl font-bold text-gray-900 mb-1">
-              {mode === "signin" ? "Welcome back" : "Create your account"}
-            </h2>
-            <p className="text-gray-400 text-sm mb-6">
-              {mode === "signin"
-                ? `Sign in to your ${role === "company" ? "company" : "candidate"} account`
-                : `Get started as a ${role === "company" ? "company" : "candidate"} today`}
-            </p>
-
-            <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-              {mode === "signup" && (
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    {role === "company" ? "Company Name" : "Full Name"}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder={role === "company" ? "Acme Inc." : "Jordan Reeves"}
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                {t === 'signin' ? 'Sign In' : 'Create Account'}
+                {tab === t && (
+                  <motion.div
+                    layoutId="tab-underline"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#2a85ff] rounded-full"
                   />
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Form content */}
+          <AnimatePresence mode="wait">
+            {tab === 'signin' ? (
+              <motion.div
+                key="signin"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25 }}
+                className="flex flex-col gap-5"
+              >
+                <div>
+                  <h2 className="text-[#070707] text-2xl font-extrabold tracking-tight leading-tight">Welcome back</h2>
+                  <p className="text-[#8a9ab0] text-sm mt-1">Sign in to your {role === 'company' ? 'company' : 'candidate'} account</p>
                 </div>
-              )}
 
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">Email</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                <InputField
                   placeholder="you@company.com"
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                  label="Email"
+                  value={signInEmail}
+                  onChange={setSignInEmail}
                 />
-              </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="block text-xs font-medium text-gray-600">Password</label>
-                  {mode === "signin" && (
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-[#5a6a7a] tracking-wide uppercase">Password</label>
+                    <button className="text-xs text-[#2a85ff] font-semibold hover:text-[#1a75ef] transition-colors cursor-pointer">
+                      Forgot password?
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type={showPw ? 'text' : 'password'}
+                      value={signInPw}
+                      onChange={e => setSignInPw(e.target.value)}
+                      placeholder="Enter your password"
+                      className="w-full border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm text-[#070707] placeholder-[#b0bac6] focus:outline-none focus:border-[#2a85ff] focus:ring-2 focus:ring-[#2a85ff]/10 transition-all bg-white pr-10"
+                    />
                     <button
                       type="button"
-                      onClick={() => { setForgotSent(true); showToast("Reset link sent — check your email"); }}
-                      className="text-xs text-blue-600 hover:text-blue-700"
-                    >{forgotSent ? "Link sent ✓" : "Forgot password?"}</button>
-                  )}
+                      onClick={() => setShowPw(v => !v)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#b0bac6] hover:text-[#5a6a7a] transition-colors cursor-pointer"
+                    >
+                      {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                 </div>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                />
-              </div>
 
-              <Link
-                href={role === "company" ? "/dashboard" : "/profile"}
-                className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-5 py-3 rounded-xl transition-colors text-sm"
+                <Link
+                  onClick={() => {
+                    localStorage.setItem('rankr_user_name', role === 'company' ? 'Acme Corp' : 'John Doe')
+                    localStorage.setItem('rankr_profile_completion', '75')
+                  }}
+                  href={role === 'company' ? '/dashboard' : '/candidate/jobs'}
+                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full text-sm font-bold text-white bg-[#2a85ff] hover:bg-[#1a75ef] shadow-[0_4px_16px_rgba(42,133,255,0.35)] hover:shadow-[0_6px_24px_rgba(42,133,255,0.5)] transition-all cursor-pointer"
+                >
+                  Sign In
+                  <ArrowRight size={16} strokeWidth={2.5} />
+                </Link>
+
+                {/* Divider */}
+                <div className="flex items-center gap-4">
+                  <div className="flex-1 h-px bg-[#e2eaf2]" />
+                  <span className="text-[#b0bac6] text-xs font-medium">or continue with</span>
+                  <div className="flex-1 h-px bg-[#e2eaf2]" />
+                </div>
+
+                {/* Google button */}
+                <button className="w-full flex items-center justify-center gap-3 py-3 rounded-full border border-[#e2eaf2] bg-white text-sm font-semibold text-[#3c4a5c] hover:bg-[#f0f5fa] hover:border-[#c6d4e8] transition-all cursor-pointer">
+                  <GoogleIcon />
+                  Continue with Google
+                </button>
+              </motion.div>
+            ) : (
+              <motion.div
+                key={`create-${role}`}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25 }}
+                className="flex flex-col gap-5"
               >
-                {mode === "signin" ? "Sign In" : "Create Account"}
-                <ArrowRight size={15} />
-              </Link>
-            </form>
+                <div>
+                  <h2 className="text-[#070707] text-2xl font-extrabold tracking-tight leading-tight">
+                    {role === 'company' ? 'Create company account' : 'Create your profile'}
+                  </h2>
+                  <p className="text-[#8a9ab0] text-sm mt-1">
+                    {role === 'company' ? 'Start screening candidates with AI' : 'Get matched to your next role'}
+                  </p>
+                </div>
 
-            <div className="flex items-center gap-3 my-5">
-              <div className="flex-1 h-px bg-gray-100" />
-              <span className="text-xs text-gray-400">or</span>
-              <div className="flex-1 h-px bg-gray-100" />
-            </div>
+                {role === 'company' ? (
+                  <>
+                    <InputField label="Company Name" placeholder="Acme Corp" value={companyName} onChange={setCompanyName} />
+                    <InputField label="Work Email" placeholder="you@company.com" value={workEmail} onChange={setWorkEmail} />
+                  </>
+                ) : (
+                  <>
+                    <InputField label="Full Name" placeholder="Amara Osei" value={fullName} onChange={setFullName} />
+                    <InputField label="Email" placeholder="you@example.com" value={createEmail} onChange={setCreateEmail} />
+                  </>
+                )}
 
-            <button
-              onClick={() => showToast("Google sign-in coming soon")}
-              className="w-full flex items-center justify-center gap-2 border border-gray-200 dark:border-white/10 hover:border-gray-300 dark:!bg-[#1e2130] text-gray-700 font-medium px-5 py-3 rounded-xl transition-colors text-sm"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-              </svg>
-              Continue with Google
-            </button>
+                {/* Password */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-[#5a6a7a] tracking-wide uppercase">Password</label>
+                  <div className="relative">
+                    <input
+                      type={showPw ? 'text' : 'password'}
+                      value={createPw}
+                      onChange={e => setCreatePw(e.target.value)}
+                      placeholder="Create a password"
+                      className="w-full border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm text-[#070707] placeholder-[#b0bac6] focus:outline-none focus:border-[#2a85ff] focus:ring-2 focus:ring-[#2a85ff]/10 transition-all bg-white pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPw(v => !v)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#b0bac6] hover:text-[#5a6a7a] transition-colors cursor-pointer"
+                    >
+                      {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
 
-            <p className="text-center text-xs text-gray-400 mt-5">
-              {mode === "signin" ? "Don't have an account?" : "Already have an account?"}{" "}
-              <button
-                onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-                className="text-blue-600 hover:text-blue-700 font-medium"
-              >
-                {mode === "signin" ? "Create one" : "Sign in"}
-              </button>
-            </p>
-          </div>
+                {/* Confirm password */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-[#5a6a7a] tracking-wide uppercase">Confirm Password</label>
+                  <div className="relative">
+                    <input
+                      type={showConfirmPw ? 'text' : 'password'}
+                      value={confirmPw}
+                      onChange={e => setConfirmPw(e.target.value)}
+                      placeholder="Repeat your password"
+                      className="w-full border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm text-[#070707] placeholder-[#b0bac6] focus:outline-none focus:border-[#2a85ff] focus:ring-2 focus:ring-[#2a85ff]/10 transition-all bg-white pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPw(v => !v)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#b0bac6] hover:text-[#5a6a7a] transition-colors cursor-pointer"
+                    >
+                      {showConfirmPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                <Link
+                  onClick={() => {
+                    localStorage.setItem('rankr_user_name', role === 'company' ? 'Acme Corp' : 'John Doe')
+                    localStorage.setItem('rankr_profile_completion', '75')
+                  }}
+                  href={role === 'company' ? '/dashboard' : '/profile'}
+                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full text-sm font-bold text-white bg-[#2a85ff] hover:bg-[#1a75ef] shadow-[0_4px_16px_rgba(42,133,255,0.35)] hover:shadow-[0_6px_24px_rgba(42,133,255,0.5)] transition-all cursor-pointer"
+                >
+                  {role === 'company' ? 'Create Company Account' : 'Create Candidate Account'}
+                  <ArrowRight size={16} strokeWidth={2.5} />
+                </Link>
+
+                <p className="text-center text-[#b0bac6] text-xs leading-relaxed">
+                  By signing up you agree to Rankr&apos;s{' '}
+                  <button className="text-[#2a85ff] hover:text-[#1a75ef] font-semibold cursor-pointer transition-colors">
+                    Terms of Use
+                  </button>
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Tab toggle footer */}
+          <p className="text-center text-[#8a9ab0] text-sm">
+            {tab === 'signin' ? (
+              <>
+                Don&apos;t have an account?{' '}
+                <button
+                  onClick={() => setTab('create')}
+                  className="text-[#2a85ff] font-semibold hover:text-[#1a75ef] transition-colors cursor-pointer"
+                >
+                  Create one
+                </button>
+              </>
+            ) : (
+              <>
+                Already have an account?{' '}
+                <button
+                  onClick={() => setTab('signin')}
+                  className="text-[#2a85ff] font-semibold hover:text-[#1a75ef] transition-colors cursor-pointer"
+                >
+                  Sign In
+                </button>
+              </>
+            )}
+          </p>
+
         </div>
       </div>
     </div>
-  );
+  )
 }
