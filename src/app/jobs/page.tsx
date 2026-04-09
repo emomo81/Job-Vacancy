@@ -139,10 +139,10 @@ export default function JobsPage() {
       <Toast message={toast} onDone={() => setToast("")} />
 
       {/* Hero */}
-      <div className="bg-[#0A0A0F] px-6 py-10">
+      <div className="bg-[#0A0A0F] px-4 sm:px-6 py-8 sm:py-10">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold text-white mb-1">Browse Jobs</h1>
-          <p className="text-gray-400 text-sm mb-6">Roles matched to your profile — scored by AI</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">Browse Jobs</h1>
+          <p className="text-gray-400 text-sm mb-5 sm:mb-6">Roles matched to your profile — scored by AI</p>
 
           {/* Search bar */}
           <div className="flex gap-3 max-w-2xl">
@@ -191,7 +191,7 @@ export default function JobsPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8 flex gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex gap-6">
         {/* -- Job list -- */}
         <div className="flex-1 min-w-0">
           <p className="text-xs text-gray-500 mb-4">{filtered.length} role{filtered.length !== 1 ? "s" : ""} found</p>
