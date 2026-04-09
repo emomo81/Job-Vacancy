@@ -26,7 +26,7 @@ function CandidateNav() {
         </Link>
         <div className="flex items-center gap-1">
           {[
-            { label: "Browse Jobs", href: "/results" },
+            { label: "Home", href: "/" },
             { label: "My Profile", href: "/profile" },
             { label: "My Applications", href: "#" },
           ].map((l) => (
@@ -77,10 +77,8 @@ export default function ProfilePage() {
       <div className="bg-[#0A0A0F] px-6 py-10">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-2">
-              Your Profile <span className="text-2xl">🔥</span>
-            </h1>
-            <p className="text-gray-400 text-sm">Help recruiters find the right version of you.</p>
+            <h1 className="text-3xl font-bold text-white mb-1">Your Profile</h1>
+            <p className="text-gray-400 text-sm">Help recruiters find the right version of you</p>
           </div>
           {/* Completion ring */}
           <div className="hidden lg:flex items-center gap-3">
@@ -144,7 +142,7 @@ export default function ProfilePage() {
               <button className="flex-1 bg-blue-600 text-white text-xs font-medium py-1.5 rounded-lg">Open to Work</button>
               <button className="flex-1 border border-gray-200 text-gray-500 text-xs font-medium py-1.5 rounded-lg hover:border-gray-300">Not Available</button>
             </div>
-            <p className="text-xs text-gray-400 mb-1">Profile 75% complete — add work experience in 2015</p>
+            <p className="text-xs text-gray-400 mb-1">Add work experience to reach 100%</p>
             <div className="flex gap-1.5">
               <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md">Remote</span>
               <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-md">Full-time</span>
