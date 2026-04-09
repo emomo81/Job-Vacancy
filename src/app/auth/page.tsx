@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { useState, useCallback } from "react";
 import { Check, ArrowRight } from "lucide-react";
 import Toast from "@/components/Toast";
@@ -20,15 +21,12 @@ export default function AuthPage() {
     <div className="min-h-screen flex">
       <Toast message={toast} onDone={() => setToast("")} />
       {/* -- Left: dark panel -------- */}
-      <div className="hidden lg:flex flex-1 bg-[#0A0A0F] flex-col justify-between p-12 relative overflow-hidden">
+      <div className="hidden lg:flex flex-1 bg-[#0A0A0F] flex-col justify-between p-8 xl:p-12 relative overflow-hidden">
         {/* Subtle radial glow */}
         <div className="absolute top-0 left-0 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
 
-        <Link href="/" className="flex items-center gap-2 relative z-10">
-          <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
-            <span className="text-white text-xs font-bold">R</span>
-          </div>
-          <span className="text-white font-bold text-lg tracking-tight">Rankr</span>
+        <Link href="/" className="relative z-10">
+          <Image src="/logo.png" alt="Job RW" width={140} height={56} className="h-11 w-auto object-contain" priority />
         </Link>
 
         <div className="relative z-10">
@@ -72,7 +70,7 @@ export default function AuthPage() {
       </div>
 
       {/* -- Right: form panel -------- */}
-      <div className="flex-1 flex items-center justify-center bg-[#F0F4F8] dark:bg-[#0f1117] p-6">
+      <div className="flex-1 flex items-center justify-center bg-[#F0F4F8] dark:bg-[#0f1117] p-4 sm:p-6">
         <div className="w-full max-w-sm">
           {/* Role toggle */}
           <div className="flex bg-white rounded-xl p-1 gap-1 mb-8 shadow-sm border border-gray-100">
