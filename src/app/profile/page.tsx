@@ -4,7 +4,7 @@ import { Pencil, Plus, Upload, Check, ExternalLink, Trash2, X } from "lucide-rea
 import CandidateNav from "@/components/CandidateNav";
 import Toast from "@/components/Toast";
 
-/* ── Initial data ──────────────────────────────────────────── */
+/* -- Initial data -------------------------------------------------------- */
 const initialSkills = ["Node.js", "TypeScript", "MongoDB", "React", "GraphQL", "Docker"];
 
 const initialExp = [
@@ -68,7 +68,7 @@ export default function ProfilePage() {
 
   const completion = 75;
 
-  /* ── Skill helpers ── */
+  /* -- Skill helpers -- */
   function removeSkill(s: string) { setSkills((prev) => prev.filter((x) => x !== s)); }
   function addSkill() {
     const trimmed = newSkill.trim();
@@ -76,7 +76,7 @@ export default function ProfilePage() {
     setNewSkill("");
   }
 
-  /* ── Experience helpers ── */
+  /* -- Experience helpers -- */
   function startAddExp() { setExpDraft({ ...blankExp, id: Date.now() }); setEditingExp(-1); }
   function startEditExp(e: typeof initialExp[0]) { setExpDraft({ ...e }); setEditingExp(e.id); }
   function saveExp() {
@@ -90,7 +90,7 @@ export default function ProfilePage() {
   }
   function deleteExp(id: number) { setExp((prev) => prev.filter((x) => x.id !== id)); }
 
-  /* ── Education helpers ── */
+  /* -- Education helpers -- */
   function startAddEdu() { setEduDraft({ ...blankEdu, id: Date.now() }); setEditingEdu(-1); }
   function startEditEdu(e: typeof initialEdu[0]) { setEduDraft({ ...e }); setEditingEdu(e.id); }
   function saveEdu() {
@@ -135,7 +135,7 @@ export default function ProfilePage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8 flex gap-6">
-        {/* ── Sidebar ── */}
+        {/* -- Sidebar -- */}
         <aside className="hidden lg:block w-56 flex-shrink-0">
           <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm p-5 mb-4">
             <div className="flex flex-col items-center text-center mb-4">
@@ -187,7 +187,7 @@ export default function ProfilePage() {
           </div>
         </aside>
 
-        {/* ── Main ── */}
+        {/* -- Main -- */}
         <div className="flex-1 space-y-5">
 
           {/* Basic Information */}

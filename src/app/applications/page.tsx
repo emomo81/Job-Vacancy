@@ -167,7 +167,7 @@ export default function ApplicationsPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8 flex gap-6">
-        {/* ── Left: list ── */}
+        {/* -- Left: list -- */}
         <div className="flex-1 min-w-0">
           {/* Toolbar */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
@@ -271,7 +271,7 @@ export default function ApplicationsPage() {
           </div>
         </div>
 
-        {/* ── Right: detail panel ── */}
+        {/* -- Right: detail panel -- */}
         {selectedApp && (
           <aside className="hidden lg:block w-80 flex-shrink-0">
             <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm p-6 sticky top-6">

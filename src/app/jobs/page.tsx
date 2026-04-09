@@ -192,7 +192,7 @@ export default function JobsPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8 flex gap-6">
-        {/* ── Job list ── */}
+        {/* -- Job list -- */}
         <div className="flex-1 min-w-0">
           <p className="text-xs text-gray-500 mb-4">{filtered.length} role{filtered.length !== 1 ? "s" : ""} found</p>
 
@@ -269,7 +269,7 @@ export default function JobsPage() {
           </div>
         </div>
 
-        {/* ── Detail panel ── */}
+        {/* -- Detail panel -- */}
         {selectedJob && (
           <aside className="hidden lg:block w-80 flex-shrink-0">
             <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm p-6 sticky top-6">

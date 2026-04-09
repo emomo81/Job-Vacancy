@@ -186,7 +186,7 @@ export default function ResultsPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-6 flex gap-6">
-        {/* ── Sidebar filters ──────────────────────────── */}
+        {/* -- Sidebar filters ------ */}
         <aside className="hidden xl:block w-48 flex-shrink-0">
           <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm p-5 sticky top-6">
             <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-4">Match Score</h3>
@@ -233,7 +233,7 @@ export default function ResultsPage() {
           </div>
         </aside>
 
-        {/* ── Candidate grid ───────────────────────────── */}
+        {/* -- Candidate grid --------- */}
         <div className="flex-1">
           {/* Toolbar */}
           <div className="flex items-center justify-between mb-5">
@@ -351,7 +351,7 @@ export default function ResultsPage() {
           </div>
         </div>
 
-        {/* ── Detail panel ─────────────────────────────── */}
+        {/* -- Detail panel ---------- */}
         {selectedCandidate && (
           <aside className="hidden 2xl:block w-72 flex-shrink-0">
             <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm p-6 sticky top-6">

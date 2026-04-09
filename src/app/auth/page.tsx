@@ -19,7 +19,7 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen flex">
       <Toast message={toast} onDone={() => setToast("")} />
-      {/* ── Left: dark panel ─────────────────────────────── */}
+      {/* -- Left: dark panel -------- */}
       <div className="hidden lg:flex flex-1 bg-[#0A0A0F] flex-col justify-between p-12 relative overflow-hidden">
         {/* Subtle radial glow */}
         <div className="absolute top-0 left-0 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
@@ -71,7 +71,7 @@ export default function AuthPage() {
         <p className="text-gray-600 text-xs relative z-10">© 2026 Rankr. All rights reserved.</p>
       </div>
 
-      {/* ── Right: form panel ────────────────────────────── */}
+      {/* -- Right: form panel -------- */}
       <div className="flex-1 flex items-center justify-center bg-[#F0F4F8] dark:bg-[#0f1117] p-6">
         <div className="w-full max-w-sm">
           {/* Role toggle */}

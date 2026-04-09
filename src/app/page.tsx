@@ -41,7 +41,7 @@ export default function LandingPage() {
       <div className="min-h-screen bg-[#0A0A0F]">
         <LandingNav />
 
-        {/* ── Hero ──────────────────────────────────────── */}
+        {/* -- Hero --------------------------------------------- */}
         <section className="relative min-h-screen flex items-center overflow-hidden">
           <UnicornHero />
 
@@ -157,7 +157,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── How it Works ───────────────────────────────── */}
+        {/* -- How it Works ------------------------------------ */}
         <section id="how-it-works" className="bg-[#F0F4F8] py-28">
           <div className="max-w-7xl mx-auto px-6 text-center">
             <p className="text-blue-600 text-xs font-semibold uppercase tracking-widest mb-3">How it works</p>
@@ -188,7 +188,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── Feature Cards ──────────────────────────────── */}
+        {/* -- Feature Cards ---------------------------------- */}
         <section className="bg-[#F0F4F8] pb-28">
           <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-6" id="companies">
             {/* Companies card */}
@@ -249,7 +249,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── Stats + CTA + Footer ── */}
+        {/* -- Stats + CTA + Footer -- */}
         <div className="relative">
           <SplineBottom />
           <div className="absolute inset-0 bg-[#0A0A0F]/60 z-[1]" />
