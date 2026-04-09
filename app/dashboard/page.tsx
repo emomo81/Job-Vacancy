@@ -82,7 +82,7 @@ export default function RankrDashboard() {
 
           {/* Right side */}
           <div className="flex items-center gap-4">
-            <button className="relative text-white/60 hover:text-white transition-colors cursor-pointer">
+            <button className="relative text-white/60 hover:text-white transition-colors cursor-pointer" aria-label="Notifications">
               <Bell size={20} />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#2a85ff] rounded-full"></span>
             </button>
@@ -96,7 +96,7 @@ export default function RankrDashboard() {
         </header>
 
         {/* Hero Banner */}
-        <div className="relative overflow-hidden" style={{ minHeight: 220 }}>
+        <div className="relative overflow-hidden min-h-[220px]">
           <div className="max-w-[1280px] mx-auto px-6 py-12 flex items-center justify-between relative z-10">
             {/* Left text */}
             <div className="flex-1 max-w-2xl">
@@ -114,9 +114,8 @@ export default function RankrDashboard() {
               <img
                 src="https://uxcanvas.ai/api/generated-images/a41dbe01-2ec5-4de6-bde6-a96289ed1c5f/9bf07167-e189-46c3-9b0b-84e832c5a707"
                 alt="Team collaborating"
-                className="w-full h-full object-cover object-top"
+                className="w-full h-full object-cover object-top grayscale-[100%] brightness-[0.7] contrast-[1.1]"
                 style={{
-                  filter: 'grayscale(100%) brightness(0.7) contrast(1.1)',
                   maskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 70%, transparent 100%), linear-gradient(to left, black 55%, transparent 100%)',
                   WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 20%, black 70%, transparent 100%), linear-gradient(to left, black 55%, transparent 100%)',
                   maskComposite: 'intersect',
@@ -160,6 +159,7 @@ export default function RankrDashboard() {
               <select
                 value={department}
                 onChange={e => setDepartment(e.target.value)}
+                aria-label="Department"
                 className="w-full appearance-none border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm text-[#070707] bg-white focus:outline-none focus:border-[#2a85ff] focus:ring-2 focus:ring-[#2a85ff]/10 transition-all cursor-pointer"
               >
                 <option value="" disabled>Select department</option>
@@ -277,6 +277,7 @@ export default function RankrDashboard() {
                 <select
                   value={education}
                   onChange={e => setEducation(e.target.value)}
+                  aria-label="Education Requirement"
                   className="w-full appearance-none border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm text-[#070707] bg-white focus:outline-none focus:border-[#2a85ff] focus:ring-2 focus:ring-[#2a85ff]/10 transition-all cursor-pointer"
                 >
                   <option value="" disabled>Select education</option>

@@ -112,7 +112,7 @@ export default function RankrCandidates() {
           </nav>
 
           <div className="flex items-center gap-4">
-            <button className="relative text-white/60 hover:text-white transition-colors cursor-pointer">
+            <button className="relative text-white/60 hover:text-white transition-colors cursor-pointer" aria-label="Notifications">
               <Bell size={20} />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#2a85ff] rounded-full"></span>
             </button>
@@ -126,7 +126,7 @@ export default function RankrCandidates() {
         </header>
 
         {/* Hero Banner */}
-        <div className="relative overflow-hidden" style={{ minHeight: 220 }}>
+        <div className="relative overflow-hidden min-h-[220px]">
           <div className="max-w-[1280px] mx-auto px-6 py-10 relative z-10">
             <h1 className="text-white font-extrabold text-5xl lg:text-6xl leading-[1.08] tracking-tight mb-4">
               Add Your<br />Candidates{' '}
@@ -170,9 +170,7 @@ export default function RankrCandidates() {
                 </span>
               </div>
               {i < STEPS.length - 1 && (
-                <div className="flex-1 h-px mx-4 min-w-[40px]" style={{
-                  background: i === 0 ? '#2a85ff' : '#d8e5f0'
-                }} />
+                <div className={`flex-1 h-px mx-4 min-w-[40px] ${i === 0 ? 'bg-[#2a85ff]' : 'bg-[#d8e5f0]'}`} />
               )}
             </React.Fragment>
           ))}
@@ -218,7 +216,7 @@ export default function RankrCandidates() {
                 <FileJson size={24} color="#2a85ff" strokeWidth={1.8} />
               </div>
               <p className="text-sm text-[#5a6a7a] font-medium text-center">Drop JSON file here or click to browse</p>
-              <input ref={rankrInputRef} type="file" accept=".json" className="hidden" onChange={handleRankrUpload} />
+              <input ref={rankrInputRef} type="file" accept=".json" className="hidden" aria-label="Upload Rankr JSON file" onChange={handleRankrUpload} />
             </div>
 
             {/* File List */}
@@ -243,7 +241,7 @@ export default function RankrCandidates() {
                     {file.status === 'done' ? (
                       <Check size={14} color="#16a34a" strokeWidth={3} />
                     ) : (
-                      <button onClick={e => { e.stopPropagation(); setRankrFiles(prev => prev.filter((_, idx) => idx !== i)) }}>
+                      <button aria-label="Remove file" onClick={e => { e.stopPropagation(); setRankrFiles(prev => prev.filter((_, idx) => idx !== i)) }}>
                         <X size={14} color="#b0bac6" />
                       </button>
                     )}
@@ -301,7 +299,7 @@ export default function RankrCandidates() {
                 <p className="text-sm text-[#5a6a7a] font-bold">Drag and drop resumes or CSV</p>
                 <p className="text-xs text-[#8a9ab0] mt-1">Supports PDF, DOCX, CSV and Excel</p>
               </div>
-              <input ref={externalInputRef} type="file" multiple className="hidden" onChange={e => handleExternalUpload(e, 'pdf')} />
+              <input ref={externalInputRef} type="file" multiple className="hidden" aria-label="Upload external resumes or CSV" onChange={e => handleExternalUpload(e, 'pdf')} />
             </div>
 
             {/* External File List */}
@@ -326,7 +324,7 @@ export default function RankrCandidates() {
                     {file.status === 'done' ? (
                       <Check size={14} color="#16a34a" strokeWidth={3} />
                     ) : (
-                      <button onClick={e => { e.stopPropagation(); setExternalFiles(prev => prev.filter((_, idx) => idx !== i)) }}>
+                      <button aria-label="Remove file" onClick={e => { e.stopPropagation(); setExternalFiles(prev => prev.filter((_, idx) => idx !== i)) }}>
                         <X size={14} color="#b0bac6" />
                       </button>
                     )}

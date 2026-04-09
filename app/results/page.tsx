@@ -264,7 +264,7 @@ export default function RankrResults() {
             ))}
           </nav>
           <div className="flex items-center gap-4">
-            <button className="relative text-white/60 hover:text-white transition-colors cursor-pointer">
+            <button className="relative text-white/60 hover:text-white transition-colors cursor-pointer" aria-label="Notifications">
               <Bell size={20} />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#2a85ff] rounded-full" />
             </button>
@@ -278,7 +278,7 @@ export default function RankrResults() {
         </header>
 
         {/* Hero Banner */}
-        <div className="relative overflow-hidden" style={{ minHeight: 140 }}>
+        <div className="relative overflow-hidden min-h-[140px]">
           <div className="max-w-[1280px] mx-auto px-6 py-8 flex items-center justify-between relative z-10">
             <div>
               <div className="flex items-center gap-3 mb-1.5">
@@ -372,7 +372,7 @@ export default function RankrResults() {
               {/* Match Score */}
               <div>
                 <p className="text-xs font-bold text-[#070707] uppercase tracking-wider mb-3">Match Score</p>
-                <div className="relative select-none mb-2" style={{ height: 20 }}>
+                <div className="relative select-none mb-2 h-[20px]">
                   <div
                     className="absolute top-1/2 -translate-y-1/2 h-1.5 w-full bg-[#e8f1ff] rounded-full cursor-pointer"
                     onClick={handleScoreTrack}
@@ -387,15 +387,15 @@ export default function RankrResults() {
                   <input
                     type="range" min={0} max={100} value={scoreMin}
                     onChange={e => setScoreMin(Math.min(Number(e.target.value), scoreMax - 5))}
-                    className="absolute w-full top-1/2 -translate-y-1/2 cursor-pointer opacity-0 pointer-events-auto"
-                    style={{ zIndex: scoreMin > 50 ? 5 : 4 }}
+                    aria-label="Minimum score"
+                    className={`absolute w-full top-1/2 -translate-y-1/2 cursor-pointer opacity-0 pointer-events-auto ${scoreMin > 50 ? 'z-[5]' : 'z-[4]'}`}
                   />
                   {/* Max thumb */}
                   <input
                     type="range" min={0} max={100} value={scoreMax}
                     onChange={e => setScoreMax(Math.max(Number(e.target.value), scoreMin + 5))}
-                    className="absolute w-full top-1/2 -translate-y-1/2 cursor-pointer opacity-0 pointer-events-auto"
-                    style={{ zIndex: scoreMax < 50 ? 5 : 4 }}
+                    aria-label="Maximum score"
+                    className={`absolute w-full top-1/2 -translate-y-1/2 cursor-pointer opacity-0 pointer-events-auto ${scoreMax < 50 ? 'z-[5]' : 'z-[4]'}`}
                   />
                   {/* Visible thumbs */}
                   <div className="absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-white border-2 border-[#2a85ff] shadow-md pointer-events-none"
@@ -419,8 +419,7 @@ export default function RankrResults() {
                     <label key={r} className="flex items-center gap-2.5 cursor-pointer group">
                       <div
                         onClick={() => toggleRec(r)}
-                        className={`w-4.5 h-4.5 rounded flex items-center justify-center border-2 transition-all cursor-pointer flex-shrink-0 ${recFilters.has(r) ? 'bg-[#2a85ff] border-[#2a85ff]' : 'border-[#d0dce8] bg-white hover:border-[#2a85ff]/50'}`}
-                        style={{ width: 18, height: 18 }}
+                        className={`w-[18px] h-[18px] rounded flex items-center justify-center border-2 transition-all cursor-pointer flex-shrink-0 ${recFilters.has(r) ? 'bg-[#2a85ff] border-[#2a85ff]' : 'border-[#d0dce8] bg-white hover:border-[#2a85ff]/50'}`}
                       >
                         {recFilters.has(r) && <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 2.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
                       </div>
@@ -446,8 +445,7 @@ export default function RankrResults() {
                       <label key={s} className="flex items-center gap-2.5 cursor-pointer">
                         <div
                           onClick={() => toggleSource(key)}
-                          className={`w-4.5 h-4.5 rounded flex items-center justify-center border-2 transition-all cursor-pointer flex-shrink-0 ${sourceFilters.has(key) ? 'bg-[#2a85ff] border-[#2a85ff]' : 'border-[#d0dce8] bg-white hover:border-[#2a85ff]/50'}`}
-                          style={{ width: 18, height: 18 }}
+                          className={`w-[18px] h-[18px] rounded flex items-center justify-center border-2 transition-all cursor-pointer flex-shrink-0 ${sourceFilters.has(key) ? 'bg-[#2a85ff] border-[#2a85ff]' : 'border-[#d0dce8] bg-white hover:border-[#2a85ff]/50'}`}
                         >
                           {sourceFilters.has(key) && <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 2.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
                         </div>
@@ -468,8 +466,7 @@ export default function RankrResults() {
                     <label key={e} className="flex items-center gap-2.5 cursor-pointer">
                       <div
                         onClick={() => toggleExp(e)}
-                        className={`rounded flex items-center justify-center border-2 transition-all cursor-pointer flex-shrink-0 ${expFilters.has(e) ? 'bg-[#2a85ff] border-[#2a85ff]' : 'border-[#d0dce8] bg-white hover:border-[#2a85ff]/50'}`}
-                        style={{ width: 18, height: 18 }}
+                        className={`w-[18px] h-[18px] rounded flex items-center justify-center border-2 transition-all cursor-pointer flex-shrink-0 ${expFilters.has(e) ? 'bg-[#2a85ff] border-[#2a85ff]' : 'border-[#d0dce8] bg-white hover:border-[#2a85ff]/50'}`}
                       >
                         {expFilters.has(e) && <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2.5 2.5L8 2.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>}
                       </div>
@@ -502,8 +499,9 @@ export default function RankrResults() {
                       {/* Top row: rank + heart */}
                       <div className="flex items-center justify-between">
                         <span className="text-[#2a85ff] font-extrabold text-lg leading-none">#{c.rank}</span>
-                        <button
+                         <button
                           onClick={e => { e.stopPropagation(); toggleLike(c.id) }}
+                          aria-label={`Like ${c.name}`}
                           className="text-[#c8d6e5] hover:text-[#ff6b8a] transition-colors cursor-pointer"
                         >
                           <Heart size={18} fill={liked.has(c.id) ? '#ff6b8a' : 'none'} color={liked.has(c.id) ? '#ff6b8a' : '#c8d6e5'} strokeWidth={2} />
@@ -612,8 +610,9 @@ export default function RankrResults() {
                           </span>
                         </div>
                       </div>
-                      <button
+                       <button
                         onClick={() => setSelectedId(null)}
+                        aria-label="Close details panel"
                         className="text-[#b0bac6] hover:text-[#5a6a7a] transition-colors cursor-pointer flex-shrink-0 mt-1"
                       >
                         <X size={18} />

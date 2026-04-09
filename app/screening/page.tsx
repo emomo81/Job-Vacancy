@@ -85,7 +85,7 @@ export default function RankrScreening() {
           </nav>
 
           <div className="flex items-center gap-4">
-            <button className="relative text-white/60 hover:text-white transition-colors cursor-pointer">
+            <button className="relative text-white/60 hover:text-white transition-colors cursor-pointer" aria-label="Notifications">
               <Bell size={20} />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#2a85ff] rounded-full" />
             </button>
@@ -99,7 +99,7 @@ export default function RankrScreening() {
         </header>
 
         {/* Hero Banner */}
-        <div className="relative overflow-hidden" style={{ minHeight: 180 }}>
+        <div className="relative overflow-hidden min-h-[180px]">
           <div className="max-w-[1280px] mx-auto px-6 py-10 relative z-10">
             <h1 className="text-white font-extrabold text-5xl lg:text-6xl leading-[1.08] tracking-tight mb-4">
               AI Screening<br />in Progress{' '}

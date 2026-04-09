@@ -69,7 +69,7 @@ function CircularProgress({ pct }: { pct: number }) {
           strokeLinecap="round"
           strokeDasharray={circ}
           strokeDashoffset={offset}
-          style={{ transition: 'stroke-dashoffset 1s ease' }}
+          className="transition-[stroke-dashoffset] duration-1000 ease-in-out"
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center rotate-0">
@@ -152,7 +152,7 @@ export default function RankrCandidateProfile() {
           </nav>
 
           <div className="flex items-center gap-4">
-            <button className="relative text-white/60 hover:text-white transition-colors cursor-pointer">
+            <button className="relative text-white/60 hover:text-white transition-colors cursor-pointer" aria-label="Notifications">
               <Bell size={20} />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#2a85ff] rounded-full" />
             </button>
@@ -166,7 +166,7 @@ export default function RankrCandidateProfile() {
         </header>
 
         {/* Hero Banner */}
-        <div className="relative overflow-hidden" style={{ minHeight: 160 }}>
+        <div className="relative overflow-hidden min-h-[160px]">
           <div className="max-w-[1280px] mx-auto px-6 py-8 flex items-center justify-between relative z-10">
             <div>
               <h1 className="text-white font-extrabold text-5xl lg:text-6xl leading-[1.08] tracking-tight mb-2">
@@ -303,6 +303,7 @@ export default function RankrCandidateProfile() {
                   <input
                     value={fullName}
                     onChange={e => setFullName(e.target.value)}
+                    aria-label="Full Name"
                     className="border border-[#e2eaf2] rounded-xl px-4 py-2.5 text-sm text-[#070707] placeholder-[#b0bac6] focus:outline-none focus:border-[#2a85ff] focus:ring-2 focus:ring-[#2a85ff]/10 transition-all"
                   />
                 </div>
@@ -329,6 +330,7 @@ export default function RankrCandidateProfile() {
                   <div className="flex items-center gap-3 border border-[#e2eaf2] rounded-xl px-4 py-2.5">
                     <button
                       onClick={() => setYearsExp(v => Math.max(0, v - 1))}
+                      aria-label="Decrease years"
                       className="w-6 h-6 rounded-full border border-[#e2eaf2] flex items-center justify-center text-[#5a6a7a] hover:border-[#2a85ff] hover:text-[#2a85ff] transition-all cursor-pointer flex-shrink-0"
                     >
                       <Minus size={12} />
@@ -336,6 +338,7 @@ export default function RankrCandidateProfile() {
                     <span className="text-[#070707] font-bold text-sm flex-1 text-center">{yearsExp === 20 ? '20+' : yearsExp} yrs</span>
                     <button
                       onClick={() => setYearsExp(v => Math.min(20, v + 1))}
+                      aria-label="Increase years"
                       className="w-6 h-6 rounded-full border border-[#e2eaf2] flex items-center justify-center text-[#5a6a7a] hover:border-[#2a85ff] hover:text-[#2a85ff] transition-all cursor-pointer flex-shrink-0"
                     >
                       <Plus size={12} />
@@ -370,7 +373,7 @@ export default function RankrCandidateProfile() {
                 {skills.map(s => (
                   <span key={s} className="flex items-center gap-1.5 bg-[#e8f1ff] text-[#2a85ff] text-xs font-semibold px-3 py-1.5 rounded-full">
                     {s}
-                    <button onClick={() => setSkills(prev => prev.filter(x => x !== s))} className="hover:text-[#1a65df] cursor-pointer">
+                    <button aria-label={`Remove skill ${s}`} onClick={() => setSkills(prev => prev.filter(x => x !== s))} className="hover:text-[#1a65df] cursor-pointer">
                       <X size={11} strokeWidth={2.5} />
                     </button>
                   </span>
@@ -380,6 +383,7 @@ export default function RankrCandidateProfile() {
                   value={skillInput}
                   onChange={e => setSkillInput(e.target.value)}
                   onKeyDown={handleSkillKey}
+                  aria-label="Add a skill"
                   placeholder={skills.length === 0 ? 'Type a skill and press Enter…' : ''}
                   className="flex-1 min-w-[160px] text-sm text-[#070707] placeholder-[#b0bac6] bg-transparent focus:outline-none"
                 />
@@ -438,7 +442,7 @@ export default function RankrCandidateProfile() {
                     <button className="px-5 py-2 rounded-full text-sm font-semibold text-white bg-[#2a85ff] hover:bg-[#1a75ef] shadow-[0_4px_14px_rgba(42,133,255,0.35)] transition-all cursor-pointer">
                       Browse Files
                     </button>
-                    <input ref={cvRef} type="file" accept=".pdf,.doc,.docx" className="hidden" onChange={() => setCvUploaded(true)} />
+                    <input ref={cvRef} type="file" accept=".pdf,.doc,.docx" className="hidden" aria-label="Upload CV file" onChange={() => setCvUploaded(true)} />
                   </motion.div>
                 ) : (
                   <motion.div

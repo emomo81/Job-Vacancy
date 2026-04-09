@@ -120,9 +120,9 @@ export default function RankrAuth() {
               AI screening that ranks every candidate and explains every decision.
             </p>
 
-            <ul className="flex flex-col gap-5">
+            <div className="flex flex-col gap-5">
               {FEATURES.map((feat, i) => (
-                <motion.li
+                <motion.div
                   key={feat}
                   initial={{ opacity: 0, x: -16 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -133,9 +133,9 @@ export default function RankrAuth() {
                     <CheckCircle size={11} color="#2a85ff" strokeWidth={2.5} />
                   </div>
                   <span className="text-white/70 text-sm leading-relaxed">{feat}</span>
-                </motion.li>
+                </motion.div>
               ))}
-            </ul>
+            </div>
           </motion.div>
         </div>
 
@@ -145,9 +145,8 @@ export default function RankrAuth() {
             src="https://uxcanvas.ai/api/generated-images/a41dbe01-2ec5-4de6-bde6-a96289ed1c5f/9bf07167-e189-46c3-9b0b-84e832c5a707"
             alt=""
             aria-hidden="true"
-            className="absolute inset-0 w-full h-full object-cover object-top"
+            className="absolute inset-0 w-full h-full object-cover object-top grayscale-[100%] brightness-[0.55] contrast-[1.1]"
             style={{
-              filter: 'grayscale(100%) brightness(0.55) contrast(1.1)',
               maskImage: 'linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%)',
               WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%)',
             }}
@@ -257,7 +256,11 @@ export default function RankrAuth() {
                 </div>
 
                 <Link
-                  href={role === 'company' ? '/dashboard' : '/profile'}
+                  onClick={() => {
+                    localStorage.setItem('rankr_user_name', role === 'company' ? 'Acme Corp' : 'John Doe')
+                    localStorage.setItem('rankr_profile_completion', '75')
+                  }}
+                  href={role === 'company' ? '/dashboard' : '/candidate/jobs'}
                   className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full text-sm font-bold text-white bg-[#2a85ff] hover:bg-[#1a75ef] shadow-[0_4px_16px_rgba(42,133,255,0.35)] hover:shadow-[0_6px_24px_rgba(42,133,255,0.5)] transition-all cursor-pointer"
                 >
                   Sign In
@@ -350,6 +353,10 @@ export default function RankrAuth() {
                 </div>
 
                 <Link
+                  onClick={() => {
+                    localStorage.setItem('rankr_user_name', role === 'company' ? 'Acme Corp' : 'John Doe')
+                    localStorage.setItem('rankr_profile_completion', '75')
+                  }}
                   href={role === 'company' ? '/dashboard' : '/profile'}
                   className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full text-sm font-bold text-white bg-[#2a85ff] hover:bg-[#1a75ef] shadow-[0_4px_16px_rgba(42,133,255,0.35)] hover:shadow-[0_6px_24px_rgba(42,133,255,0.5)] transition-all cursor-pointer"
                 >
