@@ -1,6 +1,5 @@
 "use client";
 import Link from "next/link";
-import Link from "next/link";
 import { Check, Pencil, Zap, ArrowLeft } from "lucide-react";
 import RecruiterNav from "@/components/RecruiterNav";
 import Stepper from "@/components/Stepper";
