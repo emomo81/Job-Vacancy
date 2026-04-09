@@ -43,9 +43,9 @@ export default function CandidatesPage() {
       <RecruiterNav />
 
       {/* Dark hero banner */}
-      <div className="bg-[#0A0A0F] px-6 py-10">
+      <div className="bg-[#0A0A0F] px-4 sm:px-6 py-8 sm:py-10">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold text-white mb-1">Add Candidates</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">Add Candidates</h1>
           <p className="text-gray-400 text-sm">Import from Rankr's talent pool or upload CV files directly</p>
         </div>
       </div>
@@ -63,7 +63,7 @@ export default function CandidatesPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         <h2 className="text-lg font-bold text-gray-900 mb-6">Candidate Sources</h2>
 
         <div className="grid lg:grid-cols-2 gap-6 mb-6">
@@ -172,9 +172,9 @@ export default function CandidatesPage() {
         </div>
 
         {/* Bottom bar */}
-        <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-500">Total candidates for this role:</span>
+        <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+            <span className="text-sm text-gray-500">Total candidates:</span>
             <span className="text-2xl font-bold text-gray-900">{totalCandidates}</span>
             <div className="flex gap-2">
               <span className="text-xs bg-blue-50 text-blue-600 font-medium px-2.5 py-1 rounded-full">
@@ -185,7 +185,7 @@ export default function CandidatesPage() {
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
             <Link
               href="/dashboard"
               className="flex items-center gap-2 border border-gray-200 text-gray-600 hover:border-gray-300 font-medium px-5 py-2.5 rounded-full text-sm transition-colors"
