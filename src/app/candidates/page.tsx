@@ -45,10 +45,8 @@ export default function CandidatesPage() {
       {/* Dark hero banner */}
       <div className="bg-[#0A0A0F] px-6 py-10">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold text-white mb-2">
-            Add Your Candidates <span className="text-2xl">🔥</span>
-          </h1>
-          <p className="text-gray-400 text-sm">Import from Rankr or upload externally</p>
+          <h1 className="text-3xl font-bold text-white mb-1">Add Candidates</h1>
+          <p className="text-gray-400 text-sm">Import from Rankr's talent pool or upload CV files directly</p>
         </div>
       </div>
 
