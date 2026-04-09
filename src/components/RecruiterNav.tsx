@@ -4,10 +4,10 @@ import { usePathname } from "next/navigation";
 import { Bell, ChevronDown } from "lucide-react";
 
 const navLinks = [
-  { label: "Jobs", href: "/dashboard" },
+  { label: "New Job", href: "/dashboard" },
   { label: "Candidates", href: "/candidates" },
-  { label: "Shortlist", href: "/results" },
-  { label: "Settings", href: "#" },
+  { label: "Screening", href: "/screening" },
+  { label: "Results", href: "/results" },
 ];
 
 export default function RecruiterNav() {
@@ -46,9 +46,9 @@ export default function RecruiterNav() {
         </button>
         <button className="flex items-center gap-2 pl-3 pr-2 py-2 rounded-xl border border-gray-200 hover:border-gray-300 transition-colors">
           <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
-            <span className="text-white text-xs font-semibold">R</span>
+            <span className="text-white text-xs font-semibold">A</span>
           </div>
-          <span className="text-sm font-medium text-gray-700">Recruiter name</span>
+          <span className="text-sm font-medium text-gray-700">Alex Morgan</span>
           <ChevronDown size={14} className="text-gray-400" />
         </button>
       </div>
