@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Link from "next/link";
 import { Check, Pencil, Zap, ArrowLeft } from "lucide-react";
 import RecruiterNav from "@/components/RecruiterNav";
 import Stepper from "@/components/Stepper";
@@ -18,7 +19,7 @@ const checklist = [
 
 export default function ScreeningPage() {
   return (
-    <div className="min-h-screen bg-[#F0F4F8]">
+    <div className="min-h-screen bg-[#F0F4F8] dark:bg-[#0f1117]">
       <RecruiterNav />
 
       {/* Dark hero banner */}
@@ -30,7 +31,7 @@ export default function ScreeningPage() {
       </div>
 
       {/* Stepper */}
-      <div className="bg-white border-b border-gray-100 px-6 py-4">
+      <div className="bg-white dark:bg-[#0f1117] border-b border-gray-100 dark:border-white/5 px-6 py-4">
         <div className="max-w-7xl mx-auto">
           <Stepper steps={STEPS} current={2} />
         </div>
@@ -38,7 +39,7 @@ export default function ScreeningPage() {
 
       <div className="max-w-3xl mx-auto px-6 py-8">
         {/* Job info card */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
+        <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm p-6 mb-6">
           <div className="flex items-start justify-between">
             <div>
               <div className="flex items-center gap-2 mb-1">
@@ -49,9 +50,9 @@ export default function ScreeningPage() {
               </div>
               <p className="text-gray-400 text-sm">• 14 Candidates • Screening Top 10</p>
             </div>
-            <button className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 border border-gray-200 hover:border-gray-300 px-3 py-1.5 rounded-lg transition-colors">
+            <Link href="/dashboard" className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700 border border-gray-200 hover:border-gray-300 px-3 py-1.5 rounded-lg transition-colors">
               <Pencil size={12} /> Edit Job
-            </button>
+            </Link>
           </div>
 
           <div className="mt-5 pt-5 border-t border-gray-100">
@@ -73,7 +74,7 @@ export default function ScreeningPage() {
         </div>
 
         {/* Start screening CTA */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center">
+        <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm p-12 text-center">
           <div className="w-20 h-20 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
               <Zap size={24} className="text-blue-600" />
