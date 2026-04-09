@@ -1,19 +1,24 @@
 "use client";
-import dynamic from "next/dynamic";
-
-const Spline = dynamic(() => import("@splinetool/react-spline"), { ssr: false });
+import { GodRays } from "@paper-design/shaders-react";
 
 export default function UnicornHero() {
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden">
-      {/* Hide "Made with Spline" watermark */}
-      <style>{`
-        #logo { display: none !important; }
-        spline-viewer::part(logo) { display: none !important; }
-      `}</style>
-      <Spline
-        scene="https://prod.spline.design/VLQqZjb4VXENT2oA/scene.splinecode"
-        style={{ width: "100%", height: "100%" }}
+      <GodRays
+        colorBack="#0A0A0F"
+        colors={["#1d4ed840", "#2563eb30", "#0A0A0F", "#1e3a8a20"]}
+        colorBloom="#2563eb"
+        offsetX={0.75}
+        offsetY={-0.8}
+        intensity={0.55}
+        spotty={0.4}
+        midSize={8}
+        midIntensity={0}
+        density={0.35}
+        bloom={0.25}
+        speed={0.4}
+        scale={1.5}
+        style={{ width: "100%", height: "100%", position: "absolute", top: 0, left: 0 }}
       />
     </div>
   );
