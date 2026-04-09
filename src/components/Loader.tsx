@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Loader() {
@@ -22,15 +23,12 @@ export default function Loader() {
         >
           {/* Logo */}
           <motion.div
-            className="flex items-center gap-3 mb-8"
+            className="mb-8"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
           >
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30">
-              <span className="text-white font-bold text-lg">R</span>
-            </div>
-            <span className="text-white font-bold text-2xl tracking-tight">Rankr</span>
+            <Image src="/logo.png" alt="Job RW" width={180} height={72} className="h-16 w-auto object-contain" priority />
           </motion.div>
 
           {/* Progress bar */}
