@@ -3,6 +3,13 @@ import Link from "next/link";
 import { useState } from "react";
 import { Minus, Plus, ArrowRight, Save } from "lucide-react";
 import RecruiterNav from "@/components/RecruiterNav";
+import Stepper from "@/components/Stepper";
+
+const STEPS = [
+  { label: "Create Job" },
+  { label: "Add Candidates" },
+  { label: "AI Screening" },
+];
 
 const departments = ["Engineering", "Design", "Product", "Marketing", "Sales", "Operations", "Finance", "HR"];
 const educationOptions = ["Any", "High School", "Bachelor's Degree", "Master's Degree", "PhD"];
@@ -38,30 +45,25 @@ export default function DashboardPage() {
       <RecruiterNav />
 
       {/* Dark hero banner */}
-      <div className="bg-[#0A0A0F] px-6 py-10 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-blue-900/10" />
-        <div className="max-w-7xl mx-auto relative z-10 flex items-center justify-between">
+      <div className="bg-[#0A0A0F] px-6 py-10">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-2">
-              Find the Right Talent, Faster{" "}
-              <span className="text-2xl">🔥</span>
-            </h1>
-            <p className="text-gray-400 text-sm">Let AI screen your candidates in seconds</p>
+            <h1 className="text-3xl font-bold text-white mb-1">Post a New Job</h1>
+            <p className="text-gray-400 text-sm">Define requirements and let AI find the best candidates</p>
           </div>
-          <div className="hidden lg:flex items-center gap-3 bg-white/5 border border-white/10 rounded-2xl px-6 py-4">
-            <div className="flex -space-x-2">
-              {["bg-purple-500", "bg-blue-500", "bg-green-500"].map((c, i) => (
-                <div key={i} className={`w-8 h-8 rounded-full border-2 border-[#0A0A0F] ${c}`} />
-              ))}
-            </div>
-            <p className="text-gray-400 text-xs">Team reviewing candidates</p>
-          </div>
+        </div>
+      </div>
+
+      {/* Stepper */}
+      <div className="bg-white border-b border-gray-100 px-6 py-4">
+        <div className="max-w-7xl mx-auto">
+          <Stepper steps={STEPS} current={0} />
         </div>
       </div>
 
       {/* Form */}
       <div className="max-w-3xl mx-auto px-6 py-10">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">Create a New Job</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-6">Job Details</h2>
 
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 space-y-7">
           {/* Job Title */}
