@@ -165,16 +165,16 @@ export default function ResultsPage() {
       <Toast message={toast} onDone={() => setToast("")} />
 
       {/* Header */}
-      <div className="bg-white dark:bg-[#0f1117] border-b border-gray-100 dark:border-white/5 px-6 py-5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <div className="bg-white dark:bg-[#0f1117] border-b border-gray-100 dark:border-white/5 px-4 sm:px-6 py-4 sm:py-5">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <div className="w-2 h-2 bg-green-500 rounded-full" />
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Screening Results</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Screening Results</h1>
             </div>
             <p className="text-gray-400 text-sm">9 candidates ranked from 34 applicants</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 flex-wrap">
             <button className="flex items-center gap-2 border border-gray-200 text-gray-600 hover:border-gray-300 font-medium px-4 py-2 rounded-full text-sm transition-colors">
               <Plus size={13} /> 34 Screened
             </button>
@@ -185,7 +185,7 @@ export default function ResultsPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-6 flex gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex gap-6">
         {/* -- Sidebar filters ------ */}
         <aside className="hidden xl:block w-48 flex-shrink-0">
           <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm p-5 sticky top-6">
@@ -236,10 +236,10 @@ export default function ResultsPage() {
         {/* -- Candidate grid --------- */}
         <div className="flex-1">
           {/* Toolbar */}
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-1">
-              <h2 className="text-base font-bold text-gray-900 mr-4">Shortlisted Candidates</h2>
-              <div className="flex bg-gray-100 rounded-lg p-0.5 gap-0.5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-base font-bold text-gray-900">Shortlisted Candidates</h2>
+              <div className="flex bg-gray-100 rounded-lg p-0.5 gap-0.5 overflow-x-auto">
                 {(["all", "rankr", "external"] as Tab[]).map((t) => (
                   <button
                     key={t}
@@ -337,7 +337,7 @@ export default function ResultsPage() {
           </div>
 
           {/* Bottom bar */}
-          <div className="mt-6 flex items-center justify-between">
+          <div className="mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <Link href="/screening" className="flex items-center gap-2 text-gray-500 hover:text-gray-700 text-sm transition-colors">
               <ArrowLeft size={14} /> Back to Screening
             </Link>
