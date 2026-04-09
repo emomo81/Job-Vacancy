@@ -112,10 +112,10 @@ export default function ProfilePage() {
       <Toast message={toast} onDone={() => setToast("")} />
 
       {/* Hero */}
-      <div className="bg-[#0A0A0F] px-6 py-10">
+      <div className="bg-[#0A0A0F] px-4 sm:px-6 py-8 sm:py-10">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-1">Your Profile</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-1">Your Profile</h1>
             <p className="text-gray-400 text-sm">Help recruiters find the right version of you</p>
           </div>
           <div className="hidden lg:flex items-center gap-3">
@@ -134,7 +134,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8 flex gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 flex gap-6">
         {/* -- Sidebar -- */}
         <aside className="hidden lg:block w-56 flex-shrink-0">
           <div className="bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-100 dark:border-white/5 shadow-sm p-5 mb-4">
@@ -201,7 +201,7 @@ export default function ProfilePage() {
                 <Pencil size={12} /> {editingBasic ? "Save" : "Edit"}
               </button>
             </div>
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
               {[
                 { label: "Full Name", value: name, set: setName },
                 { label: "Professional Title", value: title, set: setTitle },
@@ -322,14 +322,14 @@ export default function ProfilePage() {
                   {editingExp === e.id ? (
                     /* Inline edit form */
                     <div className="border border-blue-200 rounded-xl p-4 space-y-3 bg-blue-50/50 dark:bg-blue-500/5">
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div><label className="text-xs text-gray-500 mb-1 block">Role</label>
                           <input className={inputCls} value={expDraft.role} onChange={(ev) => setExpDraft(d => ({ ...d, role: ev.target.value }))} placeholder="Job title" /></div>
                         <div><label className="text-xs text-gray-500 mb-1 block">Company</label>
                           <input className={inputCls} value={expDraft.company} onChange={(ev) => setExpDraft(d => ({ ...d, company: ev.target.value }))} placeholder="Company name" /></div>
-                        <div className="col-span-2"><label className="text-xs text-gray-500 mb-1 block">Period</label>
+                        <div className="sm:col-span-2"><label className="text-xs text-gray-500 mb-1 block">Period</label>
                           <input className={inputCls} value={expDraft.period} onChange={(ev) => setExpDraft(d => ({ ...d, period: ev.target.value }))} placeholder="e.g. Jan 2022 – Present" /></div>
-                        <div className="col-span-2"><label className="text-xs text-gray-500 mb-1 block">Description</label>
+                        <div className="sm:col-span-2"><label className="text-xs text-gray-500 mb-1 block">Description</label>
                           <textarea rows={3} className={inputCls + " resize-none"} value={expDraft.desc} onChange={(ev) => setExpDraft(d => ({ ...d, desc: ev.target.value }))} placeholder="What did you do?" /></div>
                       </div>
                       <div className="flex gap-2">
@@ -363,14 +363,14 @@ export default function ProfilePage() {
               {/* New experience form */}
               {editingExp === -1 && (
                 <div className="border border-blue-200 rounded-xl p-4 space-y-3 bg-blue-50/50 dark:bg-blue-500/5">
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div><label className="text-xs text-gray-500 mb-1 block">Role</label>
                       <input className={inputCls} value={expDraft.role} onChange={(e) => setExpDraft(d => ({ ...d, role: e.target.value }))} placeholder="Job title" /></div>
                     <div><label className="text-xs text-gray-500 mb-1 block">Company</label>
                       <input className={inputCls} value={expDraft.company} onChange={(e) => setExpDraft(d => ({ ...d, company: e.target.value }))} placeholder="Company name" /></div>
-                    <div className="col-span-2"><label className="text-xs text-gray-500 mb-1 block">Period</label>
+                    <div className="sm:col-span-2"><label className="text-xs text-gray-500 mb-1 block">Period</label>
                       <input className={inputCls} value={expDraft.period} onChange={(e) => setExpDraft(d => ({ ...d, period: e.target.value }))} placeholder="e.g. Jan 2022 – Present" /></div>
-                    <div className="col-span-2"><label className="text-xs text-gray-500 mb-1 block">Description</label>
+                    <div className="sm:col-span-2"><label className="text-xs text-gray-500 mb-1 block">Description</label>
                       <textarea rows={3} className={inputCls + " resize-none"} value={expDraft.desc} onChange={(e) => setExpDraft(d => ({ ...d, desc: e.target.value }))} placeholder="What did you do?" /></div>
                   </div>
                   <div className="flex gap-2">
@@ -396,12 +396,12 @@ export default function ProfilePage() {
                 <div key={e.id}>
                   {editingEdu === e.id ? (
                     <div className="border border-blue-200 rounded-xl p-4 space-y-3 bg-blue-50/50 dark:bg-blue-500/5">
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div><label className="text-xs text-gray-500 mb-1 block">Degree</label>
                           <input className={inputCls} value={eduDraft.degree} onChange={(ev) => setEduDraft(d => ({ ...d, degree: ev.target.value }))} placeholder="e.g. BSc Computer Science" /></div>
                         <div><label className="text-xs text-gray-500 mb-1 block">Institution</label>
                           <input className={inputCls} value={eduDraft.institution} onChange={(ev) => setEduDraft(d => ({ ...d, institution: ev.target.value }))} placeholder="University name" /></div>
-                        <div className="col-span-2"><label className="text-xs text-gray-500 mb-1 block">Period</label>
+                        <div className="sm:col-span-2"><label className="text-xs text-gray-500 mb-1 block">Period</label>
                           <input className={inputCls} value={eduDraft.period} onChange={(ev) => setEduDraft(d => ({ ...d, period: ev.target.value }))} placeholder="e.g. 2014 – 2018" /></div>
                       </div>
                       <div className="flex gap-2">
@@ -433,12 +433,12 @@ export default function ProfilePage() {
 
               {editingEdu === -1 && (
                 <div className="border border-blue-200 rounded-xl p-4 space-y-3 bg-blue-50/50 dark:bg-blue-500/5">
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div><label className="text-xs text-gray-500 mb-1 block">Degree</label>
                       <input className={inputCls} value={eduDraft.degree} onChange={(e) => setEduDraft(d => ({ ...d, degree: e.target.value }))} placeholder="e.g. BSc Computer Science" /></div>
                     <div><label className="text-xs text-gray-500 mb-1 block">Institution</label>
                       <input className={inputCls} value={eduDraft.institution} onChange={(e) => setEduDraft(d => ({ ...d, institution: e.target.value }))} placeholder="University name" /></div>
-                    <div className="col-span-2"><label className="text-xs text-gray-500 mb-1 block">Period</label>
+                    <div className="sm:col-span-2"><label className="text-xs text-gray-500 mb-1 block">Period</label>
                       <input className={inputCls} value={eduDraft.period} onChange={(e) => setEduDraft(d => ({ ...d, period: e.target.value }))} placeholder="e.g. 2014 – 2018" /></div>
                   </div>
                   <div className="flex gap-2">
