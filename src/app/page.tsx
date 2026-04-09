@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Check, Upload, Zap, Users } from "lucide-react";
 import { motion } from "framer-motion";
 import LandingNav from "@/components/LandingNav";
@@ -49,13 +50,13 @@ export default function LandingPage() {
           <div className="absolute inset-0 bg-gradient-to-r from-[#0A0A0F] via-[#0A0A0F]/75 to-transparent z-10" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#0A0A0F]/60 via-transparent to-transparent z-10" />
 
-          <div className="relative z-20 w-full max-w-7xl mx-auto px-6 pt-28 pb-24 flex flex-col lg:flex-row items-center gap-16">
+          <div className="relative z-20 w-full max-w-7xl mx-auto px-4 sm:px-6 pt-24 sm:pt-28 pb-16 sm:pb-24 flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
             {/* Left content */}
             <div className="flex-1 max-w-xl">
-              <h1 className="text-5xl lg:text-[3.75rem] font-bold text-white leading-[1.05] mb-2 tracking-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[3.75rem] font-bold text-white leading-[1.05] mb-2 tracking-tight">
                 <TextReveal text="Hire Smarter." delay={0.2} />
               </h1>
-              <h1 className="text-5xl lg:text-[3.75rem] font-bold leading-[1.1] mb-6 tracking-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-[3.75rem] font-bold leading-[1.1] mb-6 tracking-tight">
                 <TextReveal text="Screen Faster." delay={0.5} className="text-blue-500" />
               </h1>
 
@@ -158,13 +159,13 @@ export default function LandingPage() {
         </section>
 
         {/* -- How it Works ------------------------------------ */}
-        <section id="how-it-works" className="bg-[#F0F4F8] py-28">
-          <div className="max-w-7xl mx-auto px-6 text-center">
+        <section id="how-it-works" className="bg-[#F0F4F8] dark:bg-[#0f1117] py-16 md:py-28">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
             <p className="text-blue-600 text-xs font-semibold uppercase tracking-widest mb-3">How it works</p>
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
               Three steps to your<br />perfect shortlist
             </h2>
-            <p className="text-gray-500 text-lg max-w-xl mx-auto mb-16">
+            <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg max-w-xl mx-auto mb-10 sm:mb-16">
               From job post to shortlist in minutes — no spreadsheets, no guesswork.
             </p>
 
@@ -189,14 +190,14 @@ export default function LandingPage() {
         </section>
 
         {/* -- Feature Cards ---------------------------------- */}
-        <section className="bg-[#F0F4F8] pb-28">
-          <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-6" id="companies">
+        <section className="bg-[#F0F4F8] dark:bg-[#0f1117] pb-16 md:pb-28">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 grid md:grid-cols-2 gap-6" id="companies">
             {/* Companies card */}
-            <div className="bg-white rounded-3xl p-10 border border-gray-100 shadow-sm h-full">
+            <div className="bg-white rounded-3xl p-6 sm:p-10 border border-gray-100 shadow-sm h-full">
               <span className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-600 text-xs font-semibold px-3 py-1 rounded-full mb-6">
                 <Zap size={11} /> For Companies
               </span>
-              <h3 className="text-3xl font-bold text-gray-900 mb-4 leading-tight">
+              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 leading-tight">
                 Screen 100 candidates<br />in 30 seconds
               </h3>
               <ul className="space-y-3 mb-8">
@@ -220,11 +221,11 @@ export default function LandingPage() {
             </div>
 
             {/* Candidates card */}
-            <div id="candidates" className="bg-white rounded-3xl p-10 border border-gray-100 shadow-sm h-full">
+            <div id="candidates" className="bg-white rounded-3xl p-6 sm:p-10 border border-gray-100 shadow-sm h-full">
               <span className="inline-flex items-center gap-1.5 bg-green-50 text-green-600 text-xs font-semibold px-3 py-1 rounded-full mb-6">
                 <Users size={11} /> For Candidates
               </span>
-              <h3 className="text-3xl font-bold text-gray-900 mb-4 leading-tight">
+              <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 leading-tight">
                 Let your profile<br />speak for itself
               </h3>
               <ul className="space-y-3 mb-8">
@@ -255,16 +256,16 @@ export default function LandingPage() {
           <div className="absolute inset-0 bg-[#0A0A0F]/60 z-[1]" />
 
           {/* Stats */}
-          <section className="relative z-[2] py-24">
-            <div className="max-w-7xl mx-auto px-6">
-              <div className="grid grid-cols-3 divide-x divide-white/10">
+          <section className="relative z-[2] py-16 sm:py-24">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 sm:gap-0 sm:divide-x divide-white/10">
                 {[
                   { value: "10,000+", label: "Candidates screened" },
                   { value: "500+", label: "Companies hiring" },
                   { value: "30 sec", label: "Average screen time" },
                 ].map((stat) => (
-                  <div key={stat.label} className="px-8 text-center">
-                    <p className="text-4xl font-bold text-white mb-2">{stat.value}</p>
+                  <div key={stat.label} className="px-4 sm:px-8 text-center">
+                    <p className="text-3xl sm:text-4xl font-bold text-white mb-2">{stat.value}</p>
                     <p className="text-gray-400 text-sm">{stat.label}</p>
                   </div>
                 ))}
@@ -273,13 +274,13 @@ export default function LandingPage() {
           </section>
 
           {/* CTA */}
-          <section className="relative z-[2] pb-24 px-6">
-            <div className="max-w-3xl mx-auto bg-blue-600 border border-blue-500/30 rounded-3xl p-14 text-center">
+          <section className="relative z-[2] pb-16 sm:pb-24 px-4 sm:px-6">
+            <div className="max-w-3xl mx-auto bg-blue-600 border border-blue-500/30 rounded-3xl p-8 sm:p-14 text-center">
               <span className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full mb-6">
                 <Zap size={11} /> Available today
               </span>
-              <h2 className="text-4xl font-bold text-white mb-4">Ready to hire smarter?</h2>
-              <p className="text-blue-100 text-lg mb-8 max-w-md mx-auto">
+              <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Ready to hire smarter?</h2>
+              <p className="text-blue-100 text-base sm:text-lg mb-8 max-w-md mx-auto">
                 Join hundreds of companies already using Rankr to find the best talent faster.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -299,11 +300,8 @@ export default function LandingPage() {
           {/* Footer */}
           <footer className="relative z-[2] border-t border-white/5 py-10 px-6">
             <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-blue-600 rounded-md flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">R</span>
-                </div>
-                <span className="text-white font-bold">Rankr</span>
+              <div className="flex items-center">
+                <Image src="/logo.png" alt="Job RW" width={100} height={40} className="h-8 w-auto object-contain" />
               </div>
               <div className="flex gap-6 text-sm text-gray-500">
                 {["Privacy", "Terms", "Contact", "Blog"].map((l) => (
