@@ -5,7 +5,7 @@ import { Poppins } from 'next/font/google'
 import {
   Bell, Sparkles, User, MapPin, Upload, FileText,
   Plus, X, Briefcase, GraduationCap, Check, ChevronRight,
-  ExternalLink, Minus, Building2
+  ExternalLink, Minus, Building2, Menu
 } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'motion/react'
@@ -58,8 +58,8 @@ function CircularProgress({ pct }: { pct: number }) {
   const circ = 2 * Math.PI * r
   const offset = circ - (pct / 100) * circ
   return (
-    <div className="relative w-36 h-36 flex-shrink-0">
-      <svg width={144} height={144} viewBox="0 0 144 144" className="-rotate-90">
+    <div className="relative w-24 h-24 sm:w-36 sm:h-36 flex-shrink-0">
+      <svg width="100%" height="100%" viewBox="0 0 144 144" className="-rotate-90">
         <circle cx={72} cy={72} r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={10} />
         <circle
           cx={72} cy={72} r={r}
@@ -73,8 +73,8 @@ function CircularProgress({ pct }: { pct: number }) {
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center rotate-0">
-        <span className="text-white font-extrabold text-2xl leading-none">{pct}%</span>
-        <span className="text-white/50 text-xs font-medium mt-1">Complete</span>
+        <span className="text-white font-extrabold text-lg sm:text-2xl leading-none">{pct}%</span>
+        <span className="text-white/50 text-[10px] sm:text-xs font-medium mt-1">Complete</span>
       </div>
     </div>
   )
@@ -82,6 +82,7 @@ function CircularProgress({ pct }: { pct: number }) {
 
 export default function RankrCandidateProfile() {
   const [activeNav, setActiveNav] = useState('My Profile')
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const [availability, setAvailability] = useState<'open' | 'closed'>('open')
   const [jobTypes, setJobTypes] = useState<Set<string>>(new Set(['Full-Time', 'Remote']))
@@ -127,7 +128,7 @@ export default function RankrCandidateProfile() {
       <div className="bg-[#070707]">
 
         {/* Navbar */}
-        <header className="max-w-[1280px] mx-auto px-6 flex items-center justify-between h-16">
+        <header className="max-w-[1280px] mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
           <Link href="/" className="flex items-center gap-2 select-none">
             <div className="w-8 h-8 rounded-lg bg-[#2a85ff] flex items-center justify-center">
               <Sparkles size={17} color="white" strokeWidth={2.2} />
@@ -135,7 +136,8 @@ export default function RankrCandidateProfile() {
             <span className="text-white text-xl font-bold tracking-tight">Rankr</span>
           </Link>
 
-          <nav className="flex items-center gap-8">
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-8">
             {NAV_LINKS.map(link => (
               <button
                 key={link}
@@ -151,28 +153,62 @@ export default function RankrCandidateProfile() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-4">
-            <button className="relative text-white/60 hover:text-white transition-colors cursor-pointer" aria-label="Notifications">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <button className="relative text-white/60 hover:text-white transition-colors cursor-pointer hidden sm:block" aria-label="Notifications">
               <Bell size={20} />
               <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#2a85ff] rounded-full" />
             </button>
-            <div className="flex items-center gap-2 cursor-pointer group">
+            <div className="hidden sm:flex items-center gap-2 cursor-pointer group">
               <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#2a85ff] to-[#6eb3ff] flex items-center justify-center">
                 <span className="text-white text-xs font-bold">JR</span>
               </div>
-              <span className="text-white/80 text-sm font-medium group-hover:text-white transition-colors">Jordan Reeves</span>
+              <span className="text-white/80 text-sm font-medium group-hover:text-white transition-colors hidden lg:block">Jordan Reeves</span>
             </div>
+            {/* Mobile menu toggle */}
+            <button 
+              className="md:hidden text-white/70 hover:text-white p-1"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              aria-label="Toggle menu"
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
         </header>
 
+        {/* Mobile Nav Drawer */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden bg-[#0a0a0a] border-b border-white/5 overflow-hidden"
+            >
+              <div className="px-4 py-6 flex flex-col gap-4">
+                {NAV_LINKS.map(link => (
+                  <button
+                    key={link}
+                    onClick={() => { setActiveNav(link); setIsMobileMenuOpen(false) }}
+                    className={`text-left text-lg font-bold ${
+                      activeNav === link ? 'text-[#2a85ff]' : 'text-white/60'
+                    }`}
+                  >
+                    {link}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Hero Banner */}
-        <div className="relative overflow-hidden min-h-[160px]">
-          <div className="max-w-[1280px] mx-auto px-6 py-8 flex items-center justify-between relative z-10">
-            <div>
-              <h1 className="text-white font-extrabold text-5xl lg:text-6xl leading-[1.08] tracking-tight mb-2">
+        <div className="relative overflow-hidden min-h-[120px] sm:min-h-[160px]">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-8 flex items-center justify-between relative z-10 gap-4">
+            <div className="min-w-0">
+              <h1 className="text-white font-extrabold text-3xl sm:text-5xl lg:text-6xl leading-[1.08] tracking-tight mb-2">
                 Your Profile <span className="text-[#2a85ff]">✦</span>
               </h1>
-              <p className="text-white/50 text-base font-normal">
+              <p className="text-white/50 text-sm sm:text-base font-normal">
                 Help recruiters find the right version of you
               </p>
             </div>
@@ -184,18 +220,18 @@ export default function RankrCandidateProfile() {
       </div>
 
       {/* Content */}
-      <main className="max-w-[1280px] mx-auto px-6 py-10">
-        <div className="flex gap-7 items-start">
+      <main className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 sm:py-10">
+        <div className="flex flex-col lg:flex-row gap-5 lg:gap-7 items-start">
 
           {/* ── LEFT COLUMN ── */}
-          <div className="w-[300px] flex-shrink-0 flex flex-col gap-5">
+          <div className="w-full lg:w-[300px] lg:flex-shrink-0 flex flex-col gap-5">
 
             {/* Profile Card */}
-            <div className="bg-white rounded-2xl shadow-[0_4px_32px_rgba(0,0,0,0.07)] p-6 flex flex-col items-center gap-4">
+            <div className="bg-white rounded-2xl shadow-[0_4px_32px_rgba(0,0,0,0.07)] p-5 sm:p-6 flex flex-col items-center gap-4">
               {/* Avatar */}
               <div className="relative">
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#2a85ff] to-[#6eb3ff] flex items-center justify-center ring-4 ring-[#2a85ff]/20">
-                  <span className="text-white text-2xl font-extrabold tracking-tight">JR</span>
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-[#2a85ff] to-[#6eb3ff] flex items-center justify-center ring-4 ring-[#2a85ff]/20">
+                  <span className="text-white text-xl sm:text-2xl font-extrabold tracking-tight">JR</span>
                 </div>
                 <div className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center border border-[#e2eaf2]">
                   <Upload size={13} color="#2a85ff" strokeWidth={2.2} />
@@ -259,7 +295,7 @@ export default function RankrCandidateProfile() {
                   <button
                     key={opt.key}
                     onClick={() => setAvailability(opt.key as 'open' | 'closed')}
-                    className={`flex-1 py-2 rounded-full text-xs font-semibold transition-all cursor-pointer ${availability === opt.key ? opt.colorActive : opt.colorInactive}`}
+                    className={`flex-1 py-2.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${availability === opt.key ? opt.colorActive : opt.colorInactive}`}
                   >
                     {opt.label}
                   </button>
@@ -292,7 +328,7 @@ export default function RankrCandidateProfile() {
           <div className="flex-1 min-w-0 flex flex-col gap-5">
 
             {/* Card 1 — Basic Information */}
-            <div className="bg-white rounded-2xl shadow-[0_4px_32px_rgba(0,0,0,0.07)] p-6">
+            <div className="bg-white rounded-2xl shadow-[0_4px_32px_rgba(0,0,0,0.07)] p-5 sm:p-6">
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-[#070707] font-bold text-lg">Basic Information</h2>
                 <button className="text-xs font-semibold text-[#2a85ff] hover:underline cursor-pointer">Edit</button>
@@ -363,13 +399,13 @@ export default function RankrCandidateProfile() {
             </div>
 
             {/* Card 2 — Skills */}
-            <div className="bg-white rounded-2xl shadow-[0_4px_32px_rgba(0,0,0,0.07)] p-6">
+            <div className="bg-white rounded-2xl shadow-[0_4px_32px_rgba(0,0,0,0.07)] p-5 sm:p-6">
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-[#070707] font-bold text-lg">Skills</h2>
                 <button className="text-xs font-semibold text-[#2a85ff] hover:underline cursor-pointer">Edit</button>
               </div>
               {/* Skill tag input */}
-              <div className="min-h-[52px] border border-[#e2eaf2] rounded-xl px-4 py-3 flex flex-wrap gap-2 focus-within:border-[#2a85ff] focus-within:ring-2 focus-within:ring-[#2a85ff]/10 transition-all mb-4">
+              <div className="min-h-[52px] border border-[#e2eaf2] rounded-xl px-3 sm:px-4 py-3 flex flex-wrap gap-2 focus-within:border-[#2a85ff] focus-within:ring-2 focus-within:ring-[#2a85ff]/10 transition-all mb-4">
                 {skills.map(s => (
                   <span key={s} className="flex items-center gap-1.5 bg-[#e8f1ff] text-[#2a85ff] text-xs font-semibold px-3 py-1.5 rounded-full">
                     {s}
@@ -385,7 +421,7 @@ export default function RankrCandidateProfile() {
                   onKeyDown={handleSkillKey}
                   aria-label="Add a skill"
                   placeholder={skills.length === 0 ? 'Type a skill and press Enter…' : ''}
-                  className="flex-1 min-w-[160px] text-sm text-[#070707] placeholder-[#b0bac6] bg-transparent focus:outline-none"
+                  className="flex-1 min-w-[120px] sm:min-w-[160px] text-sm text-[#070707] placeholder-[#b0bac6] bg-transparent focus:outline-none"
                 />
               </div>
               <p className="text-xs text-[#b0bac6] mb-4">Press Enter to add each skill</p>
@@ -393,12 +429,12 @@ export default function RankrCandidateProfile() {
               {/* Experience Level pills */}
               <div>
                 <p className="text-xs font-semibold text-[#5a6a7a] uppercase tracking-wide mb-2.5">Experience Level</p>
-                <div className="flex gap-3 flex-wrap">
+                <div className="flex gap-2 sm:gap-3 flex-wrap">
                   {['Entry Level', 'Intermediate', 'Expert'].map(lvl => (
                     <button
                       key={lvl}
                       onClick={() => setExpLevel(lvl)}
-                      className={`px-5 py-2 rounded-full text-sm font-medium transition-all cursor-pointer border ${
+                      className={`px-4 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-medium transition-all cursor-pointer border ${
                         expLevel === lvl
                           ? 'bg-[#2a85ff] text-white border-[#2a85ff] shadow-sm'
                           : 'bg-[#f0f5fa] text-[#5a6a7a] border-transparent hover:border-[#2a85ff]/30 hover:text-[#2a85ff]'
@@ -412,7 +448,7 @@ export default function RankrCandidateProfile() {
             </div>
 
             {/* Card 3 — CV Upload */}
-            <div className="bg-white rounded-2xl shadow-[0_4px_32px_rgba(0,0,0,0.07)] p-6">
+            <div className="bg-white rounded-2xl shadow-[0_4px_32px_rgba(0,0,0,0.07)] p-5 sm:p-6">
               <h2 className="text-[#070707] font-bold text-lg mb-5">Upload Your CV</h2>
 
               <AnimatePresence mode="wait">
@@ -426,18 +462,18 @@ export default function RankrCandidateProfile() {
                     onDragOver={e => { e.preventDefault(); setCvDragging(true) }}
                     onDragLeave={() => setCvDragging(false)}
                     onDrop={e => { e.preventDefault(); setCvDragging(false); setCvUploaded(true) }}
-                    className={`border-2 border-dashed rounded-2xl px-6 py-12 flex flex-col items-center justify-center gap-4 cursor-pointer transition-all ${
+                    className={`border-2 border-dashed rounded-2xl px-4 sm:px-6 py-8 sm:py-12 flex flex-col items-center justify-center gap-4 cursor-pointer transition-all ${
                       cvDragging
                         ? 'border-[#2a85ff] bg-[#e8f1ff]'
                         : 'border-[#d0dce8] bg-[#f8fbff] hover:border-[#2a85ff]/50 hover:bg-[#f0f7ff]'
                     }`}
                   >
-                    <div className="w-16 h-16 rounded-2xl bg-[#e8f1ff] flex items-center justify-center">
-                      <FileText size={30} color="#2a85ff" strokeWidth={1.6} />
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#e8f1ff] flex items-center justify-center">
+                      <FileText size={28} color="#2a85ff" strokeWidth={1.6} />
                     </div>
                     <div className="text-center">
-                      <p className="text-[#070707] font-bold text-base">Drop your CV here</p>
-                      <p className="text-[#8a9ab0] text-sm mt-1">PDF, DOC or DOCX · Max 5MB</p>
+                      <p className="text-[#070707] font-bold text-sm sm:text-base">Drop your CV here</p>
+                      <p className="text-[#8a9ab0] text-xs sm:text-sm mt-1">PDF, DOC or DOCX · Max 5MB</p>
                     </div>
                     <button className="px-5 py-2 rounded-full text-sm font-semibold text-white bg-[#2a85ff] hover:bg-[#1a75ef] shadow-[0_4px_14px_rgba(42,133,255,0.35)] transition-all cursor-pointer">
                       Browse Files
@@ -452,16 +488,16 @@ export default function RankrCandidateProfile() {
                     exit={{ opacity: 0 }}
                     className="border-2 border-dashed border-[#2a85ff]/30 rounded-2xl bg-[#f4f9ff] p-4"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-[#e8f1ff] flex items-center justify-center flex-shrink-0">
-                        <FileText size={22} color="#2a85ff" strokeWidth={1.8} />
+                    <div className="flex items-center gap-3 sm:gap-4">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[#e8f1ff] flex items-center justify-center flex-shrink-0">
+                        <FileText size={20} color="#2a85ff" strokeWidth={1.8} />
                       </div>
-                      <div className="flex-1 min-0">
+                      <div className="flex-1 min-w-0">
                         <p className="text-[#070707] font-bold text-sm truncate">Jordan_Reeves_CV.pdf</p>
                         <p className="text-[#8a9ab0] text-xs mt-0.5">243 KB · Uploaded just now</p>
                       </div>
-                      <div className="flex items-center gap-3 flex-shrink-0">
-                        <span className="inline-flex items-center gap-1.5 text-xs font-bold text-[#16a34a] bg-[#e6f9f0] px-3 py-1.5 rounded-full border border-[#16a34a]/20">
+                      <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                        <span className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-[#16a34a] bg-[#e6f9f0] px-3 py-1.5 rounded-full border border-[#16a34a]/20">
                           <Check size={11} strokeWidth={3} />
                           Uploaded
                         </span>
@@ -478,46 +514,47 @@ export default function RankrCandidateProfile() {
               </AnimatePresence>
 
               <p className="text-xs text-[#b0bac6] mt-4 leading-relaxed">
-                Your CV is used by Rankr's AI to match you to relevant jobs automatically
+                Your CV is used by Rankr&apos;s AI to match you to relevant jobs automatically
               </p>
             </div>
 
             {/* Card 4 — Work Experience */}
-            <div className="bg-white rounded-2xl shadow-[0_4px_32px_rgba(0,0,0,0.07)] p-6">
+            <div className="bg-white rounded-2xl shadow-[0_4px_32px_rgba(0,0,0,0.07)] p-5 sm:p-6">
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-[#070707] font-bold text-lg">Work Experience</h2>
                 <button className="text-xs font-semibold text-[#2a85ff] hover:underline cursor-pointer flex items-center gap-1">
                   <Plus size={13} strokeWidth={2.5} />
-                  Add Experience
+                  <span className="hidden sm:inline">Add Experience</span>
+                  <span className="sm:hidden">Add</span>
                 </button>
               </div>
 
               <div className="flex flex-col gap-4">
                 {WORK_EXP.map(exp => (
-                  <div key={exp.id} className="flex gap-4">
+                  <div key={exp.id} className="flex gap-3 sm:gap-4">
                     <div
-                      className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                      className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center flex-shrink-0"
                       style={{ background: `${exp.color}18` }}
                     >
-                      <span className="text-sm font-extrabold" style={{ color: exp.color }}>{exp.initials}</span>
+                      <span className="text-xs sm:text-sm font-extrabold" style={{ color: exp.color }}>{exp.initials}</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2">
+                        <div className="min-w-0">
                           <p className="text-[#070707] font-bold text-sm leading-tight">{exp.title}</p>
                           <p className="text-[#8a9ab0] text-xs mt-0.5">{exp.company}</p>
                         </div>
                         <span className="text-xs text-[#b0bac6] font-medium flex-shrink-0">{exp.range}</span>
                       </div>
-                      <p className="text-[#5a6a7a] text-xs mt-2 leading-relaxed line-clamp-2">{exp.desc}</p>
+                      <p className="text-[#5a6a7a] text-xs mt-2 leading-relaxed line-clamp-3 sm:line-clamp-2">{exp.desc}</p>
                     </div>
                   </div>
                 ))}
 
                 {/* Dashed add row */}
-                <button className="flex items-center gap-3 border-2 border-dashed border-[#e2eaf2] rounded-xl px-4 py-3.5 hover:border-[#2a85ff]/40 hover:bg-[#f4f9ff] transition-all cursor-pointer group">
-                  <div className="w-9 h-9 rounded-xl bg-[#f0f5fa] flex items-center justify-center group-hover:bg-[#e8f1ff] transition-colors">
-                    <Briefcase size={16} color="#b0bac6" strokeWidth={2} />
+                <button className="flex items-center gap-3 border-2 border-dashed border-[#e2eaf2] rounded-xl px-4 py-3 sm:py-3.5 hover:border-[#2a85ff]/40 hover:bg-[#f4f9ff] transition-all cursor-pointer group">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#f0f5fa] flex items-center justify-center group-hover:bg-[#e8f1ff] transition-colors flex-shrink-0">
+                    <Briefcase size={14} color="#b0bac6" strokeWidth={2} />
                   </div>
                   <span className="text-sm font-semibold text-[#b0bac6] group-hover:text-[#2a85ff] transition-colors">Add another experience</span>
                 </button>
@@ -525,29 +562,30 @@ export default function RankrCandidateProfile() {
             </div>
 
             {/* Card 5 — Education */}
-            <div className="bg-white rounded-2xl shadow-[0_4px_32px_rgba(0,0,0,0.07)] p-6">
+            <div className="bg-white rounded-2xl shadow-[0_4px_32px_rgba(0,0,0,0.07)] p-5 sm:p-6">
               <div className="flex items-center justify-between mb-5">
                 <h2 className="text-[#070707] font-bold text-lg">Education</h2>
                 <button className="text-xs font-semibold text-[#2a85ff] hover:underline cursor-pointer flex items-center gap-1">
                   <Plus size={13} strokeWidth={2.5} />
-                  Add Education
+                  <span className="hidden sm:inline">Add Education</span>
+                  <span className="sm:hidden">Add</span>
                 </button>
               </div>
 
               <div className="flex flex-col gap-4">
                 {EDUCATION.map(edu => (
-                  <div key={edu.id} className="flex gap-4">
+                  <div key={edu.id} className="flex gap-3 sm:gap-4">
                     <div
-                      className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                      className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center flex-shrink-0"
                       style={{ background: `${edu.color}18` }}
                     >
-                      <span className="text-sm font-extrabold" style={{ color: edu.color }}>{edu.initials}</span>
+                      <span className="text-xs sm:text-sm font-extrabold" style={{ color: edu.color }}>{edu.initials}</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
+                      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2">
+                        <div className="min-w-0">
                           <p className="text-[#070707] font-bold text-sm leading-tight">{edu.degree}</p>
-                          <p className="text-[#8a9ab0] text-xs mt-0.5">{edu.institution}</p>
+                          <p className="text-[#8a9ab0] text-xs mt-0.5 truncate">{edu.institution}</p>
                         </div>
                         <span className="text-xs text-[#b0bac6] font-medium flex-shrink-0">{edu.year}</span>
                       </div>
@@ -556,9 +594,9 @@ export default function RankrCandidateProfile() {
                 ))}
 
                 {/* Dashed add row */}
-                <button className="flex items-center gap-3 border-2 border-dashed border-[#e2eaf2] rounded-xl px-4 py-3.5 hover:border-[#2a85ff]/40 hover:bg-[#f4f9ff] transition-all cursor-pointer group">
-                  <div className="w-9 h-9 rounded-xl bg-[#f0f5fa] flex items-center justify-center group-hover:bg-[#e8f1ff] transition-colors">
-                    <GraduationCap size={16} color="#b0bac6" strokeWidth={2} />
+                <button className="flex items-center gap-3 border-2 border-dashed border-[#e2eaf2] rounded-xl px-4 py-3 sm:py-3.5 hover:border-[#2a85ff]/40 hover:bg-[#f4f9ff] transition-all cursor-pointer group">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#f0f5fa] flex items-center justify-center group-hover:bg-[#e8f1ff] transition-colors flex-shrink-0">
+                    <GraduationCap size={14} color="#b0bac6" strokeWidth={2} />
                   </div>
                   <span className="text-sm font-semibold text-[#b0bac6] group-hover:text-[#2a85ff] transition-colors">Add education entry</span>
                 </button>
@@ -571,19 +609,19 @@ export default function RankrCandidateProfile() {
 
       {/* Sticky Bottom Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#e8f1ff] shadow-[0_-4px_32px_rgba(0,0,0,0.08)] z-50">
-        <div className="max-w-[1280px] mx-auto px-6 h-16 flex items-center justify-between gap-4">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">
             <div className="w-2 h-2 rounded-full bg-[#f07830] flex-shrink-0" />
-            <p className="text-sm text-[#5a6a7a] truncate">
-              <span className="font-semibold text-[#070707]">Profile {COMPLETION_PCT}% complete</span>
-              {' '}— add work experience to reach 100%
+            <p className="text-xs sm:text-sm text-[#5a6a7a] truncate">
+              <span className="font-semibold text-[#070707]">{COMPLETION_PCT}%</span>
+              <span className="hidden sm:inline"> complete — add work experience to reach 100%</span>
             </p>
           </div>
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <button className="px-6 py-2.5 rounded-full text-sm font-semibold text-[#5a6a7a] border border-[#e2eaf2] hover:border-[#2a85ff]/40 hover:text-[#2a85ff] transition-all cursor-pointer bg-white">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <button className="hidden sm:block px-6 py-2.5 rounded-full text-sm font-semibold text-[#5a6a7a] border border-[#e2eaf2] hover:border-[#2a85ff]/40 hover:text-[#2a85ff] transition-all cursor-pointer bg-white">
               Save Draft
             </button>
-            <button className="px-7 py-2.5 rounded-full text-sm font-semibold text-white bg-[#2a85ff] hover:bg-[#1a75ef] shadow-[0_4px_16px_rgba(42,133,255,0.35)] hover:shadow-[0_4px_20px_rgba(42,133,255,0.5)] transition-all cursor-pointer flex items-center gap-2">
+            <button className="px-5 sm:px-7 py-2.5 rounded-full text-xs sm:text-sm font-semibold text-white bg-[#2a85ff] hover:bg-[#1a75ef] shadow-[0_4px_16px_rgba(42,133,255,0.35)] hover:shadow-[0_4px_20px_rgba(42,133,255,0.5)] transition-all cursor-pointer flex items-center gap-2">
               <Check size={15} strokeWidth={2.8} />
               Save Profile
             </button>

@@ -87,19 +87,20 @@ export default function BrowseJobsPage() {
       </div>
 
       {/* ── MATCH RECOMMENDATION ── */}
-      <div className="bg-[#070707] rounded-[2rem] p-8 relative overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.1)]">
+      <div className="bg-[#070707] rounded-2xl sm:rounded-[2rem] p-5 sm:p-8 relative overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.1)]">
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#2a85ff]/10 blur-[60px] pointer-events-none" />
-        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 sm:gap-6">
           <div className="flex items-center gap-5">
-            <div className="w-16 h-16 rounded-2xl bg-[#2a85ff]/20 flex items-center justify-center text-[#2a85ff] border border-[#2a85ff]/30">
-              <Sparkles size={32} />
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-[#2a85ff]/20 flex items-center justify-center text-[#2a85ff] border border-[#2a85ff]/30 flex-shrink-0">
+              <Sparkles size={24} className="sm:hidden" />
+              <Sparkles size={32} className="hidden sm:block" />
             </div>
             <div>
-              <h2 className="text-white text-2xl font-extrabold tracking-tight">AI Matching is active</h2>
+              <h2 className="text-white text-lg sm:text-2xl font-extrabold tracking-tight">AI Matching is active</h2>
               <p className="text-white/40 text-sm mt-1">We found 12 jobs that match your &quot;Senior Backend Engineer&quot; profile.</p>
             </div>
           </div>
-          <button className="px-8 py-3 rounded-xl bg-[#2a85ff] hover:bg-[#1a75ef] text-white text-sm font-bold transition-all cursor-pointer shadow-[0_4px_16px_rgba(42,133,255,0.4)]">
+          <button className="px-6 sm:px-8 py-3 rounded-xl bg-[#2a85ff] hover:bg-[#1a75ef] text-white text-sm font-bold transition-all cursor-pointer shadow-[0_4px_16px_rgba(42,133,255,0.4)] w-full sm:w-auto text-center">
             View Smart Matches
           </button>
         </div>
@@ -113,7 +114,7 @@ export default function BrowseJobsPage() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
-            className="bg-white rounded-[1.5rem] border border-[#e2eaf2]/60 p-6 flex flex-col md:flex-row items-center gap-6 hover:shadow-[0_12px_32px_rgba(0,0,0,0.04)] hover:border-[#2a85ff]/20 transition-all group"
+            className="bg-white rounded-2xl sm:rounded-[1.5rem] border border-[#e2eaf2]/60 p-4 sm:p-6 flex flex-col md:flex-row items-start md:items-center gap-4 sm:gap-6 hover:shadow-[0_12px_32px_rgba(0,0,0,0.04)] hover:border-[#2a85ff]/20 transition-all group"
           >
             {/* Company Logo */}
             <div 
@@ -159,7 +160,7 @@ export default function BrowseJobsPage() {
             </div>
 
             {/* Match Score */}
-            <div className="flex flex-col items-center gap-3 md:border-l md:border-[#e2eaf2] md:pl-8 flex-shrink-0">
+            <div className="flex items-center justify-between w-full md:w-auto gap-4 md:border-l md:border-[#e2eaf2] md:pl-8 flex-shrink-0">
               <div className="text-center">
                 <div className="text-[#2a85ff] text-2xl font-black leading-none">{job.match}%</div>
                 <div className="text-[#8a9ab0] text-[10px] font-bold uppercase tracking-widest mt-1">Match</div>

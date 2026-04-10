@@ -74,10 +74,10 @@ export default function CandidateProfilePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Profile Card */}
-        <div className="lg:col-span-2 bg-white rounded-[2.5rem] shadow-[0_8px_40px_rgba(0,0,0,0.04)] p-10 flex flex-col sm:flex-row items-center gap-10">
+        <div className="lg:col-span-2 bg-white rounded-2xl sm:rounded-[2.5rem] shadow-[0_8px_40px_rgba(0,0,0,0.04)] p-5 sm:p-8 lg:p-10 flex flex-col sm:flex-row items-center gap-6 sm:gap-10">
           <div className="relative group">
-            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-[#2a85ff] to-[#6eb3ff] flex items-center justify-center ring-[12px] ring-[#2a85ff]/10">
-              <span className="text-white text-4xl font-extrabold tracking-tight">
+            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-[#2a85ff] to-[#6eb3ff] flex items-center justify-center ring-[8px] sm:ring-[12px] ring-[#2a85ff]/10">
+              <span className="text-white text-2xl sm:text-4xl font-extrabold tracking-tight">
                 {fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
               </span>
             </div>
@@ -88,7 +88,7 @@ export default function CandidateProfilePage() {
 
           <div className="flex-1 min-w-0 text-center sm:text-left">
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 mb-2">
-              <h1 className="text-[#070707] text-4xl font-extrabold tracking-tight">{fullName}</h1>
+              <h1 className="text-[#070707] text-2xl sm:text-4xl font-extrabold tracking-tight">{fullName}</h1>
               <div className="inline-flex items-center gap-1.5 bg-[#e6f9f0] text-[#16a34a] text-xs font-bold px-3 py-1 rounded-full border border-[#16a34a]/20">
                 <Check size={12} strokeWidth={3} /> Verified
               </div>
@@ -109,15 +109,15 @@ export default function CandidateProfilePage() {
         </div>
 
         {/* Completion Card */}
-        <div className="bg-[#070707] rounded-[2.5rem] p-10 flex flex-col justify-between relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
+        <div className="bg-[#070707] rounded-2xl sm:rounded-[2.5rem] p-5 sm:p-8 lg:p-10 flex flex-col justify-between relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
           <div className="absolute top-0 right-0 w-40 h-40 bg-[#2a85ff]/10 blur-[60px] pointer-events-none" />
           
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-5 sm:mb-8">
             <h3 className="text-white text-xl font-bold">Profile Completion</h3>
             <span className="text-[#2a85ff] text-2xl font-black">{completionPct}%</span>
           </div>
 
-          <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden mb-8">
+          <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden mb-5 sm:mb-8">
             <motion.div 
               className="h-full bg-[#2a85ff] shadow-[0_0_20px_rgba(42,133,255,0.5)]"
               initial={{ width: 0 }}
@@ -148,8 +148,8 @@ export default function CandidateProfilePage() {
         <div className="space-y-8">
           
           {/* Availability */}
-          <div className="bg-white rounded-[2rem] p-8 shadow-[0_4px_32px_rgba(0,0,0,0.03)] border border-[#e2eaf2]/60">
-            <div className="flex items-center justify-between mb-8">
+          <div className="bg-white rounded-2xl sm:rounded-[2rem] p-5 sm:p-8 shadow-[0_4px_32px_rgba(0,0,0,0.03)] border border-[#e2eaf2]/60">
+            <div className="flex items-center justify-between mb-5 sm:mb-8">
               <h3 className="text-[#070707] font-bold text-lg">Availability</h3>
               <Sparkles size={18} className="text-[#2a85ff]" />
             </div>
@@ -199,7 +199,7 @@ export default function CandidateProfilePage() {
           </div>
 
           {/* CV Section */}
-          <div className="bg-white rounded-[2rem] p-8 shadow-[0_4px_32px_rgba(0,0,0,0.03)] border border-[#e2eaf2]/60">
+          <div className="bg-white rounded-2xl sm:rounded-[2rem] p-5 sm:p-8 shadow-[0_4px_32px_rgba(0,0,0,0.03)] border border-[#e2eaf2]/60">
             <h3 className="text-[#070707] font-bold text-lg mb-6">Upload Current CV</h3>
             
             {!cvUploaded ? (
@@ -212,7 +212,7 @@ export default function CandidateProfilePage() {
                 </div>
                 <p className="text-[#070707] text-sm font-bold">Drop CV here</p>
                 <p className="text-[#b0bac6] text-[10px]">PDF, DOCX (Max 5MB)</p>
-                <input ref={cvRef} type="file" className="hidden" onChange={() => setCvUploaded(true)} />
+                <input ref={cvRef} type="file" className="hidden" aria-label="Upload CV file" onChange={() => setCvUploaded(true)} />
               </div>
             ) : (
               <div className="bg-[#f0f5fa] rounded-2xl p-4 flex items-center gap-3 border border-[#2a85ff]/10">
@@ -223,7 +223,7 @@ export default function CandidateProfilePage() {
                   <p className="text-[#070707] text-xs font-bold truncate">My_Professional_CV.pdf</p>
                   <p className="text-[#16a34a] text-[10px] font-bold mt-0.5 uppercase tracking-wider">Uploaded</p>
                 </div>
-                <button onClick={() => setCvUploaded(false)} className="text-[#b0bac6] hover:text-[#5a6a7a] transition-colors cursor-pointer p-1">
+                <button onClick={() => setCvUploaded(false)} aria-label="Remove uploaded CV" className="text-[#b0bac6] hover:text-[#5a6a7a] transition-colors cursor-pointer p-1">
                   <X size={14} />
                 </button>
               </div>
@@ -238,9 +238,9 @@ export default function CandidateProfilePage() {
         <div className="lg:col-span-2 space-y-8">
           
           {/* Basic Information Edit */}
-          <div className="bg-white rounded-[2rem] p-10 shadow-[0_4px_32px_rgba(0,0,0,0.03)] border border-[#e2eaf2]/60">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-[#070707] font-extrabold text-2xl tracking-tight">Basic Information</h2>
+          <div className="bg-white rounded-2xl sm:rounded-[2rem] p-5 sm:p-8 lg:p-10 shadow-[0_4px_32px_rgba(0,0,0,0.03)] border border-[#e2eaf2]/60">
+            <div className="flex items-center justify-between mb-5 sm:mb-8">
+              <h2 className="text-[#070707] font-extrabold text-xl sm:text-2xl tracking-tight">Basic Information</h2>
               <button className="px-5 py-2 rounded-full text-xs font-bold text-[#2a85ff] bg-[#e8f1ff] hover:bg-[#d0e4ff] transition-all cursor-pointer">Edit</button>
             </div>
 
@@ -299,9 +299,9 @@ export default function CandidateProfilePage() {
           </div>
 
           {/* Skills Section */}
-          <div className="bg-white rounded-[2rem] p-10 shadow-[0_4px_32px_rgba(0,0,0,0.03)] border border-[#e2eaf2]/60">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-[#070707] font-extrabold text-2xl tracking-tight">Skills & Core Competencies</h2>
+          <div className="bg-white rounded-2xl sm:rounded-[2rem] p-5 sm:p-8 lg:p-10 shadow-[0_4px_32px_rgba(0,0,0,0.03)] border border-[#e2eaf2]/60">
+            <div className="flex items-center justify-between mb-5 sm:mb-8">
+              <h2 className="text-[#070707] font-extrabold text-xl sm:text-2xl tracking-tight">Skills & Core Competencies</h2>
               <button className="px-5 py-2 rounded-full text-xs font-bold text-[#2a85ff] bg-[#e8f1ff] hover:bg-[#d0e4ff] transition-all cursor-pointer">Manage</button>
             </div>
             
@@ -311,6 +311,7 @@ export default function CandidateProfilePage() {
                   <span className="text-sm font-bold text-[#070707]">{s}</span>
                   <button 
                     onClick={() => setSkills(skills.filter(x => x !== s))}
+                    aria-label={`Remove ${s} skill`}
                     className="text-[#b0bac6] hover:text-[#dc2626] transition-colors cursor-pointer"
                   >
                     <X size={14} />
@@ -331,11 +332,13 @@ export default function CandidateProfilePage() {
           </div>
 
           {/* Work Experience Section */}
-          <div className="bg-white rounded-[2rem] p-10 shadow-[0_4px_32px_rgba(0,0,0,0.03)] border border-[#e2eaf2]/60">
-            <div className="flex items-center justify-between mb-10">
-              <h2 className="text-[#070707] font-extrabold text-2xl tracking-tight">Work History</h2>
-              <button className="flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold text-white bg-[#070707] hover:bg-[#202020] transition-all cursor-pointer">
-                <Plus size={16} strokeWidth={2.5} /> Add Experience
+          <div className="bg-white rounded-2xl sm:rounded-[2rem] p-5 sm:p-8 lg:p-10 shadow-[0_4px_32px_rgba(0,0,0,0.03)] border border-[#e2eaf2]/60">
+            <div className="flex items-center justify-between mb-6 sm:mb-10 gap-3">
+              <h2 className="text-[#070707] font-extrabold text-xl sm:text-2xl tracking-tight">Work History</h2>
+              <button className="flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold text-white bg-[#070707] hover:bg-[#202020] transition-all cursor-pointer flex-shrink-0">
+                <Plus size={16} strokeWidth={2.5} />
+                <span className="hidden sm:inline">Add Experience</span>
+                <span className="sm:hidden">Add</span>
               </button>
             </div>
 
@@ -361,11 +364,11 @@ export default function CandidateProfilePage() {
           </div>
 
           {/* Final Actions */}
-          <div className="flex items-center justify-end gap-4 pt-4">
-            <button className="px-8 py-4 rounded-2xl text-base font-bold text-[#5a6a7a] bg-white border border-[#e2eaf2] hover:bg-[#f0f5fa] transition-all cursor-pointer shadow-sm">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 pt-4">
+            <button className="px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl text-sm sm:text-base font-bold text-[#5a6a7a] bg-white border border-[#e2eaf2] hover:bg-[#f0f5fa] transition-all cursor-pointer shadow-sm text-center">
               Discard
             </button>
-            <button onClick={handleSave} className="px-10 py-4 rounded-2xl text-base font-bold text-white bg-[#2a85ff] hover:bg-[#1a75ef] shadow-[0_8px_24px_rgba(42,133,255,0.4)] hover:scale-[1.02] transition-all cursor-pointer">
+            <button onClick={handleSave} className="px-8 sm:px-10 py-3.5 sm:py-4 rounded-2xl text-sm sm:text-base font-bold text-white bg-[#2a85ff] hover:bg-[#1a75ef] shadow-[0_8px_24px_rgba(42,133,255,0.4)] hover:scale-[1.02] transition-all cursor-pointer text-center">
               Save Changes
             </button>
           </div>

@@ -69,7 +69,7 @@ export default function MyApplicationsPage() {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="bg-white rounded-[2rem] border border-[#e2eaf2]/60 p-8 hover:shadow-[0_12px_40px_rgba(0,0,0,0.04)] transition-all group"
+              className="bg-white rounded-2xl sm:rounded-[2rem] border border-[#e2eaf2]/60 p-5 sm:p-8 hover:shadow-[0_12px_40px_rgba(0,0,0,0.04)] transition-all group"
             >
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
                 
@@ -79,7 +79,7 @@ export default function MyApplicationsPage() {
                     <FileText size={24} strokeWidth={1.5} />
                   </div>
                   <div>
-                    <h3 className="text-[#070707] text-xl font-extrabold truncate group-hover:text-[#2a85ff] transition-colors">
+                    <h3 className="text-[#070707] text-lg sm:text-xl font-extrabold truncate group-hover:text-[#2a85ff] transition-colors">
                       {app.role}
                     </h3>
                     <div className="flex items-center gap-3 mt-1.5">
@@ -91,7 +91,7 @@ export default function MyApplicationsPage() {
                 </div>
 
                 {/* Center: Status & Match */}
-                <div className="flex items-center gap-10 lg:px-10 lg:border-x lg:border-[#e2eaf2]">
+                <div className="flex flex-wrap items-center gap-6 sm:gap-10 lg:px-10 lg:border-x lg:border-[#e2eaf2]">
                   <div className="text-center">
                     <p className="text-[#8a9ab0] text-[10px] font-bold uppercase tracking-widest mb-1.5">Your Match</p>
                     <div className="inline-flex items-center gap-1.5 text-[#2a85ff] font-black text-xl">
@@ -118,7 +118,7 @@ export default function MyApplicationsPage() {
               </div>
 
               {/* Status Update / Feedback Alert */}
-              <div className="mt-8 p-5 rounded-2xl bg-[#f8fbff] border border-[#2a85ff]/5 flex items-start gap-4">
+              <div className="mt-5 sm:mt-8 p-4 sm:p-5 rounded-2xl bg-[#f8fbff] border border-[#2a85ff]/5 flex items-start gap-3 sm:gap-4">
                 <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center text-[#2a85ff] flex-shrink-0">
                   <AlertCircle size={16} />
                 </div>
