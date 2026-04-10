@@ -1,16 +1,9 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Poppins } from 'next/font/google'
 import { Sparkles, Eye, EyeOff, CheckCircle, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'motion/react'
-
-const poppins = Poppins({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
-  variable: '--font-poppins',
-})
 
 type Role = 'company' | 'candidate'
 type Tab = 'signin' | 'create'
@@ -18,7 +11,7 @@ type Tab = 'signin' | 'create'
 const FEATURES = [
   'Screen hundreds of CVs in seconds',
   'AI-generated match scores and reasoning',
-  'Works with Umurava profiles and external uploads',
+  'Works with Rankr profiles and external uploads',
 ]
 
 function GoogleIcon() {
@@ -49,14 +42,14 @@ function InputField({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      {label && <label className="text-xs font-semibold text-[#5a6a7a] tracking-wide uppercase">{label}</label>}
+      {label && <label className="text-xs font-bold text-[#5a6a7a] tracking-wide uppercase">{label}</label>}
       <div className="relative">
         <input
           type={type}
           value={value}
           onChange={e => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm text-[#070707] placeholder-[#b0bac6] focus:outline-none focus:border-[#2a85ff] focus:ring-2 focus:ring-[#2a85ff]/10 transition-all bg-white pr-10"
+          className="w-full border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm text-[#070707] placeholder-[#b0bac6] focus:outline-none focus:border-[#2a85ff] focus:ring-4 focus:ring-[#2a85ff]/5 transition-all bg-[#fcfdfe] pr-10"
         />
         {rightElement && (
           <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
@@ -86,319 +79,180 @@ export default function RankrAuth() {
   const [confirmPw, setConfirmPw] = useState('')
 
   return (
-    <div className={`${poppins.className} min-h-screen flex`}>
+    <div className="min-h-screen flex bg-white">
 
-      {/* ── LEFT COLUMN ── */}
+      {/* ── LEFT COLUMN (HIDDEN ON MOBILE) ── */}
       <div className="hidden lg:flex flex-col w-1/2 bg-[#070707] relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-[#2a85ff]/10 blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-1/3 left-0 w-64 h-64 rounded-full bg-[#2a85ff]/5 blur-[100px] pointer-events-none" />
 
-        {/* Ambient glows */}
-        <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-[#2a85ff]/6 blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-1/3 left-0 w-64 h-64 rounded-full bg-[#2a85ff]/4 blur-[80px] pointer-events-none" />
-
-        {/* Wordmark */}
-        <div className="px-10 pt-10 flex-shrink-0">
-          <Link href="/" className="inline-flex items-center gap-2.5 select-none">
-            <div className="w-9 h-9 rounded-xl bg-[#2a85ff] flex items-center justify-center flex-shrink-0 shadow-[0_4px_16px_rgba(42,133,255,0.4)]">
-              <Sparkles size={18} color="white" strokeWidth={2.2} />
+        <div className="px-12 pt-12 flex-shrink-0">
+          <Link href="/" className="inline-flex items-center gap-2.5 group">
+            <div className="w-10 h-10 rounded-xl bg-[#2a85ff] flex items-center justify-center transition-transform group-hover:scale-110">
+              <Sparkles size={20} color="white" strokeWidth={2.2} />
             </div>
             <span className="text-white text-2xl font-bold tracking-tight">Rankr</span>
           </Link>
         </div>
 
-        {/* Center content */}
-        <div className="flex-1 flex flex-col justify-center px-10 py-10 relative z-10">
-
+        <div className="flex-1 flex flex-col justify-center px-20">
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55 }}
+            transition={{ duration: 0.6 }}
           >
-            <h1 className="text-white font-extrabold text-4xl xl:text-5xl leading-[1.1] tracking-tight mb-4">
+            <h1 className="text-white font-black text-5xl xl:text-7xl leading-[1] tracking-tighter mb-6">
               The smarter way<br />to hire.
             </h1>
-            <p className="text-white/45 text-sm xl:text-base leading-relaxed mb-10 max-w-[380px]">
-              AI screening that ranks every candidate and explains every decision.
+            <p className="text-white/40 text-lg xl:text-xl leading-relaxed mb-12 max-w-[420px]">
+              AI screening that ranks every candidate and explains every decision based on performance.
             </p>
 
-            <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-6">
               {FEATURES.map((feat, i) => (
                 <motion.div
                   key={feat}
                   initial={{ opacity: 0, x: -16 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.45, delay: 0.15 + i * 0.1 }}
-                  className="flex items-start gap-3.5"
+                  transition={{ delay: 0.2 + i * 0.1 }}
+                  className="flex items-start gap-4"
                 >
-                  <div className="w-5 h-5 rounded-full bg-[#2a85ff]/15 border border-[#2a85ff]/30 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <CheckCircle size={11} color="#2a85ff" strokeWidth={2.5} />
+                  <div className="w-6 h-6 rounded-full bg-[#2a85ff]/20 border border-[#2a85ff]/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <CheckCircle size={13} color="#2a85ff" strokeWidth={3} />
                   </div>
-                  <span className="text-white/70 text-sm leading-relaxed">{feat}</span>
+                  <span className="text-white/70 text-base font-medium">{feat}</span>
                 </motion.div>
               ))}
             </div>
           </motion.div>
         </div>
 
-        {/* Decorative grayscale image at bottom */}
-        <div className="flex-shrink-0 h-56 relative overflow-hidden">
+        <div className="flex-shrink-0 h-64 relative overflow-hidden">
           <img
             src="https://uxcanvas.ai/api/generated-images/a41dbe01-2ec5-4de6-bde6-a96289ed1c5f/9bf07167-e189-46c3-9b0b-84e832c5a707"
             alt=""
-            aria-hidden="true"
-            className="absolute inset-0 w-full h-full object-cover object-top grayscale-[100%] brightness-[0.55] contrast-[1.1]"
+            className="absolute inset-0 w-full h-full object-cover object-top grayscale brightness-50"
             style={{
-              maskImage: 'linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%)',
-              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 30%, black 70%, transparent 100%)',
+              maskImage: 'linear-gradient(to bottom, transparent 0%, black 40%, black 80%, transparent 100%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 40%, black 80%, transparent 100%)',
             }}
           />
         </div>
       </div>
 
-      {/* ── RIGHT COLUMN ── */}
-      <div className="flex-1 lg:w-1/2 bg-white flex flex-col items-center justify-center min-h-screen px-6 py-12">
-
-        {/* Mobile wordmark */}
-        <div className="lg:hidden mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 select-none">
-            <div className="w-8 h-8 rounded-xl bg-[#2a85ff] flex items-center justify-center">
-              <Sparkles size={16} color="white" strokeWidth={2.2} />
+      {/* ── RIGHT COLUMN (FULL ON MOBILE) ── */}
+      <div className="flex-1 lg:w-1/2 flex flex-col items-center justify-center p-6 sm:p-12">
+        
+        {/* Mobile Header */}
+        <div className="lg:hidden w-full max-w-[420px] mb-12 flex items-center justify-between">
+          <Link href="/" className="inline-flex items-center gap-2">
+            <div className="w-9 h-9 rounded-xl bg-[#2a85ff] flex items-center justify-center">
+              <Sparkles size={18} color="white" />
             </div>
             <span className="text-[#070707] text-xl font-bold tracking-tight">Rankr</span>
           </Link>
+          <Link href="/" className="text-sm font-bold text-[#8a9ab0] hover:text-[#070707]">Back</Link>
         </div>
 
-        <div className="w-full max-w-[420px] flex flex-col gap-7">
-
-          {/* Role selector pills */}
-          <div className="flex rounded-full border border-[#e2eaf2] p-1 gap-1 bg-[#f0f5fa]">
+        <div className="w-full max-w-[420px] flex flex-col gap-8">
+          
+          {/* Role selector */}
+          <div className="flex rounded-2xl border border-[#e2eaf2] p-1.5 gap-1 bg-[#f0f5fa]">
             {(['company', 'candidate'] as Role[]).map(r => (
               <button
                 key={r}
                 onClick={() => setRole(r)}
-                className={`flex-1 py-2.5 rounded-full text-sm font-semibold transition-all cursor-pointer ${
+                className={`flex-1 py-3.5 rounded-[0.8rem] text-sm font-black transition-all cursor-pointer ${
                   role === r
-                    ? 'bg-[#2a85ff] text-white shadow-[0_4px_14px_rgba(42,133,255,0.35)]'
+                    ? 'bg-white text-[#2a85ff] shadow-sm ring-1 ring-[#e2eaf2]'
                     : 'text-[#8a9ab0] hover:text-[#5a6a7a]'
                 }`}
               >
-                {r === 'company' ? "I'm a Company" : "I'm a Candidate"}
+                {r === 'company' ? "Recruiter" : "Candidate"}
               </button>
             ))}
           </div>
 
-          {/* Tabs */}
-          <div className="flex border-b border-[#e2eaf2]">
-            {(['signin', 'create'] as Tab[]).map(t => (
-              <button
-                key={t}
-                onClick={() => setTab(t)}
-                className={`flex-1 pb-3 text-sm font-semibold transition-all cursor-pointer relative ${
-                  tab === t ? 'text-[#070707]' : 'text-[#8a9ab0] hover:text-[#5a6a7a]'
-                }`}
-              >
-                {t === 'signin' ? 'Sign In' : 'Create Account'}
-                {tab === t && (
-                  <motion.div
-                    layoutId="tab-underline"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#2a85ff] rounded-full"
-                  />
-                )}
-              </button>
-            ))}
+          <div className="flex flex-col gap-2">
+            <h2 className="text-[#070707] text-3xl sm:text-4xl font-black tracking-tight leading-none">
+              {tab === 'signin' ? 'Welcome back' : 'Get started'}
+            </h2>
+            <p className="text-[#8a9ab0] text-sm font-medium">
+              Access your {role} portal instantly
+            </p>
           </div>
 
-          {/* Form content */}
           <AnimatePresence mode="wait">
-            {tab === 'signin' ? (
-              <motion.div
-                key="signin"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.25 }}
-                className="flex flex-col gap-5"
+            <motion.div
+              key={`${tab}-${role}`}
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              className="flex flex-col gap-6"
+            >
+              {tab === 'signin' ? (
+                <>
+                  <InputField placeholder="you@company.com" label="Email" value={signInEmail} onChange={setSignInEmail} />
+                  <div className="flex flex-col gap-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-[#5a6a7a] tracking-wide uppercase">Password</label>
+                      <button className="text-xs text-[#2a85ff] font-bold hover:underline">Forgot?</button>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type={showPw ? 'text' : 'password'}
+                        value={signInPw}
+                        onChange={e => setSignInPw(e.target.value)}
+                        placeholder="••••••••"
+                        className="w-full border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm text-[#070707] bg-[#fcfdfe] focus:outline-none focus:border-[#2a85ff] focus:ring-4 focus:ring-[#2a85ff]/5 transition-all pr-12"
+                      />
+                      <button onClick={() => setShowPw(!showPw)} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#b0bac6]">
+                        {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {role === 'company' ? (
+                    <>
+                      <InputField label="Company Name" placeholder="Google" value={companyName} onChange={setCompanyName} />
+                      <InputField label="Work Email" placeholder="you@google.com" value={workEmail} onChange={setWorkEmail} />
+                    </>
+                  ) : (
+                    <>
+                      <InputField label="Full Name" placeholder="Elon Musk" value={fullName} onChange={setFullName} />
+                      <InputField label="Email" placeholder="elon@x.com" value={createEmail} onChange={setCreateEmail} />
+                    </>
+                  )}
+                  <InputField type="password" label="Password" placeholder="••••••••" value={createPw} onChange={setCreatePw} />
+                </>
+              )}
+
+              <Link
+                href={role === 'company' ? '/dashboard' : '/profile'}
+                className="w-full flex items-center justify-center gap-3 py-4.5 rounded-full text-base font-black text-white bg-[#2a85ff] hover:bg-[#1a75ef] shadow-xl shadow-[#2a85ff]/20 transition-all hover:-translate-y-0.5"
               >
-                <div>
-                  <h2 className="text-[#070707] text-2xl font-extrabold tracking-tight leading-tight">Welcome back</h2>
-                  <p className="text-[#8a9ab0] text-sm mt-1">Sign in to your {role === 'company' ? 'company' : 'candidate'} account</p>
-                </div>
+                {tab === 'signin' ? 'Sign In' : 'Create Account'}
+                <ArrowRight size={20} />
+              </Link>
 
-                <InputField
-                  placeholder="you@company.com"
-                  label="Email"
-                  value={signInEmail}
-                  onChange={setSignInEmail}
-                />
-
-                <div className="flex flex-col gap-1.5">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-[#5a6a7a] tracking-wide uppercase">Password</label>
-                    <button className="text-xs text-[#2a85ff] font-semibold hover:text-[#1a75ef] transition-colors cursor-pointer">
-                      Forgot password?
-                    </button>
-                  </div>
-                  <div className="relative">
-                    <input
-                      type={showPw ? 'text' : 'password'}
-                      value={signInPw}
-                      onChange={e => setSignInPw(e.target.value)}
-                      placeholder="Enter your password"
-                      className="w-full border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm text-[#070707] placeholder-[#b0bac6] focus:outline-none focus:border-[#2a85ff] focus:ring-2 focus:ring-[#2a85ff]/10 transition-all bg-white pr-10"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPw(v => !v)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#b0bac6] hover:text-[#5a6a7a] transition-colors cursor-pointer"
-                    >
-                      {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                </div>
-
-                <Link
-                  onClick={() => {
-                    localStorage.setItem('rankr_user_name', role === 'company' ? 'Acme Corp' : 'John Doe')
-                    localStorage.setItem('rankr_profile_completion', '75')
-                  }}
-                  href={role === 'company' ? '/dashboard' : '/candidate/jobs'}
-                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full text-sm font-bold text-white bg-[#2a85ff] hover:bg-[#1a75ef] shadow-[0_4px_16px_rgba(42,133,255,0.35)] hover:shadow-[0_6px_24px_rgba(42,133,255,0.5)] transition-all cursor-pointer"
-                >
-                  Sign In
-                  <ArrowRight size={16} strokeWidth={2.5} />
-                </Link>
-
-                {/* Divider */}
-                <div className="flex items-center gap-4">
-                  <div className="flex-1 h-px bg-[#e2eaf2]" />
-                  <span className="text-[#b0bac6] text-xs font-medium">or continue with</span>
-                  <div className="flex-1 h-px bg-[#e2eaf2]" />
-                </div>
-
-                {/* Google button */}
-                <button className="w-full flex items-center justify-center gap-3 py-3 rounded-full border border-[#e2eaf2] bg-white text-sm font-semibold text-[#3c4a5c] hover:bg-[#f0f5fa] hover:border-[#c6d4e8] transition-all cursor-pointer">
-                  <GoogleIcon />
-                  Continue with Google
-                </button>
-              </motion.div>
-            ) : (
-              <motion.div
-                key={`create-${role}`}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.25 }}
-                className="flex flex-col gap-5"
-              >
-                <div>
-                  <h2 className="text-[#070707] text-2xl font-extrabold tracking-tight leading-tight">
-                    {role === 'company' ? 'Create company account' : 'Create your profile'}
-                  </h2>
-                  <p className="text-[#8a9ab0] text-sm mt-1">
-                    {role === 'company' ? 'Start screening candidates with AI' : 'Get matched to your next role'}
-                  </p>
-                </div>
-
-                {role === 'company' ? (
-                  <>
-                    <InputField label="Company Name" placeholder="Acme Corp" value={companyName} onChange={setCompanyName} />
-                    <InputField label="Work Email" placeholder="you@company.com" value={workEmail} onChange={setWorkEmail} />
-                  </>
-                ) : (
-                  <>
-                    <InputField label="Full Name" placeholder="Amara Osei" value={fullName} onChange={setFullName} />
-                    <InputField label="Email" placeholder="you@example.com" value={createEmail} onChange={setCreateEmail} />
-                  </>
-                )}
-
-                {/* Password */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-[#5a6a7a] tracking-wide uppercase">Password</label>
-                  <div className="relative">
-                    <input
-                      type={showPw ? 'text' : 'password'}
-                      value={createPw}
-                      onChange={e => setCreatePw(e.target.value)}
-                      placeholder="Create a password"
-                      className="w-full border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm text-[#070707] placeholder-[#b0bac6] focus:outline-none focus:border-[#2a85ff] focus:ring-2 focus:ring-[#2a85ff]/10 transition-all bg-white pr-10"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPw(v => !v)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#b0bac6] hover:text-[#5a6a7a] transition-colors cursor-pointer"
-                    >
-                      {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Confirm password */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-[#5a6a7a] tracking-wide uppercase">Confirm Password</label>
-                  <div className="relative">
-                    <input
-                      type={showConfirmPw ? 'text' : 'password'}
-                      value={confirmPw}
-                      onChange={e => setConfirmPw(e.target.value)}
-                      placeholder="Repeat your password"
-                      className="w-full border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm text-[#070707] placeholder-[#b0bac6] focus:outline-none focus:border-[#2a85ff] focus:ring-2 focus:ring-[#2a85ff]/10 transition-all bg-white pr-10"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPw(v => !v)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#b0bac6] hover:text-[#5a6a7a] transition-colors cursor-pointer"
-                    >
-                      {showConfirmPw ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                </div>
-
-                <Link
-                  onClick={() => {
-                    localStorage.setItem('rankr_user_name', role === 'company' ? 'Acme Corp' : 'John Doe')
-                    localStorage.setItem('rankr_profile_completion', '75')
-                  }}
-                  href={role === 'company' ? '/dashboard' : '/profile'}
-                  className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full text-sm font-bold text-white bg-[#2a85ff] hover:bg-[#1a75ef] shadow-[0_4px_16px_rgba(42,133,255,0.35)] hover:shadow-[0_6px_24px_rgba(42,133,255,0.5)] transition-all cursor-pointer"
-                >
-                  {role === 'company' ? 'Create Company Account' : 'Create Candidate Account'}
-                  <ArrowRight size={16} strokeWidth={2.5} />
-                </Link>
-
-                <p className="text-center text-[#b0bac6] text-xs leading-relaxed">
-                  By signing up you agree to Rankr&apos;s{' '}
-                  <button className="text-[#2a85ff] hover:text-[#1a75ef] font-semibold cursor-pointer transition-colors">
-                    Terms of Use
-                  </button>
-                </p>
-              </motion.div>
-            )}
+              <button className="w-full h-14 flex items-center justify-center gap-3 rounded-full border border-[#e2eaf2] text-[#3c4a5c] font-bold text-sm hover:bg-[#f0f5fa] transition-all">
+                <GoogleIcon />
+                Continue with Google
+              </button>
+            </motion.div>
           </AnimatePresence>
 
-          {/* Tab toggle footer */}
           <p className="text-center text-[#8a9ab0] text-sm">
-            {tab === 'signin' ? (
-              <>
-                Don&apos;t have an account?{' '}
-                <button
-                  onClick={() => setTab('create')}
-                  className="text-[#2a85ff] font-semibold hover:text-[#1a75ef] transition-colors cursor-pointer"
-                >
-                  Create one
-                </button>
-              </>
-            ) : (
-              <>
-                Already have an account?{' '}
-                <button
-                  onClick={() => setTab('signin')}
-                  className="text-[#2a85ff] font-semibold hover:text-[#1a75ef] transition-colors cursor-pointer"
-                >
-                  Sign In
-                </button>
-              </>
-            )}
+            {tab === 'signin' ? "New to Rankr?" : "Already have an account?"}{' '}
+            <button
+              onClick={() => setTab(tab === 'signin' ? 'create' : 'signin')}
+              className="text-[#2a85ff] font-black hover:underline ml-1"
+            >
+              {tab === 'signin' ? 'Create account' : 'Sign in'}
+            </button>
           </p>
-
         </div>
       </div>
     </div>

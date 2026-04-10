@@ -1,23 +1,10 @@
 'use client'
 
 import React, { useState, useRef } from 'react'
-import { Poppins } from 'next/font/google'
-import { Bell, Sparkles, User, Check, Upload, FileJson, FileSpreadsheet, FileText, X, ChevronRight } from 'lucide-react'
+import { Sparkles, Check, Upload, FileJson, FileSpreadsheet, FileText, X, ChevronRight, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-
-const poppins = Poppins({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
-  variable: '--font-poppins',
-})
-
-const NAV_LINKS = ['Jobs', 'Candidates', 'Shortlists', 'Settings']
-
-const MOCK_PROFILES = [
-  { id: 1, name: 'Amara Osei', role: 'Frontend Engineer', skills: ['React', 'TypeScript', 'CSS'] },
-  { id: 2, name: 'Lena Müller', role: 'UX Designer', skills: ['Figma', 'Prototyping'] },
-  { id: 3, name: 'James Park', role: 'Full Stack Dev', skills: ['Node.js', 'GraphQL', 'React'] },
-]
+import { animate, motion } from 'motion/react'
+import Navbar from '../components/Navbar'
 
 const STEPS = [
   { label: 'Create Job', status: 'done' },
@@ -25,23 +12,15 @@ const STEPS = [
   { label: 'AI Screening', status: 'inactive' },
 ]
 
-function initials(name: string) {
-  return name.split(' ').map(n => n[0]).join('').toUpperCase()
-}
-
 export default function RankrCandidates() {
-  const [activeNav, setActiveNav] = useState('Candidates')
-
   const [rankrFiles, setRankrFiles] = useState<{ name: string; size: string; status: 'uploading' | 'done' }[]>([
     { name: 'talent_pool_frontend.json', size: '156KB', status: 'done' },
-    { name: 'q1_backup.json', size: '42KB', status: 'done' }
   ])
   const [rankrDragging, setRankrDragging] = useState(false)
   const rankrInputRef = useRef<HTMLInputElement>(null)
 
   const [externalFiles, setExternalFiles] = useState<{ name: string; size: string; type: 'csv' | 'pdf'; status: 'uploading' | 'done' }[]>([
     { name: 'applicants_v1.csv', size: '1.2MB', type: 'csv', status: 'done' },
-    { name: 'resume_oscar.pdf', size: '250KB', type: 'pdf', status: 'done' }
   ])
   const [externalDragging, setExternalDragging] = useState(false)
   const externalInputRef = useRef<HTMLInputElement>(null)
@@ -81,305 +60,195 @@ export default function RankrCandidates() {
   }
 
   return (
-    <div className={`${poppins.className} min-h-screen bg-[#f0f5fa]`}>
+    <div className="min-h-screen bg-[#f0f5fa]">
+      <Navbar type="app" activeNav="Candidates" />
 
-      {/* Navbar + Hero */}
-      <div className="bg-[#070707]">
-
-        {/* Navbar */}
-        <header className="max-w-[1280px] mx-auto px-6 flex items-center justify-between h-16">
-          <Link href="/dashboard" className="flex items-center gap-2 select-none">
-            <div className="w-8 h-8 rounded-lg bg-[#2a85ff] flex items-center justify-center">
-              <Sparkles size={17} color="white" strokeWidth={2.2} />
-            </div>
-            <span className="text-white text-xl font-bold tracking-tight">Rankr</span>
-          </Link>
-
-          <nav className="flex items-center gap-8">
-            {NAV_LINKS.map(link => (
-              <button
-                key={link}
-                onClick={() => setActiveNav(link)}
-                className={`text-sm font-medium pb-1 transition-colors cursor-pointer ${
-                  activeNav === link
-                    ? 'text-white border-b-2 border-[#2a85ff]'
-                    : 'text-white/50 hover:text-white/80 border-b-2 border-transparent'
-                }`}
-              >
-                {link}
-              </button>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-4">
-            <button className="relative text-white/60 hover:text-white transition-colors cursor-pointer" aria-label="Notifications">
-              <Bell size={20} />
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#2a85ff] rounded-full"></span>
-            </button>
-            <div className="flex items-center gap-2 cursor-pointer group">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#2a85ff] to-[#6eb3ff] flex items-center justify-center">
-                <User size={15} color="white" strokeWidth={2} />
-              </div>
-              <span className="text-white/80 text-sm font-medium group-hover:text-white transition-colors">Recruiter name</span>
-            </div>
-          </div>
-        </header>
-
-        {/* Hero Banner */}
-        <div className="relative overflow-hidden min-h-[220px]">
-          <div className="max-w-[1280px] mx-auto px-6 py-10 relative z-10">
-            <h1 className="text-white font-extrabold text-5xl lg:text-6xl leading-[1.08] tracking-tight mb-4">
-              Add Your<br />Candidates{' '}
+      {/* Hero */}
+      <div className="bg-[#070707] pt-28 sm:pt-36 lg:pt-40 pb-12 sm:pb-20 relative overflow-hidden">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 relative z-10">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+            <h1 className="text-white font-extrabold text-4xl sm:text-6xl lg:text-7xl leading-[1.08] tracking-tight mb-4 text-center sm:text-left">
+              Add Your<br className="hidden sm:block" />Candidates{' '}
               <span className="text-[#2a85ff]">✦</span>
             </h1>
-            <p className="text-white/50 text-base font-normal">
-              Import from Rankr or upload externally
+            <p className="text-white/50 text-sm sm:text-base font-normal text-center sm:text-left">
+              Import from Rankr or upload externally from your local database
             </p>
-          </div>
-          <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-[#2a85ff]/5 blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-1/3 w-64 h-64 rounded-full bg-[#2a85ff]/5 blur-3xl pointer-events-none" />
+          </motion.div>
         </div>
+        <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-[#2a85ff]/5 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/3 w-64 h-64 rounded-full bg-[#2a85ff]/5 blur-3xl pointer-events-none" />
       </div>
 
-      {/* Main content */}
-      <main className="max-w-[1100px] mx-auto px-6 py-10">
-
-        {/* Breadcrumb Steps */}
-        <div className="flex items-center gap-0 mb-10">
+      <main className="max-w-[1100px] mx-auto px-4 sm:px-6 py-10 lg:py-16">
+        
+        {/* Breadcrumb Steps (Responsive) */}
+        <div className="flex items-center gap-2 sm:gap-4 mb-10 sm:mb-16 overflow-x-auto no-scrollbar pb-2">
           {STEPS.map((step, i) => (
             <React.Fragment key={step.label}>
-              <div className="flex items-center gap-2.5">
-                {/* Circle */}
+              <div className="flex items-center gap-2.5 flex-shrink-0">
                 {step.status === 'done' ? (
-                  <div className="w-7 h-7 rounded-full bg-[#2a85ff] flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-[#2a85ff] flex items-center justify-center">
                     <Check size={14} color="white" strokeWidth={3} />
                   </div>
                 ) : step.status === 'active' ? (
-                  <div className="w-7 h-7 rounded-full bg-[#2a85ff] flex items-center justify-center flex-shrink-0 ring-4 ring-[#2a85ff]/20">
+                  <div className="w-8 h-8 rounded-full bg-[#2a85ff] flex items-center justify-center ring-4 ring-[#2a85ff]/20">
                     <div className="w-2.5 h-2.5 rounded-full bg-white" />
                   </div>
                 ) : (
-                  <div className="w-7 h-7 rounded-full border-2 border-[#c8d6e5] flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full border-2 border-[#c8d6e5] flex items-center justify-center">
                     <div className="w-2 h-2 rounded-full bg-[#c8d6e5]" />
                   </div>
                 )}
-                <span className={`text-sm font-semibold whitespace-nowrap ${
+                <span className={`text-xs sm:text-sm font-bold whitespace-nowrap ${
                   step.status === 'inactive' ? 'text-[#b0bac6]' : 'text-[#070707]'
                 }`}>
                   {step.label}
                 </span>
               </div>
               {i < STEPS.length - 1 && (
-                <div className={`flex-1 h-px mx-4 min-w-[40px] ${i === 0 ? 'bg-[#2a85ff]' : 'bg-[#d8e5f0]'}`} />
+                <div className={`h-px w-8 sm:w-16 ${i === 0 ? 'bg-[#2a85ff]' : 'bg-[#d8e5f0]'}`} />
               )}
             </React.Fragment>
           ))}
         </div>
 
-        {/* Section Heading */}
-        <h2 className="text-[#070707] text-2xl font-bold mb-6">Candidate Sources</h2>
+        <h2 className="text-[#070707] text-2xl font-bold mb-8">Candidate Sources</h2>
 
-        {/* Two tab cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-
-          {/* LEFT — Rankr Platform */}
-          <div className="bg-white rounded-2xl shadow-[0_4px_32px_rgba(0,0,0,0.07)] p-6 flex flex-col gap-5">
-            {/* Card header */}
+        {/* Source Cards Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-8">
+          
+          {/* Card 1: Rankr */}
+          <div className="bg-white rounded-[2rem] shadow-[0_4px_32px_rgba(0,0,0,0.06)] p-6 sm:p-8 flex flex-col gap-6">
             <div className="flex items-start justify-between">
-              <div className="w-11 h-11 rounded-xl bg-[#e8f1ff] flex items-center justify-center">
-                <Sparkles size={20} color="#2a85ff" strokeWidth={2.2} />
+              <div className="w-12 h-12 rounded-2xl bg-[#e8f1ff] flex items-center justify-center">
+                <Sparkles size={24} color="#2a85ff" />
               </div>
-              <span className="text-xs font-semibold text-[#2a85ff] bg-[#e8f1ff] px-3 py-1 rounded-full">
-                Structured Data
+              <span className="text-[10px] sm:text-xs font-bold text-[#2a85ff] bg-[#e8f1ff] px-4 py-1.5 rounded-full uppercase tracking-widest">
+                Rankr Pool
               </span>
             </div>
             <div>
-              <h3 className="text-[#070707] font-bold text-lg mb-1">Import Talent Profiles</h3>
+              <h3 className="text-[#070707] font-extrabold text-xl mb-1.5">Import Talent Profiles</h3>
               <p className="text-[#8a9ab0] text-sm leading-relaxed">
-                Upload structured JSON profiles from Rankr's talent pool following the official schema
+                Connect your Rankr talent pool to automatically pull profiles matching this role.
               </p>
             </div>
 
-            {/* Upload Zone */}
             <div
               onClick={() => rankrInputRef.current?.click()}
               onDragOver={e => { e.preventDefault(); setRankrDragging(true) }}
               onDragLeave={() => setRankrDragging(false)}
               onDrop={e => { e.preventDefault(); setRankrDragging(false); handleRankrUpload(e) }}
-              className={`border-2 border-dashed rounded-xl px-6 py-6 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all ${
-                rankrDragging
-                  ? 'border-[#2a85ff] bg-[#e8f1ff]'
-                  : 'border-[#d0dce8] bg-[#f8fbff] hover:border-[#2a85ff]/50 hover:bg-[#f0f7ff]'
+              className={`border-2 border-dashed rounded-3xl p-6 sm:p-10 flex flex-col items-center justify-center gap-4 cursor-pointer transition-all ${
+                rankrDragging ? 'border-[#2a85ff] bg-[#e8f1ff]' : 'border-[#d0dce8] bg-[#f8fbff] hover:bg-[#f0f7ff]'
               }`}
             >
-              <div className="w-12 h-12 rounded-xl bg-[#e8f1ff] flex items-center justify-center">
-                <FileJson size={24} color="#2a85ff" strokeWidth={1.8} />
+              <div className="w-16 h-16 rounded-2xl bg-white flex items-center justify-center shadow-lg">
+                <FileJson size={32} color="#2a85ff" />
               </div>
-              <p className="text-sm text-[#5a6a7a] font-medium text-center">Drop JSON file here or click to browse</p>
-              <input ref={rankrInputRef} type="file" accept=".json" className="hidden" aria-label="Upload Rankr JSON file" onChange={handleRankrUpload} />
+              <div className="text-center">
+                <p className="text-[#070707] font-bold text-sm">Drop JSON profiles here</p>
+                <p className="text-[#8a9ab0] text-xs mt-1">or click to browse library</p>
+              </div>
+              <input ref={rankrInputRef} type="file" accept=".json" className="hidden" onChange={handleRankrUpload} />
             </div>
 
-            {/* File List */}
-            {rankrFiles.length > 0 && (
-              <div className="flex flex-col gap-2 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
-                {rankrFiles.map((file, i) => (
-                  <div key={i} className="flex items-center gap-3 bg-[#f8fbff] border border-[#e8f1ff] rounded-xl p-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#2a85ff]/10 flex items-center justify-center">
-                      <FileJson size={16} color="#2a85ff" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-0.5">
-                        <p className="text-xs font-bold text-[#070707] truncate">{file.name}</p>
-                        <span className="text-[10px] text-[#8a9ab0]">{file.size}</span>
-                      </div>
-                      <div className="h-1 w-full bg-[#e8f1ff] rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full bg-[#2a85ff] transition-all duration-1000 ${file.status === 'done' ? 'w-full' : 'w-[40%]'}`}
-                        />
-                      </div>
-                    </div>
-                    {file.status === 'done' ? (
-                      <Check size={14} color="#16a34a" strokeWidth={3} />
-                    ) : (
-                      <button aria-label="Remove file" onClick={e => { e.stopPropagation(); setRankrFiles(prev => prev.filter((_, idx) => idx !== i)) }}>
-                        <X size={14} color="#b0bac6" />
-                      </button>
-                    )}
+            {/* List */}
+            <div className="space-y-3">
+              {rankrFiles.map((file, i) => (
+                <div key={i} className="bg-[#fcfdfe] hover:bg-white border border-[#f0f5fa] rounded-2xl p-4 flex items-center gap-4 transition-all">
+                  <div className="w-10 h-10 rounded-xl bg-[#2a85ff]/10 flex items-center justify-center">
+                    <FileJson size={18} color="#2a85ff" />
                   </div>
-                ))}
-              </div>
-            )}
-
-            <p className="text-xs text-[#b0bac6]">Supports .json files · Follows Rankr Talent Schema v1</p>
-
-            {/* Count badge */}
-            <div className="mt-auto pt-2 border-t border-[#f0f5fa] flex items-center justify-between">
-              <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#2a85ff] bg-[#e8f1ff] px-4 py-1.5 rounded-full">
-                <div className="w-2 h-2 rounded-full bg-[#2a85ff]" />
-                {rankrFiles.filter(f => f.status === 'done').length * 6} profiles found
-              </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-[#070707] truncate">{file.name}</p>
+                    <p className="text-[10px] text-[#b0bac6] font-medium">{file.size} • JSON</p>
+                  </div>
+                  <Check size={18} color="#16a34a" strokeWidth={3} />
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* RIGHT — External Sources */}
-          <div className="bg-white rounded-2xl shadow-[0_4px_32px_rgba(0,0,0,0.07)] p-6 flex flex-col gap-5">
-            {/* Card header */}
+          {/* Card 2: External */}
+          <div className="bg-white rounded-[2rem] shadow-[0_4px_32px_rgba(0,0,0,0.06)] p-6 sm:p-8 flex flex-col gap-6">
             <div className="flex items-start justify-between">
-              <div className="w-11 h-11 rounded-xl bg-[#fff3e8] flex items-center justify-center">
-                <Upload size={20} color="#f07830" strokeWidth={2} />
+              <div className="w-12 h-12 rounded-2xl bg-[#fff3e8] flex items-center justify-center">
+                <Upload size={24} color="#f07830" />
               </div>
-              <span className="text-xs font-semibold text-[#f07830] bg-[#fff3e8] px-3 py-1 rounded-full">
-                External Upload
+              <span className="text-[10px] sm:text-xs font-bold text-[#f07830] bg-[#fff3e8] px-4 py-1.5 rounded-full uppercase tracking-widest">
+                External
               </span>
             </div>
             <div>
-              <h3 className="text-[#070707] font-bold text-lg mb-1">Upload Applicants</h3>
+              <h3 className="text-[#070707] font-extrabold text-xl mb-1.5">Direct Uploads</h3>
               <p className="text-[#8a9ab0] text-sm leading-relaxed">
-                Upload a CSV/Excel spreadsheet or drag and drop PDF resumes from external job boards
+                Bulk upload resumes in PDF/CSV format from external databases or job boards.
               </p>
             </div>
 
-            {/* External Upload Zone */}
             <div
               onClick={() => externalInputRef.current?.click()}
-              onDragOver={e => { e.preventDefault(); setExternalDragging(true) }}
-              onDragLeave={() => setExternalDragging(false)}
-              onDrop={e => { e.preventDefault(); setExternalDragging(false); handleExternalUpload(e, 'pdf') }}
-              className={`border-2 border-dashed rounded-xl px-6 py-10 flex flex-col items-center justify-center gap-4 cursor-pointer transition-all ${
-                externalDragging
-                  ? 'border-[#f07830] bg-[#fff3e8]'
-                  : 'border-[#d0dce8] bg-[#fdf8f5] hover:border-[#f07830]/50 hover:bg-[#fff8f3]'
-              }`}
+              className="border-2 border-dashed border-[#d0dce8] bg-[#fcfdfe] hover:bg-[#fff9f4] rounded-3xl p-6 sm:p-10 flex flex-col items-center justify-center gap-4 cursor-pointer transition-all"
             >
-              <div className="flex items-center gap-3">
-                <FileSpreadsheet size={24} color="#f07830" strokeWidth={1.8} />
-                <FileText size={24} color="#f07830" strokeWidth={1.8} />
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-lg"><FileSpreadsheet size={28} color="#f07830" /></div>
+                <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-lg"><FileText size={28} color="#e74c3c" /></div>
               </div>
               <div className="text-center">
-                <p className="text-sm text-[#5a6a7a] font-bold">Drag and drop resumes or CSV</p>
-                <p className="text-xs text-[#8a9ab0] mt-1">Supports PDF, DOCX, CSV and Excel</p>
+                <p className="text-[#070707] font-bold text-sm">Upload CSV or PDF Resumes</p>
+                <p className="text-[#8a9ab0] text-xs mt-1">Multi-select files supported</p>
               </div>
-              <input ref={externalInputRef} type="file" multiple className="hidden" aria-label="Upload external resumes or CSV" onChange={e => handleExternalUpload(e, 'pdf')} />
+              <input ref={externalInputRef} type="file" multiple className="hidden" onChange={e => handleExternalUpload(e, 'pdf')} />
             </div>
 
-            {/* External File List */}
-            {externalFiles.length > 0 && (
-              <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
-                {externalFiles.map((file, i) => (
-                  <div key={i} className="flex items-center gap-3 bg-[#fffaf5] border border-[#fff3e8] rounded-xl p-3">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${file.type === 'csv' ? 'bg-[#f07830]/10' : 'bg-[#e74c3c]/10'}`}>
-                      {file.type === 'csv' ? <FileSpreadsheet size={16} color="#f07830" /> : <FileText size={16} color="#e74c3c" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-0.5">
-                        <p className="text-xs font-bold text-[#070707] truncate">{file.name}</p>
-                        <span className="text-[10px] text-[#8a9ab0]">{file.size}</span>
-                      </div>
-                      <div className="h-1 w-full bg-[#fff3e8] rounded-full overflow-hidden">
-                        <div 
-                          className={`h-full bg-[#f07830] transition-all duration-1000 ${file.status === 'done' ? 'w-full' : 'w-[20%]'}`}
-                        />
-                      </div>
-                    </div>
-                    {file.status === 'done' ? (
-                      <Check size={14} color="#16a34a" strokeWidth={3} />
-                    ) : (
-                      <button aria-label="Remove file" onClick={e => { e.stopPropagation(); setExternalFiles(prev => prev.filter((_, idx) => idx !== i)) }}>
-                        <X size={14} color="#b0bac6" />
-                      </button>
-                    )}
+             {/* List */}
+             <div className="space-y-3">
+              {externalFiles.map((file, i) => (
+                <div key={i} className="bg-[#fcfdfe] hover:bg-white border border-[#f0f5fa] rounded-2xl p-4 flex items-center gap-4 transition-all">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${file.type === 'csv' ? 'bg-[#f07830]/10' : 'bg-[#e74c3c]/10'}`}>
+                    {file.type === 'csv' ? <FileSpreadsheet size={18} color="#f07830" /> : <FileText size={18} color="#e74c3c" />}
                   </div>
-                ))}
-              </div>
-            )}
-
-            {/* Count badge */}
-            <div className="mt-auto pt-2 border-t border-[#f0f5fa] flex items-center justify-between">
-              <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#f07830] bg-[#fff3e8] px-4 py-1.5 rounded-full">
-                <div className="w-2 h-2 rounded-full bg-[#f07830]" />
-                {externalFiles.filter(f => f.status === 'done').length * 4} applicants loaded
-              </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-[#070707] truncate">{file.name}</p>
+                    <p className="text-[10px] text-[#b0bac6] font-medium">{file.size} • {file.type.toUpperCase()}</p>
+                  </div>
+                  <Check size={18} color="#16a34a" strokeWidth={3} />
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Unified counter bar */}
-        <div className="bg-white rounded-2xl shadow-[0_4px_32px_rgba(0,0,0,0.07)] px-7 py-5 flex flex-wrap items-center gap-4 mb-8">
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-[#8a9ab0] uppercase tracking-wide mb-1">Total Candidates Ready</p>
-            <p className="text-[#070707] font-extrabold text-4xl leading-none tracking-tight">
-              {rankrFiles.filter(f => f.status === 'done').length * 6 + externalFiles.filter(f => f.status === 'done').length * 4}
-            </p>
+        {/* Counter Summary Bar */}
+        <div className="bg-[#070707] rounded-[2rem] p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-8 shadow-2xl">
+          <div className="flex-1 text-center sm:text-left">
+            <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mb-1">Total Candidates Found</p>
+            <div className="flex items-baseline justify-center sm:justify-start gap-2">
+              <span className="text-white text-5xl font-black">{rankrFiles.length * 6 + externalFiles.length * 4}</span>
+              <span className="text-[#2a85ff] text-xl font-bold italic">Profiles</span>
+            </div>
           </div>
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#2a85ff] bg-[#e8f1ff] px-4 py-1.5 rounded-full">
-              <div className="w-2 h-2 rounded-full bg-[#2a85ff]" />
-              {rankrFiles.filter(f => f.status === 'done').length * 6} Rankr
-            </span>
-            <span className="text-[#d0dce8] font-light text-lg">|</span>
-            <span className="inline-flex items-center gap-2 text-sm font-semibold text-[#f07830] bg-[#fff3e8] px-4 py-1.5 rounded-full">
-              <div className="w-2 h-2 rounded-full bg-[#f07830]" />
-              {externalFiles.filter(f => f.status === 'done').length * 4} External
-            </span>
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+             <Link 
+              href="/screening" 
+              className="w-full sm:w-auto px-10 py-5 rounded-full text-base font-black text-white bg-[#2a85ff] hover:bg-[#1a75ef] shadow-xl transition-all flex items-center justify-center gap-3 group"
+            >
+              Next: AI Screening
+              <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
           </div>
-          <Link href="/screening" className="flex-shrink-0 px-5 py-2.5 rounded-full text-sm font-semibold text-white bg-[#2a85ff] hover:bg-[#1a75ef] shadow-[0_4px_16px_rgba(42,133,255,0.35)] hover:shadow-[0_4px_20px_rgba(42,133,255,0.5)] transition-all cursor-pointer flex items-center gap-2">
-            Next: Screen Candidates
-            <ChevronRight size={16} strokeWidth={2.5} />
+        </div>
+
+        {/* Footer actions */}
+        <div className="flex items-center justify-between mt-12">
+          <Link href="/dashboard" className="text-[#8a9ab0] hover:text-[#070707] text-sm font-bold flex items-center gap-2 transition-colors">
+            <ArrowLeft size={16} />
+            Edit Job Profile
           </Link>
         </div>
 
-        {/* Bottom actions */}
-        <div className="flex items-center justify-between">
-          <Link
-            href="/dashboard"
-            className="px-6 py-2.5 rounded-full text-sm font-semibold text-[#5a6a7a] border border-[#e2eaf2] hover:border-[#2a85ff]/40 hover:text-[#2a85ff] transition-all cursor-pointer bg-white inline-flex items-center gap-2"
-          >
-            ← Back
-          </Link>
-          <Link href="/screening" className="px-7 py-2.5 rounded-full text-sm font-semibold text-white bg-[#2a85ff] hover:bg-[#1a75ef] shadow-[0_4px_16px_rgba(42,133,255,0.35)] hover:shadow-[0_4px_20px_rgba(42,133,255,0.5)] transition-all cursor-pointer flex items-center gap-2">
-            Screen All Candidates →
-          </Link>
-        </div>
       </main>
     </div>
   )
