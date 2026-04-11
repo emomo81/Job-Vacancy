@@ -1,15 +1,10 @@
 import type { NextConfig } from "next";
+import path from "path";
+import os from "os";
 
 const nextConfig: NextConfig = {
-  // Allow Spline & Unicorn Studio assets
-  images: {
-    remotePatterns: [
-      { protocol: "https", hostname: "prod.spline.design" },
-      { protocol: "https", hostname: "cdn.jsdelivr.net" },
-    ],
-  },
-  // Required for Render (standalone output bundles everything needed)
-  output: "standalone",
+  /* Use a local directory for .next */
+  distDir: '.next',
 };
 
 export default nextConfig;
