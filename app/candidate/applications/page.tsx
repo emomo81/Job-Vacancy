@@ -41,6 +41,14 @@ const APPLICATIONS = [
 ]
 
 export default function MyApplicationsPage() {
+  const handleViewDetails = (role: string) => {
+    alert(`Viewing details for ${role}. This feature will be available in the next update!`)
+  }
+
+  const handleMessage = (company: string) => {
+    alert(`Starting conversation with ${company}...`)
+  }
+
   return (
     <div className="flex flex-col gap-8">
       
@@ -108,10 +116,18 @@ export default function MyApplicationsPage() {
 
                 {/* Right: Actions */}
                 <div className="flex items-center gap-3">
-                  <button aria-label="View application details" className="flex-1 lg:flex-none px-6 py-3 rounded-xl bg-[#f0f5fa] hover:bg-[#e2eaf2] text-[#070707] text-sm font-bold transition-all cursor-pointer">
+                  <button 
+                    onClick={() => handleViewDetails(app.role)}
+                    aria-label="View application details" 
+                    className="flex-1 lg:flex-none px-6 py-3 rounded-xl bg-[#f0f5fa] hover:bg-[#e2eaf2] text-[#070707] text-sm font-bold transition-all cursor-pointer"
+                  >
                     View Details
                   </button>
-                  <button aria-label="Message company" className="p-3 rounded-xl bg-white border border-[#e2eaf2] text-[#8a9ab0] hover:text-[#2a85ff] hover:border-[#2a85ff]/30 transition-all cursor-pointer">
+                  <button 
+                    onClick={() => handleMessage(app.company)}
+                    aria-label="Message company" 
+                    className="p-3 rounded-xl bg-white border border-[#e2eaf2] text-[#8a9ab0] hover:text-[#2a85ff] hover:border-[#2a85ff]/30 transition-all cursor-pointer"
+                  >
                     <MessageCircle size={20} />
                   </button>
                 </div>

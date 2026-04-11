@@ -230,7 +230,7 @@ export default function RankrAuth() {
               )}
 
               <Link
-                href={role === 'company' ? '/dashboard' : '/profile'}
+                href={role === 'company' ? '/dashboard' : '/candidate'}
                 className="w-full flex items-center justify-center gap-3 py-4.5 rounded-full text-base font-black text-white bg-[#2a85ff] hover:bg-[#1a75ef] shadow-xl shadow-[#2a85ff]/20 transition-all hover:-translate-y-0.5"
               >
                 {tab === 'signin' ? 'Sign In' : 'Create Account'}

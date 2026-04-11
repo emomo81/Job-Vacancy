@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Sparkles, ChevronRight, Play, Globe, Shield, Zap, ArrowRight } from 'lucide-react'
+import { Sparkles, ChevronRight, Play, Globe, Shield, Zap, ArrowRight, Briefcase, User } from 'lucide-react'
 import Link from 'next/link'
 import { motion } from 'motion/react'
 import Navbar from './components/Navbar'
@@ -162,21 +162,65 @@ export default function RankrLanding() {
           </div>
         </section>
 
-        {/* CTA SECTION */}
-        <section className="py-32 sm:py-56 relative overflow-hidden">
-          <div className="absolute inset-0 bg-[#2a85ff] pointer-events-none" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.2),transparent)] opacity-50 pointer-events-none" />
-          
-          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 relative z-10 text-center">
-            <h2 className="text-white text-6xl sm:text-9xl font-black tracking-tighter mb-10 sm:mb-16 leading-[0.85]">
-              READY TO<br />HIRE SMARTER?
-            </h2>
-            <Link href="/auth" className="inline-flex items-center gap-2 px-10 sm:px-14 py-6 sm:py-8 rounded-full bg-white text-[#2a85ff] text-xl sm:text-2xl font-black hover:scale-105 transition-all shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
-              Get Started Now
-              <ChevronRight size={28} strokeWidth={3} />
-            </Link>
+        {/* NEW FEATURES SHOWCASE */}
+        <section className="py-24 sm:py-32 relative bg-white/[0.02] border-t border-white/5">
+          <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+            <div className="text-center mb-16">
+              <h2 className="text-white text-4xl sm:text-6xl font-black tracking-tight mb-4">New Features Showcase</h2>
+              <p className="text-white/40 text-lg">Quick access to the latest updates I just implemented for you.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Feature 1: Jobs */}
+              <Link href="/candidate/jobs" className="group relative p-8 rounded-[2.5rem] bg-white/5 border border-white/10 hover:border-[#2a85ff]/50 hover:bg-white/[0.08] transition-all overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#2a85ff]/5 blur-3xl group-hover:bg-[#2a85ff]/20 transition-all" />
+                <div className="w-16 h-16 rounded-2xl bg-[#2a85ff]/20 flex items-center justify-center text-[#2a85ff] mb-6 border border-[#2a85ff]/30 group-hover:scale-110 transition-transform">
+                  <Briefcase size={32} />
+                </div>
+                <h3 className="text-white text-2xl font-bold mb-3 group-hover:text-[#2a85ff] transition-colors">Smart Job Matches</h3>
+                <p className="text-white/40 text-sm leading-relaxed mb-6">
+                  Check out the expanded job list, new search filters, and functional "View Smart Matches" filtering.
+                </p>
+                <div className="inline-flex items-center gap-2 text-[#2a85ff] text-sm font-bold">
+                  Explore Jobs <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+
+              {/* Feature 2: Profile */}
+              <Link href="/candidate/profile" className="group relative p-8 rounded-[2.5rem] bg-white/5 border border-white/10 hover:border-[#2a85ff]/50 hover:bg-white/[0.08] transition-all overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#2a85ff]/5 blur-3xl group-hover:bg-[#2a85ff]/20 transition-all" />
+                <div className="w-16 h-16 rounded-2xl bg-[#2a85ff]/20 flex items-center justify-center text-[#2a85ff] mb-6 border border-[#2a85ff]/30 group-hover:scale-110 transition-transform">
+                  <User size={32} />
+                </div>
+                <h3 className="text-white text-2xl font-bold mb-3 group-hover:text-[#2a85ff] transition-colors">Work History</h3>
+                <p className="text-white/40 text-sm leading-relaxed mb-6">
+                  Manage your professional experience with the new dynamic add/edit/delete work history system.
+                </p>
+                <div className="inline-flex items-center gap-2 text-[#2a85ff] text-sm font-bold">
+                  View Profile <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+
+              {/* Feature 3: AI Screening */}
+              <Link href="/screening" className="group relative p-8 rounded-[2.5rem] bg-white/5 border border-white/10 hover:border-[#2a85ff]/50 hover:bg-white/[0.08] transition-all overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#2a85ff]/5 blur-3xl group-hover:bg-[#2a85ff]/20 transition-all" />
+                <div className="w-16 h-16 rounded-2xl bg-[#2a85ff]/20 flex items-center justify-center text-[#2a85ff] mb-6 border border-[#2a85ff]/30 group-hover:scale-110 transition-transform">
+                  <Sparkles size={32} />
+                </div>
+                <h3 className="text-white text-2xl font-bold mb-3 group-hover:text-[#2a85ff] transition-colors">AI Assessment</h3>
+                <p className="text-white/40 text-sm leading-relaxed mb-6">
+                  See the premium spinning animation and glow effects on the assessment start icon.
+                </p>
+                <div className="inline-flex items-center gap-2 text-[#2a85ff] text-sm font-bold">
+                  Watch Assessment <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+            </div>
           </div>
         </section>
+
+        {/* CTA SECTION */}
+
       </main>
 
       <footer className="py-24 sm:py-32 border-t border-white/5">

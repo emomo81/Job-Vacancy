@@ -17,6 +17,15 @@ const COMPLETION_ITEMS = [
   { id: 'avail', label: 'Availability', done: false },
 ]
 
+interface Experience {
+  id: string;
+  role: string;
+  company: string;
+  startDate: string;
+  endDate: string;
+  description: string;
+}
+
 export default function CandidateProfilePage() {
   // Load initial data from localStorage if exists
   const [fullName, setFullName] = useState('New Candidate')
@@ -26,6 +35,10 @@ export default function CandidateProfilePage() {
   const [linkedin, setLinkedin] = useState('')
   const [skills, setSkills] = useState<string[]>(['TypeScript', 'React'])
   const [completionPct, setCompletionPct] = useState(75)
+
+  const [workHistory, setWorkHistory] = useState<Experience[]>([])
+  const [isExpModalOpen, setIsExpModalOpen] = useState(false)
+  const [editingExp, setEditingExp] = useState<Experience | null>(null)
 
   const [skillInput, setSkillInput] = useState('')
   const [availability, setAvailability] = useState<'open' | 'closed'>('open')
@@ -48,6 +61,24 @@ export default function CandidateProfilePage() {
       setYearsExp(7)
       setSkills(['Node.js', 'TypeScript', 'MongoDB', 'React', 'GraphQL', 'Docker'])
       setCvUploaded(true)
+      setWorkHistory([
+        {
+          id: '1',
+          role: 'Senior Backend Engineer',
+          company: 'TechFlow Systems',
+          startDate: 'Jan 2021',
+          endDate: 'Present',
+          description: 'Architected high-performance microservices using Node.js and Go. Reduced API latency by 40% through Redis caching and PostgreSQL optimization.'
+        },
+        {
+          id: '2',
+          role: 'Full Stack Developer',
+          company: 'GreenLogic',
+          startDate: 'Jun 2018',
+          endDate: 'Dec 2020',
+          description: 'Built scalable web applications using React and Python/Django. Led the migration of legacy systems to AWS.'
+        }
+      ])
     }
   }, [])
 
@@ -55,8 +86,35 @@ export default function CandidateProfilePage() {
     localStorage.setItem('rankr_user_name', fullName)
     localStorage.setItem('rankr_profile_completion', completionPct.toString())
     // In a real app we'd save the rest too
-    alert('Profile saved successfully!')
+    alert('Profile saved successfully! Your changes are now live.')
     window.location.reload() // Refresh to update layout sync
+  }
+
+  const handleExpSave = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    const newExp: Experience = {
+      id: editingExp?.id || Date.now().toString(),
+      role: formData.get('role') as string,
+      company: formData.get('company') as string,
+      startDate: formData.get('startDate') as string,
+      endDate: formData.get('endDate') as string,
+      description: formData.get('description') as string,
+    }
+
+    if (editingExp) {
+      setWorkHistory(prev => prev.map(exp => exp.id === editingExp.id ? newExp : exp))
+    } else {
+      setWorkHistory(prev => [newExp, ...prev])
+    }
+    setIsExpModalOpen(false)
+    setEditingExp(null)
+  }
+
+  const handleDeleteExp = (id: string) => {
+    if (confirm('Are you sure you want to delete this experience?')) {
+      setWorkHistory(prev => prev.filter(exp => exp.id !== id))
+    }
   }
 
   const handleSkillKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -70,6 +128,66 @@ export default function CandidateProfilePage() {
   return (
     <div className="flex flex-col gap-8 pb-32">
       
+      {/* ── EXPERIENCE MODAL ── */}
+      <AnimatePresence>
+        {isExpModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsExpModalOpen(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-xl bg-white rounded-[2.5rem] p-8 shadow-2xl overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#2a85ff]/5 blur-3xl" />
+              <h3 className="text-2xl font-black text-[#070707] mb-6">
+                {editingExp ? 'Edit Experience' : 'Add Experience'}
+              </h3>
+              
+              <form onSubmit={handleExpSave} className="space-y-5">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">Role / Title</label>
+                    <input name="role" defaultValue={editingExp?.role} required className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#2a85ff]" placeholder="e.g. Senior Backend Engineer" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">Company</label>
+                    <input name="company" defaultValue={editingExp?.company} required className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#2a85ff]" placeholder="e.g. Google" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">Start Date</label>
+                    <input name="startDate" defaultValue={editingExp?.startDate} required className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#2a85ff]" placeholder="e.g. Jan 2021" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">End Date</label>
+                    <input name="endDate" defaultValue={editingExp?.endDate} required className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#2a85ff]" placeholder="e.g. Present" />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">Description / Achievements</label>
+                  <textarea name="description" defaultValue={editingExp?.description} required rows={4} className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#2a85ff] resize-none" placeholder="Describe your key impact..." />
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button type="button" onClick={() => setIsExpModalOpen(false)} className="flex-1 py-3.5 rounded-xl text-sm font-bold text-[#5a6a7a] bg-[#f0f5fa] hover:bg-[#e2eaf2] transition-all">Cancel</button>
+                  <button type="submit" className="flex-2 py-3.5 rounded-xl text-sm font-bold text-white bg-[#2a85ff] hover:bg-[#1a75ef] shadow-lg shadow-[#2a85ff]/20">Save Experience</button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* ── TOP SECTION: PROFILE SUMMARY ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
@@ -335,7 +453,10 @@ export default function CandidateProfilePage() {
           <div className="bg-white rounded-2xl sm:rounded-[2rem] p-5 sm:p-8 lg:p-10 shadow-[0_4px_32px_rgba(0,0,0,0.03)] border border-[#e2eaf2]/60">
             <div className="flex items-center justify-between mb-6 sm:mb-10 gap-3">
               <h2 className="text-[#070707] font-extrabold text-xl sm:text-2xl tracking-tight">Work History</h2>
-              <button className="flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold text-white bg-[#070707] hover:bg-[#202020] transition-all cursor-pointer flex-shrink-0">
+              <button 
+                onClick={() => { setEditingExp(null); setIsExpModalOpen(true); }}
+                className="flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold text-white bg-[#070707] hover:bg-[#202020] transition-all cursor-pointer flex-shrink-0"
+              >
                 <Plus size={16} strokeWidth={2.5} />
                 <span className="hidden sm:inline">Add Experience</span>
                 <span className="sm:hidden">Add</span>
@@ -343,23 +464,54 @@ export default function CandidateProfilePage() {
             </div>
 
             <div className="space-y-12">
-              <div className="relative pl-10">
-                <div className="absolute left-0 top-2 bottom-0 w-px bg-gradient-to-b from-[#2a85ff] to-transparent" />
-                <div className="absolute left-[-5px] top-2 w-[11px] h-[11px] rounded-full bg-[#2a85ff] ring-4 ring-[#e8f1ff]" />
-                
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <h4 className="text-[#070707] text-xl font-bold">Recent Role</h4>
-                    <p className="text-[#2a85ff] font-bold mt-1">Company Name</p>
+              {workHistory.length > 0 ? (
+                workHistory.map((exp, idx) => (
+                  <div key={exp.id} className="relative pl-10 group">
+                    <div className={`absolute left-0 top-2 bottom-0 w-px ${idx === workHistory.length - 1 ? 'h-0' : 'bg-gradient-to-b from-[#2a85ff] to-[#e2eaf2]'}`} />
+                    <div className="absolute left-[-5px] top-2 w-[11px] h-[11px] rounded-full bg-[#2a85ff] ring-4 ring-[#e8f1ff]" />
+                    
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                      <div className="flex-1 min-w-[200px]">
+                        <h4 className="text-[#070707] text-xl font-bold">{exp.role}</h4>
+                        <div className="flex items-center gap-3 mt-1">
+                          <p className="text-[#2a85ff] font-bold">{exp.company}</p>
+                          <span className="w-1 h-1 rounded-full bg-[#d0dce8]" />
+                          <span className="text-[#8a9ab0] text-xs font-bold">{exp.startDate} – {exp.endDate}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button 
+                          onClick={() => { setEditingExp(exp); setIsExpModalOpen(true); }}
+                          className="p-2 rounded-lg bg-[#f0f5fa] text-[#5a6a7a] hover:bg-[#2a85ff] hover:text-white transition-all cursor-pointer"
+                          aria-label="Edit experience"
+                        >
+                          <FileText size={14} />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteExp(exp.id)}
+                          className="p-2 rounded-lg bg-[#fff0f0] text-[#ef4444] hover:bg-[#ef4444] hover:text-white transition-all cursor-pointer"
+                          aria-label="Delete experience"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-[#5a6a7a] text-sm leading-relaxed mt-5 max-w-2xl bg-[#f8fbff] p-6 rounded-2xl border border-dashed border-[#e2eaf2]">
+                      {exp.description}
+                    </p>
                   </div>
-                  <span className="bg-[#f0f5fa] text-[#8a9ab0] text-xs font-bold px-4 py-1.5 rounded-full border border-[#e2eaf2]">
-                    Start Date – End Date
-                  </span>
+                ))
+              ) : (
+                <div className="text-center py-10 bg-[#f8fbff] rounded-3xl border border-dashed border-[#e2eaf2]">
+                  <p className="text-[#8a9ab0] font-bold">No work history added yet.</p>
+                  <button 
+                    onClick={() => { setEditingExp(null); setIsExpModalOpen(true); }}
+                    className="mt-2 text-[#2a85ff] text-sm font-bold hover:underline"
+                  >
+                    Click to add your first role
+                  </button>
                 </div>
-                <p className="text-[#5a6a7a] text-sm leading-relaxed mt-5 max-w-2xl bg-[#f8fbff] p-6 rounded-2xl border border-dashed border-[#e2eaf2]">
-                  Add your major achievements and responsibilities here. Focus on quantifiable impacts and the tech stack used.
-                </p>
-              </div>
+              )}
             </div>
           </div>
 

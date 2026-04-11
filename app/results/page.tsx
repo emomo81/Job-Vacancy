@@ -8,68 +8,63 @@ import {
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'motion/react'
 import Navbar from '../components/Navbar'
+import { MOCK_CANDIDATES } from '../../utils/mock-candidates'
+import { Candidate, Recommendation, Source } from '../../utils/candidate-types'
 
-const CANDIDATES = [
-  {
-    id: 1, rank: 1, name: 'Amara Osei', role: 'Senior Backend Engineer', initials: 'AO',
-    source: 'Rankr', score: 94, skills: ['Node.js', 'TypeScript', 'GraphQL'],
-    recommendation: 'Hire', expLevel: 'Expert', years: 7, education: "Master's",
-    location: 'Nairobi, Kenya',
-    reasoning: 'Exceptional Node.js background with 7 years of hands-on experience. Exceeds technical requirements.',
-    strengths: ['Deep Node.js mastery', 'GraphQL design expertise', 'Led team of 8 engineers'],
-    gaps: ['No AWS certification'],
-    matched: ['Node.js', 'TypeScript', 'GraphQL', 'Leadership'],
-  },
-  {
-    id: 2, rank: 2, name: 'Lena Müller', role: 'Full Stack Developer', initials: 'LM',
-    source: 'Rankr', score: 88, skills: ['React', 'Node.js', 'Docker'],
-    recommendation: 'Hire', expLevel: 'Expert', years: 6, education: "Bachelor's",
-    location: 'Berlin, Germany',
-    reasoning: 'Strong full-stack profile. Docker and CI/CD experience are a plus.',
-    strengths: ['Startup CTO background', 'CI/CD expertise'],
-    gaps: ['Limited GraphQL'],
-    matched: ['Node.js', 'React', 'Docker'],
-  },
-  {
-    id: 3, rank: 3, name: 'James Park', role: 'Backend Engineer', initials: 'JP',
-    source: 'External', score: 85, skills: ['Python', 'FastAPI', 'AWS'],
-    recommendation: 'Hire', expLevel: 'Intermediate', years: 5, education: "Bachelor's",
-    location: 'Seoul, South Korea',
-    reasoning: 'Strong Python/FastAPI background. AWS Solutions Architect certified.',
-    strengths: ['AWS Solutions Architect', '98th percentile LeetCode'],
-    gaps: ['Python primary, not TS'],
-    matched: ['AWS', 'FastAPI', 'Python'],
-  },
-]
+// Helper to derive expLevel from years
+const getExpLevel = (years: number): string => {
+  if (years >= 10) return 'Expert';
+  if (years >= 5) return 'Intermediate';
+  return 'Junior';
+};
 
-type Recommendation = 'Hire' | 'Consider' | 'Pass'
+// Helper to derive initials from name
+const getInitials = (name: string): string => {
+  const parts = name.split(' ');
+  return parts.map(p => p[0]).join('').toUpperCase();
+};
 
-const recColor: Record<Recommendation, string> = {
-  Hire: 'bg-[#e6f9f0] text-[#16a34a] border border-[#16a34a]/20',
-  Consider: 'bg-[#fff9e6] text-[#ca8a04] border border-[#ca8a04]/20',
-  Pass: 'bg-[#fef2f2] text-[#dc2626] border border-[#dc2626]/20',
+// Map MOCK_CANDIDATES to the format expected by the results page
+const RESULTS_CANDIDATES: Array<Candidate & { initials: string; rank: number; expLevel: string }> = MOCK_CANDIDATES.map(
+  (c, index) => ({
+    ...c,
+    initials: getInitials(c.name),
+    rank: index + 1, // Simple rank based on order, actual ranking might be score-based
+    expLevel: getExpLevel(c.experienceYears),
+    // Ensure all fields used in the component are present, even if empty arrays
+    reasoning: c.reasoning || `AI analysis suggests ${c.name} is a strong fit for ${c.role} based on ${c.skills.join(', ')}.`,
+    strengths: c.strengths || [],
+    gaps: c.gaps || [],
+    matched: c.matched || [],
+  })
+).sort((a, b) => b.score - a.score); // Sort by score descending
+
+const recColor: Record<'hire' | 'consider' | 'pass', string> = {
+  'hire': 'bg-[#e6f9f0] text-[#16a34a] border border-[#16a34a]/20',
+  'consider': 'bg-[#fff9e6] text-[#ca8a04] border border-[#ca8a04]/20',
+  'pass': 'bg-[#fef2f2] text-[#dc2626] border border-[#dc2626]/20',
 }
 
-const recDot: Record<Recommendation, string> = {
-  Hire: 'bg-[#16a34a]',
-  Consider: 'bg-[#ca8a04]',
-  Pass: 'bg-[#dc2626]',
+const recDot: Record<'hire' | 'consider' | 'pass', string> = {
+  'hire': 'bg-[#16a34a]',
+  'consider': 'bg-[#ca8a04]',
+  'pass': 'bg-[#dc2626]',
 }
 
 export default function RankrResults() {
-  const [liked, setLiked] = useState<Set<number>>(new Set())
+  const [liked, setLiked] = useState<Set<string>>(new Set())
   const [activeTab, setActiveTab] = useState<'All' | 'Rankr' | 'External'>('All')
-  const [selectedId, setSelectedId] = useState<number | null>(1)
+  const [selectedId, setSelectedId] = useState<string | null>('c1')
   const [scoreMin, setScoreMin] = useState(60)
   const [scoreMax, setScoreMax] = useState(100)
-  const [recFilters, setRecFilters] = useState<Set<Recommendation>>(new Set(['Hire', 'Consider']))
+  const [recFilters, setRecFilters] = useState<Set<'hire' | 'consider' | 'pass'>>(new Set(['hire', 'consider']))
   const [sourceFilters, setSourceFilters] = useState<Set<string>>(new Set(['Rankr', 'External']))
   const [expFilters, setExpFilters] = useState<Set<string>>(new Set(['Intermediate', 'Expert']))
-  const [shortlisted, setShortlisted] = useState<Set<number>>(new Set([1, 2, 3]))
+  const [shortlisted, setShortlisted] = useState<Set<string>>(new Set(['c1', 'c2', 'c3']))
   const [panelTab, setPanelTab] = useState<'reasoning' | 'meta'>('reasoning')
   const [showFilters, setShowFilters] = useState(false)
 
-  const toggleLike = (id: number) => {
+  const toggleLike = (id: string) => {
     setLiked(prev => {
       const next = new Set(prev)
       next.has(id) ? next.delete(id) : next.add(id)
@@ -83,16 +78,17 @@ export default function RankrResults() {
     setter(next)
   }
 
-  const filtered = CANDIDATES.filter(c => {
-    const tabMatch = activeTab === 'All' || c.source === activeTab
+  const filtered = RESULTS_CANDIDATES.filter(c => {
+    const tabMatch = activeTab === 'All' || (c.source as string).toLowerCase() === activeTab.toLowerCase()
     const scoreMatch = c.score >= scoreMin && c.score <= scoreMax
-    const recMatch = recFilters.has(c.recommendation as Recommendation)
-    const srcMatch = sourceFilters.has(c.source)
+    // Ensure comparison with lowercase strings from imported type
+    const recMatch = recFilters.has(c.recommendation.toLowerCase() as 'hire' | 'consider' | 'pass') 
+    const srcMatch = Array.from(sourceFilters).some(s => s.toLowerCase() === (c.source as string).toLowerCase())
     const expMatch = expFilters.has(c.expLevel)
     return tabMatch && scoreMatch && recMatch && srcMatch && expMatch
   })
 
-  const selected = selectedId ? CANDIDATES.find(c => c.id === selectedId) : null
+  const selected = selectedId ? RESULTS_CANDIDATES.find(c => c.id === selectedId) : null
 
   return (
     <div className="min-h-screen bg-[#f0f5fa]">
@@ -115,8 +111,8 @@ export default function RankrResults() {
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="px-4 py-2 rounded-full bg-white/10 border border-white/10 text-white text-xs font-bold">34 Screened</div>
-            <div className="px-4 py-2 rounded-full bg-[#2a85ff]/20 border border-[#2a85ff]/30 text-[#6eb3ff] text-xs font-bold">20 Shortlisted</div>
+            <div className="px-4 py-2 rounded-full bg-white/10 border border-white/10 text-white text-xs font-bold">{RESULTS_CANDIDATES.length} Screened</div>
+            <div className="px-4 py-2 rounded-full bg-[#2a85ff]/20 border border-[#2a85ff]/30 text-[#6eb3ff] text-xs font-bold">{shortlisted.size} Shortlisted</div>
           </div>
         </div>
       </div>
@@ -175,14 +171,14 @@ export default function RankrResults() {
               <div>
                 <p className="text-[10px] font-black uppercase tracking-widest text-[#b0bac6] mb-4">Recommendation</p>
                 <div className="space-y-3">
-                  {(['Hire', 'Consider', 'Pass'] as Recommendation[]).map(r => (
+                  {(['hire', 'consider', 'pass'] as Recommendation[]).map(r => (
                     <label key={r} className="flex items-center gap-3 cursor-pointer group">
                       <input 
                         type="checkbox" checked={recFilters.has(r)} 
                         onChange={() => toggleFilter(recFilters, r, setRecFilters)}
                         className="w-4 h-4 rounded text-[#2a85ff] border-[#e2eaf2]"
                       />
-                      <span className="text-sm font-bold text-[#5a6a7a] group-hover:text-[#2a85ff] transition-colors">{r}</span>
+                      <span className="text-sm font-bold text-[#5a6a7a] group-hover:text-[#2a85ff] transition-colors capitalize">{r}</span>
                     </label>
                   ))}
                 </div>
@@ -193,7 +189,7 @@ export default function RankrResults() {
           {/* Cards Area */}
           <div className="flex-1 min-w-0">
             <div className={`grid gap-6 ${selectedId ? 'grid-cols-1 xl:grid-cols-2' : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3'}`}>
-              {filtered.map((c, i) => (
+              {filtered.slice(0, 15).map((c, i) => (
                 <motion.div
                   key={c.id}
                   initial={{ opacity: 0, y: 10 }}
@@ -264,15 +260,15 @@ export default function RankrResults() {
                         </div>
                         <div className="p-4 rounded-2xl bg-[#f0f5fa]">
                           <p className="text-[10px] font-bold text-[#b0bac6] uppercase mb-1">Exp</p>
-                          <p className="text-2xl font-black text-[#070707]">{selected.years}y</p>
+                          <p className="text-2xl font-black text-[#070707]">{selected.experienceYears}y</p>
                         </div>
                      </div>
 
                      <div className="space-y-4">
-                        <p className="text-sm font-bold uppercase tracking-widest text-[#b0bac6]">AI Reasoning</p>
-                        <p className="text-sm text-[#5a6a7a] leading-relaxed italic">"{selected.reasoning}"</p>
+                        <h4 className="font-bold text-[#b0bac6] text-xs uppercase tracking-widest">AI Reasoning</h4>
+                        <p className="text-[#5a6a7a] leading-relaxed font-medium italic">"{selected.reasoning}"</p>
                         <div className="space-y-2">
-                          {selected.strengths.map((s, i) => (
+                          {(selected.strengths ?? []).map((s, i) => (
                             <div key={i} className="flex gap-2 text-sm text-[#16a34a] font-medium">
                               <CheckCircle size={16} className="mt-0.5 flex-shrink-0" /> {s}
                             </div>
@@ -375,14 +371,14 @@ export default function RankrResults() {
                   <div>
                     <p className="text-[10px] font-black uppercase tracking-widest text-[#b0bac6] mb-6">Recommendation</p>
                     <div className="space-y-5">
-                      {(['Hire', 'Consider', 'Pass'] as Recommendation[]).map(r => (
+                      {(['hire', 'consider', 'pass'] as Recommendation[]).map(r => (
                         <label key={r} className="flex items-center gap-4 cursor-pointer">
                           <input 
                             type="checkbox" checked={recFilters.has(r)} 
                             onChange={() => toggleFilter(recFilters, r, setRecFilters)}
                             className="w-5 h-5 rounded text-[#2a85ff] border-[#e2eaf2]"
                           />
-                          <span className="text-lg font-bold text-[#5a6a7a]">{r}</span>
+                          <span className="text-lg font-bold text-[#5a6a7a] capitalize">{r}</span>
                         </label>
                       ))}
                     </div>

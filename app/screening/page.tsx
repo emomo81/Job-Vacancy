@@ -136,12 +136,28 @@ export default function RankrScreening() {
                 className="relative z-10 flex flex-col items-center gap-8"
               >
                 <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-[2rem] bg-[#2a85ff] shadow-[0_20px_60px_rgba(42,133,255,0.4)] flex items-center justify-center relative">
-                  <Sparkles size={40} className="sm:size-56" color="white" />
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 20, ease: 'linear' }}
+                    className="relative z-10"
+                  >
+                    <Sparkles size={40} className="sm:w-14 sm:h-14" color="white" />
+                  </motion.div>
+                  
+                  {/* Premium Spinning Rings */}
                   <motion.div 
                     animate={{ rotate: 360 }}
                     transition={{ repeat: Infinity, duration: 8, ease: 'linear' }}
-                    className="absolute inset-0 rounded-full border-2 border-dashed border-white/20 scale-125"
+                    className="absolute inset-0 rounded-[2.5rem] border-2 border-dashed border-white/30 scale-125"
                   />
+                  <motion.div 
+                    animate={{ rotate: -360 }}
+                    transition={{ repeat: Infinity, duration: 12, ease: 'linear' }}
+                    className="absolute inset-0 rounded-full border border-white/10 scale-150"
+                  />
+                  
+                  {/* Glowing Effect */}
+                  <div className="absolute inset-0 bg-white/20 blur-2xl rounded-full animate-pulse" />
                 </div>
                 <div>
                   <h2 className="text-[#070707] text-2xl sm:text-4xl font-black mb-3">Begin AI Assessment</h2>

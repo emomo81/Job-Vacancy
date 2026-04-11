@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
+import path from "path";
+import os from "os";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  /* Use a local directory for .next */
+  distDir: '.next',
 };
 
 export default nextConfig;

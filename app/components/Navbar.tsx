@@ -15,6 +15,12 @@ const NAV_LINKS = ['Jobs', 'Candidates', 'Shortlists', 'Settings']
 export default function Navbar({ type = 'landing', activeNav }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false)
 
+  const getHref = (link: string) => {
+    if (link === 'Jobs') return '/dashboard'
+    if (link === 'Shortlists') return '/results'
+    return `/${link.toLowerCase()}`
+  }
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#070707]/80 backdrop-blur-md border-b border-white/5">
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 flex items-center justify-between h-16 sm:h-20">
@@ -32,7 +38,7 @@ export default function Navbar({ type = 'landing', activeNav }: NavbarProps) {
             {NAV_LINKS.map(link => (
               <Link
                 key={link}
-                href={link === 'Jobs' ? '/dashboard' : `/${link.toLowerCase()}`}
+                href={getHref(link)}
                 className={`text-sm font-medium pb-1 transition-colors relative ${
                   activeNav === link
                     ? 'text-white'
@@ -65,15 +71,15 @@ export default function Navbar({ type = 'landing', activeNav }: NavbarProps) {
                 <Bell size={20} />
                 <span className="absolute top-2 right-2 w-2 h-2 bg-[#2a85ff] rounded-full border border-[#070707]"></span>
               </button>
-              <div className="hidden sm:flex items-center gap-3 pl-2 border-l border-white/10 cursor-pointer group">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#2a85ff] to-[#6eb3ff] flex items-center justify-center">
+              <Link href="/settings" className="hidden sm:flex items-center gap-3 pl-2 border-l border-white/10 cursor-pointer group">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#2a85ff] to-[#6eb3ff] flex items-center justify-center group-hover:ring-2 group-hover:ring-[#2a85ff]/50 transition-all">
                   <User size={15} color="white" strokeWidth={2} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-white text-xs font-bold leading-none">Recruiter</span>
+                  <span className="text-white text-xs font-bold leading-none group-hover:text-[#2a85ff] transition-colors">Recruiter</span>
                   <span className="text-white/40 text-[10px] mt-0.5">Acme Corp</span>
                 </div>
-              </div>
+              </Link>
             </>
           ) : (
             <div className="hidden sm:flex items-center gap-4">
@@ -108,7 +114,7 @@ export default function Navbar({ type = 'landing', activeNav }: NavbarProps) {
                 NAV_LINKS.map(link => (
                   <Link
                     key={link}
-                    href={link === 'Jobs' ? '/dashboard' : `/${link.toLowerCase()}`}
+                    href={getHref(link)}
                     onClick={() => setIsOpen(false)}
                     className={`text-lg font-bold ${
                       activeNav === link ? 'text-[#2a85ff]' : 'text-white/60'
