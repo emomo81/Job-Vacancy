@@ -3,8 +3,8 @@ import path from "path";
 import os from "os";
 
 const nextConfig: NextConfig = {
-  /* Use a local directory for .next */
   distDir: '.next',
+  output: 'standalone',
 };
 
 export default nextConfig;
