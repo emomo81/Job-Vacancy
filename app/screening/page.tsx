@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { Sparkles, Check, Zap, Pencil, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'motion/react'
+import { motion, AnimatePresence } from 'framer-motion'
 import Navbar from '../components/Navbar'
 
 const STEPS = [
