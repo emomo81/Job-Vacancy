@@ -4,7 +4,11 @@
       "Bash(npm install:*)",
       "mcp__Desktop_Commander__read_file",
       "mcp__Desktop_Commander__read_multiple_files",
-      "Bash(python -c \"from PIL import Image; print\\('Pillow OK'\\)\")"
+      "Bash(python -c \"from PIL import Image; print\\('Pillow OK'\\)\")",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('Dynamic:', json.dumps\\(d.get\\('dynamicRoutes',[]\\), indent=2\\)\\); print\\('Static:', json.dumps\\(d.get\\('staticRoutes',[]\\), indent=2\\)\\)\")",
+      "Bash(node -e ':*)",
+      "Bash(node -e \" const fs = require\\('fs'\\); const path = require\\('path'\\); const projectRoot = 'C:/Users/emomo/OneDrive/Desktop/Real Projects/Job-Vacancy'; // Find the Next.js function that determines the app dir const files = [ 'node_modules/next/dist/lib/find-pages-dir.js', 'node_modules/next/dist/server/config.js', ]; files.forEach\\(f => { const full = path.join\\(projectRoot, f\\); if \\(fs.existsSync\\(full\\)\\) { const content = fs.readFileSync\\(full, 'utf8'\\); const match = content.match\\(/src.{0,200}app|app.{0,200}src/g\\); if \\(match\\) console.log\\(f, ':', match.slice\\(0,3\\).join\\('\\\\n'\\)\\); } }\\); \")",
+      "Bash(npm run:*)"
     ]
   }
 }
