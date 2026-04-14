@@ -6,7 +6,7 @@ import {
   X, Star, AlertTriangle, CheckCircle, ArrowUpDown, Filter, Menu
 } from 'lucide-react'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'motion/react'
+import { motion, AnimatePresence } from 'framer-motion'
 import Navbar from '../components/Navbar'
 import { MOCK_CANDIDATES } from '../../utils/mock-candidates'
 import { Candidate, Recommendation, Source } from '../../utils/candidate-types'
