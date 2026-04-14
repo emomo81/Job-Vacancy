@@ -6,7 +6,7 @@ import {
   Plus, X, Briefcase, GraduationCap, Check, 
   ExternalLink, Minus, Sparkles, AlertCircle
 } from 'lucide-react'
-import { motion, AnimatePresence } from 'motion/react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const COMPLETION_ITEMS = [
   { id: 'info', label: 'Basic Information', done: true },
