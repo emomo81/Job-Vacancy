@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { Sparkles, Bell, User, Menu, X } from 'lucide-react'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'motion/react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface NavbarProps {
   type?: 'landing' | 'app'
