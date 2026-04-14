@@ -5,7 +5,7 @@ import {
   FileText, CheckCircle2, Clock, ChevronRight, 
   ExternalLink, MessageCircle, AlertCircle
 } from 'lucide-react'
-import { motion } from 'motion/react'
+import { motion } from 'framer-motion'
 
 const APPLICATIONS = [
   {
