@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { motion } from 'motion/react'
+import { motion } from 'framer-motion'
 
 const poppins = Poppins({
   subsets: ['latin'],
