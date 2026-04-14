@@ -3,7 +3,7 @@
 import React from 'react'
 import { Sparkles, ChevronRight, Play, Globe, Shield, Zap, ArrowRight, Briefcase, User } from 'lucide-react'
 import Link from 'next/link'
-import { motion } from 'motion/react'
+import { motion } from 'framer-motion'
 import Navbar from './components/Navbar'
 
 const STATS = [
