@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { Sparkles, ChevronDown, Plus, Minus, X, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
-import { motion } from 'motion/react'
+import { motion } from 'framer-motion'
 import Navbar from '../components/Navbar'
 
 const DEPARTMENTS = ['Engineering', 'Design', 'Marketing', 'Operations', 'Sales', 'Other']
