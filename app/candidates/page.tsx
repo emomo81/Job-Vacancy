@@ -3,7 +3,7 @@
 import React, { useState, useRef } from 'react'
 import { Sparkles, Check, Upload, FileJson, FileSpreadsheet, FileText, X, ChevronRight, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
-import { animate, motion } from 'motion/react'
+import { animate, motion } from 'framer-motion'
 import Navbar from '../components/Navbar'
 
 const STEPS = [
