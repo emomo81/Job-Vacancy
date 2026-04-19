@@ -20,6 +20,39 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Run Full Stack Locally
+
+Frontend runs on port `3000` and backend runs on port `4000`.
+
+1. Frontend env:
+Copy `.env.local.example` to `.env.local`.
+
+2. Backend env:
+Copy `backend/.env.example` to `backend/.env` and set `MONGODB_URI`.
+
+3. Install backend deps:
+
+```bash
+cd backend
+npm install
+```
+
+4. Start backend:
+
+```bash
+cd backend
+npm run dev
+```
+
+5. Start frontend (new terminal from repo root):
+
+```bash
+npm run dev
+```
+
+6. Test flow:
+Open `/auth`, create a recruiter account, create a job, import candidates, run screening, and open results.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

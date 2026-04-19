@@ -1,10 +1,13 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { Sparkles, Check, Zap, Pencil, ArrowLeft } from 'lucide-react'
+import React, { useEffect, useMemo, useState } from 'react'
+import { Check, Pencil, ArrowLeft, Zap } from 'lucide-react'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
+import { useRouter } from 'next/navigation'
 import Navbar from '../components/Navbar'
+import { apiFetch, getCurrentJobId, setCurrentJobId } from '../../utils/api-client'
+import ProgressBar from '../components/ui/ProgressBar'
 
 const STEPS = [
   { label: 'Create Job', status: 'done' },
@@ -12,52 +15,103 @@ const STEPS = [
   { label: 'AI Screening', status: 'active' },
 ]
 
-const CHECKLIST = [
-  { label: 'Job requirements defined' },
-  { label: '12 Rankr profiles loaded' },
-  { label: '22 external applicants loaded' },
-]
+type ScreeningRun = {
+  _id: string
+  status: 'queued' | 'running' | 'completed' | 'failed' | 'cancelled'
+  progressPct: number
+  totalCandidates: number
+  processedCandidates: number
+}
 
 export default function RankrScreening() {
-  const [screening, setScreening] = useState(false)
-  const [progress, setProgress] = useState(0)
-  const [completed, setCompleted] = useState(0)
+  const router = useRouter()
+
+  const [jobId, setJobId] = useState('')
+  const [runId, setRunId] = useState('')
+  const [jobTitle, setJobTitle] = useState('Selected Job')
+  const [department, setDepartment] = useState('')
+  const [candidateTotal, setCandidateTotal] = useState(0)
+  const [run, setRun] = useState<ScreeningRun | null>(null)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    if (!screening) {
-      setProgress(0)
-      setCompleted(0)
-      return
+    if (typeof window === 'undefined') return
+    const query = new URLSearchParams(window.location.search)
+    const queryJobId = query.get('jobId') || ''
+    const queryRunId = query.get('runId') || ''
+    const localJobId = getCurrentJobId()
+    const activeJobId = queryJobId || localJobId
+
+    if (activeJobId) {
+      setJobId(activeJobId)
+      setCurrentJobId(activeJobId)
     }
-    const total = 34
-    const duration = 4000
-    const interval = 60
-    const steps = duration / interval
-    let step = 0
-    const timer = setInterval(() => {
-      step++
-      const pct = Math.min((step / steps) * 100, 100)
-      setProgress(pct)
-      setCompleted(Math.floor((pct / 100) * total))
-      if (step >= steps) clearInterval(timer)
-    }, interval)
-    return () => clearInterval(timer)
-  }, [screening])
+    if (queryRunId) setRunId(queryRunId)
+  }, [])
+
+  useEffect(() => {
+    if (!jobId) return
+
+    void (async () => {
+      try {
+        const [jobResult, candidateResult] = await Promise.all([
+          apiFetch(`/jobs/${jobId}`),
+          apiFetch(`/jobs/${jobId}/candidates`),
+        ])
+
+        setJobTitle(jobResult.data?.title || 'Selected Job')
+        setDepartment(jobResult.data?.department || '')
+        setCandidateTotal(Number(candidateResult.data?.total || 0))
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load screening details')
+      }
+    })()
+  }, [jobId])
+
+  useEffect(() => {
+    if (!runId) return
+
+    const poll = setInterval(() => {
+      void (async () => {
+        try {
+          const result = await apiFetch(`/screening-runs/${runId}`)
+          const runData = result.data as ScreeningRun
+          setRun(runData)
+
+          if (runData.status === 'completed') {
+            clearInterval(poll)
+            router.push(`/results?jobId=${jobId}`)
+          }
+
+          if (runData.status === 'failed' || runData.status === 'cancelled') {
+            clearInterval(poll)
+            setError('Screening did not complete successfully.')
+          }
+        } catch (err) {
+          clearInterval(poll)
+          setError(err instanceof Error ? err.message : 'Failed to read screening progress')
+        }
+      })()
+    }, 1200)
+
+    return () => clearInterval(poll)
+  }, [jobId, router, runId])
+
+  const progress = useMemo(() => Number(run?.progressPct || 0), [run])
 
   return (
     <div className="min-h-screen bg-[#f0f5fa]">
       <Navbar type="app" activeNav="Candidates" />
 
-      {/* Hero Banner */}
       <div className="bg-[#070707] pt-28 sm:pt-36 lg:pt-40 pb-12 sm:pb-20 relative overflow-hidden">
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
             <h1 className="text-white font-extrabold text-4xl sm:text-6xl lg:text-7xl leading-[1.08] tracking-tight mb-4 text-center sm:text-left">
               AI Screening<br className="hidden sm:block" />in Progress{' '}
               <span className="text-[#2a85ff]">✦</span>
             </h1>
             <p className="text-white/50 text-sm sm:text-base font-normal text-center sm:text-left">
-              Gemini is analysing your candidates in real-time
+              Gemini is analyzing more candidates and preparing your shortlist.
             </p>
           </motion.div>
         </div>
@@ -65,51 +119,38 @@ export default function RankrScreening() {
         <div className="absolute bottom-0 left-1/3 w-64 h-64 rounded-full bg-[#2a85ff]/5 blur-3xl pointer-events-none" />
       </div>
 
-      <main className="max-w-[860px] mx-auto px-4 sm:px-6 py-10 lg:py-16">
-
-        {/* Breadcrumb Steps (Responsive) */}
+      <main className="max-w-215 mx-auto px-4 sm:px-6 py-10 lg:py-16">
         <div className="flex items-center gap-2 sm:gap-4 mb-10 sm:mb-16 overflow-x-auto no-scrollbar pb-2">
           {STEPS.map((step, i) => (
             <React.Fragment key={step.label}>
-              <div className="flex items-center gap-2.5 flex-shrink-0">
+              <div className="flex items-center gap-2.5 shrink-0">
                 {step.status === 'done' ? (
                   <div className="w-8 h-8 rounded-full bg-[#2a85ff] flex items-center justify-center">
                     <Check size={14} color="white" strokeWidth={3} />
                   </div>
-                ) : step.status === 'active' ? (
+                ) : (
                   <div className="w-8 h-8 rounded-full bg-[#2a85ff] flex items-center justify-center ring-4 ring-[#2a85ff]/20">
                     <div className="w-2.5 h-2.5 rounded-full bg-white" />
                   </div>
-                ) : (
-                  <div className="w-8 h-8 rounded-full border-2 border-[#c8d6e5] flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-[#c8d6e5]" />
-                  </div>
                 )}
-                <span className={`text-xs sm:text-sm font-bold whitespace-nowrap ${
-                  step.status === 'inactive' ? 'text-[#b0bac6]' : 'text-[#070707]'
-                }`}>
-                  {step.label}
-                </span>
+                <span className="text-xs sm:text-sm font-bold whitespace-nowrap text-[#070707]">{step.label}</span>
               </div>
-              {i < STEPS.length - 1 && (
-                <div className="h-px w-8 sm:w-16 bg-[#2a85ff]" />
-              )}
+              {i < STEPS.length - 1 && <div className="h-px w-8 sm:w-16 bg-[#2a85ff]" />}
             </React.Fragment>
           ))}
         </div>
 
-        {/* Job Summary Card */}
         <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-[#e2eaf2] p-5 sm:p-7 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-3 mb-3">
-              <h2 className="text-[#070707] font-extrabold text-xl sm:text-2xl tracking-tight">Senior Backend Engineer</h2>
+              <h2 className="text-[#070707] font-extrabold text-xl sm:text-2xl tracking-tight">{jobTitle}</h2>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold px-3 py-1 rounded-full bg-[#e6f9f0] text-[#16a34a] border border-[#16a34a]/10">Expert</span>
-                <span className="text-[10px] font-bold px-3 py-1 rounded-full bg-[#e8f1ff] text-[#2a85ff] border border-[#2a85ff]/10">Remote</span>
+                {department ? <span className="text-[10px] font-bold px-3 py-1 rounded-full bg-[#e8f1ff] text-[#2a85ff] border border-[#2a85ff]/10">{department}</span> : null}
+                <span className="text-[10px] font-bold px-3 py-1 rounded-full bg-[#e6f9f0] text-[#16a34a] border border-[#16a34a]/10">{run?.status || 'running'}</span>
               </div>
             </div>
             <div className="flex items-center gap-5 text-[#8a9ab0] text-sm">
-              <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-[#b0bac6]" /> 34 Candidates</span>
+              <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-[#b0bac6]" /> {candidateTotal} Candidates</span>
               <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-[#2a85ff]" /> AI Screening active</span>
             </div>
           </div>
@@ -122,117 +163,47 @@ export default function RankrScreening() {
           </Link>
         </div>
 
-        {/* CTA Area */}
-        <div className="bg-white rounded-[2rem] sm:rounded-[3rem] shadow-xl border border-white p-6 sm:p-12 text-center relative overflow-hidden">
+        <div className="bg-white rounded-4xl sm:rounded-[3rem] shadow-xl border border-white p-6 sm:p-12 text-center relative overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(42,133,255,0.05),transparent)] pointer-events-none" />
-          
-          <AnimatePresence mode="wait">
-            {!screening ? (
-              <motion.div
-                key="idle"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.1 }}
-                className="relative z-10 flex flex-col items-center gap-8"
-              >
-                <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-[2rem] bg-[#2a85ff] shadow-[0_20px_60px_rgba(42,133,255,0.4)] flex items-center justify-center relative">
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 20, ease: 'linear' }}
-                    className="relative z-10"
-                  >
-                    <Sparkles size={40} className="sm:w-14 sm:h-14" color="white" />
-                  </motion.div>
-                  
-                  {/* Premium Spinning Rings */}
-                  <motion.div 
-                    animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 8, ease: 'linear' }}
-                    className="absolute inset-0 rounded-[2.5rem] border-2 border-dashed border-white/30 scale-125"
-                  />
-                  <motion.div 
-                    animate={{ rotate: -360 }}
-                    transition={{ repeat: Infinity, duration: 12, ease: 'linear' }}
-                    className="absolute inset-0 rounded-full border border-white/10 scale-150"
-                  />
-                  
-                  {/* Glowing Effect */}
-                  <div className="absolute inset-0 bg-white/20 blur-2xl rounded-full animate-pulse" />
-                </div>
-                <div>
-                  <h2 className="text-[#070707] text-2xl sm:text-4xl font-black mb-3">Begin AI Assessment</h2>
-                  <p className="text-[#8a9ab0] text-sm sm:text-base max-w-md mx-auto leading-relaxed italic">
-                    "Ranking each candidate by technical fit and experience, while providing detailed reasoning."
-                  </p>
-                </div>
-                <button
-                  onClick={() => setScreening(true)}
-                  className="w-full sm:w-auto px-12 py-5 rounded-full bg-[#2a85ff] text-white font-black text-lg shadow-2xl hover:scale-105 transition-all"
-                >
-                  Start Screening
-                </button>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="loading"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="relative z-10 flex flex-col items-center gap-10"
-              >
-                <div className="relative w-20 h-20 sm:w-24 sm:h-24">
-                   <motion.div
-                    className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#2a85ff]"
-                    animate={{ rotate: 360 }}
-                    transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Zap size={32} color="#2a85ff" fill="#2a85ff" className="opacity-20" />
-                  </div>
-                </div>
 
-                <div className="w-full max-w-md bg-[#fcfdfe] border border-[#e2eaf2] rounded-3xl p-6 shadow-sm">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm font-bold text-[#070707]">Analysing 34 Candidates</span>
-                    <span className="text-sm font-black text-[#2a85ff]">{Math.round(progress)}%</span>
-                  </div>
-                  <div className="h-3 bg-[#f0f5fa] rounded-full overflow-hidden">
-                    <motion.div
-                      className="h-full bg-[#2a85ff]"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </div>
-                  <div className="mt-4 flex flex-wrap justify-center gap-2">
-                    {['Amara O.', 'Lena M.', 'James P.', 'Sara K.'].map((n, i) => (
-                      <motion.div 
-                        key={n}
-                        animate={{ opacity: [0.3, 1, 0.3] }}
-                        transition={{ repeat: Infinity, duration: 1.5, delay: i * 0.3 }}
-                        className="text-[10px] font-bold text-[#2a85ff] bg-[#e8f1ff] px-2.5 py-1 rounded-lg"
-                      >
-                        Evaluating {n}
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
+          <div className="relative z-10 flex flex-col items-center gap-10">
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24">
+              <motion.div
+                className="absolute inset-0 rounded-full border-4 border-transparent border-t-[#2a85ff]"
+                animate={{ rotate: 360 }}
+                transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Zap size={32} color="#2a85ff" fill="#2a85ff" className="opacity-20" />
+              </div>
+            </div>
 
-                {progress >= 100 && (
-                  <Link
-                    href="/results"
-                    className="px-10 py-5 rounded-full bg-[#16a34a] text-white font-black text-lg shadow-2xl animate-bounce"
-                  >
-                    View Top Talent Results
-                  </Link>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
+            <div className="w-full max-w-md bg-[#fcfdfe] border border-[#e2eaf2] rounded-3xl p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm font-bold text-[#070707]">Analyzing more candidates...</span>
+                <span className="text-sm font-black text-[#2a85ff]">{Math.round(progress)}%</span>
+              </div>
+
+              <ProgressBar value={progress} />
+
+              <div className="mt-4 text-xs text-[#8a9ab0] font-medium">
+                {run?.processedCandidates || 0} / {run?.totalCandidates || candidateTotal} processed
+              </div>
+            </div>
+
+            {run?.status === 'completed' ? (
+              <div className="text-sm font-bold text-[#16a34a]">Analysis complete. Redirecting to shortlists...</div>
+            ) : null}
+
+            {error ? <div className="text-sm font-bold text-[#dc2626]">{error}</div> : null}
+          </div>
         </div>
 
         <div className="mt-12 flex items-center justify-between">
-           <Link href="/candidates" className="flex items-center gap-2 text-[#8a9ab0] font-bold hover:text-[#070707] transition-all">
-             <ArrowLeft size={18} />
-             Add More Candidates
-           </Link>
+          <Link href="/candidates" className="flex items-center gap-2 text-[#8a9ab0] font-bold hover:text-[#070707] transition-all">
+            <ArrowLeft size={18} />
+            Add More Candidates
+          </Link>
         </div>
       </main>
     </div>
