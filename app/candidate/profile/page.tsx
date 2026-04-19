@@ -2,11 +2,12 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import {
-  User, MapPin, Upload, FileText,
-  Plus, X, Briefcase, GraduationCap, Check, 
-  ExternalLink, Minus, Sparkles, AlertCircle
+  MapPin, Upload, FileText,
+  Plus, X, Briefcase, Check, 
+  ExternalLink, Minus, Sparkles
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { apiFetch } from '../../../utils/api-client'
 
 const COMPLETION_ITEMS = [
   { id: 'info', label: 'Basic Information', done: true },
@@ -34,7 +35,8 @@ export default function CandidateProfilePage() {
   const [yearsExp, setYearsExp] = useState(2)
   const [linkedin, setLinkedin] = useState('')
   const [skills, setSkills] = useState<string[]>(['TypeScript', 'React'])
-  const [completionPct, setCompletionPct] = useState(75)
+  const [education, setEducation] = useState('')
+  const [completionPct, setCompletionPct] = useState(0)
 
   const [workHistory, setWorkHistory] = useState<Experience[]>([])
   const [isExpModalOpen, setIsExpModalOpen] = useState(false)
@@ -42,59 +44,119 @@ export default function CandidateProfilePage() {
 
   const [skillInput, setSkillInput] = useState('')
   const [availability, setAvailability] = useState<'open' | 'closed'>('open')
-  const [visible, setVisible] = useState(true)
+  const [visible] = useState(true)
   const [remote, setRemote] = useState(true)
   const [fulltime, setFulltime] = useState(true)
   const [cvUploaded, setCvUploaded] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
   
   const cvRef = useRef<HTMLInputElement>(null)
 
   // Initialize from session/example
   useEffect(() => {
-    const savedName = localStorage.getItem('rankr_user_name')
-    if (savedName) setFullName(savedName)
-    else {
-      // Default demo content if brand new
-      setFullName('Jordan Reeves')
-      setProTitle('Senior Backend Engineer')
-      setLocation('San Francisco, CA')
-      setYearsExp(7)
-      setSkills(['Node.js', 'TypeScript', 'MongoDB', 'React', 'GraphQL', 'Docker'])
-      setCvUploaded(true)
-      setWorkHistory([
-        {
-          id: '1',
-          role: 'Senior Backend Engineer',
-          company: 'TechFlow Systems',
-          startDate: 'Jan 2021',
-          endDate: 'Present',
-          description: 'Architected high-performance microservices using Node.js and Go. Reduced API latency by 40% through Redis caching and PostgreSQL optimization.'
-        },
-        {
-          id: '2',
-          role: 'Full Stack Developer',
-          company: 'GreenLogic',
-          startDate: 'Jun 2018',
-          endDate: 'Dec 2020',
-          description: 'Built scalable web applications using React and Python/Django. Led the migration of legacy systems to AWS.'
-        }
-      ])
-    }
+    void (async () => {
+      try {
+        const result = await apiFetch('/candidate/profile')
+        const p = result.data
+        setFullName(p.fullName || 'New Candidate')
+        setProTitle(p.professionalTitle || 'Product Engineer')
+        setLocation(p.location || 'Kigali, Rwanda')
+        setYearsExp(Number(p.yearsExperience || 0))
+        setLinkedin(p.linkedinUrl || '')
+        setSkills(Array.isArray(p.skills) ? p.skills : [])
+        setWorkHistory(
+          (p.experiences || []).map((exp: {
+            _id?: string
+            role?: string
+            company?: string
+            startDate?: string
+            endDate?: string
+            description?: string
+          }, idx: number) => ({
+            id: String(exp._id || `exp-${idx}-${Date.now()}`),
+            role: exp.role || '',
+            company: exp.company || '',
+            startDate: exp.startDate || '',
+            endDate: exp.endDate || '',
+            description: exp.description || '',
+          }))
+        )
+        setCompletionPct(Number(p.completionPct || 0))
+        setCvUploaded(Boolean(p.cv?.uploadedAt))
+        setEducation(p.education || '')
+      } catch {
+        const savedName = localStorage.getItem('rankr_user_name')
+        if (savedName) setFullName(savedName)
+      }
+    })()
   }, [])
 
-  const handleSave = () => {
-    localStorage.setItem('rankr_user_name', fullName)
-    localStorage.setItem('rankr_profile_completion', completionPct.toString())
-    // In a real app we'd save the rest too
-    alert('Profile saved successfully! Your changes are now live.')
-    window.location.reload() // Refresh to update layout sync
+  useEffect(() => {
+    let score = 0;
+    if (fullName.trim() && proTitle.trim() && location.trim()) score += 20;
+    if (skills.length >= 2) score += 20;
+    if (workHistory.length >= 1) score += 20;
+    if (education.trim()) score += 20;
+    if (cvUploaded) score += 20;
+    setCompletionPct(score);
+  }, [fullName, proTitle, location, skills, workHistory, education, cvUploaded])
+
+  const handleSave = async () => {
+    try {
+      setSaving(true)
+      setError('')
+      await apiFetch('/candidate/profile', {
+        method: 'PATCH',
+        body: {
+          fullName,
+          professionalTitle: proTitle,
+          location,
+          yearsExperience: yearsExp,
+          linkedinUrl: linkedin,
+          skills,
+          education,
+          completionPct,
+          visibility: {
+            openToWork: availability === 'open',
+            visibleToRecruiters: visible,
+            remote,
+            fulltime,
+          },
+        },
+      })
+      localStorage.setItem('rankr_user_name', fullName)
+      localStorage.setItem('rankr_profile_completion', completionPct.toString())
+      alert('Profile saved successfully! Your changes are now live.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save profile')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const formData = new FormData()
+    formData.append('cv', file)
+    try {
+      await apiFetch('/candidate/profile/cv', {
+        method: 'POST',
+        isFormData: true,
+        body: formData,
+      })
+      setCvUploaded(true)
+      alert("CV parsed and uploaded successfully!")
+    } catch {
+      alert('Failed to upload CV. Max 5MB PDF.')
+    }
   }
 
   const handleExpSave = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
-    const newExp: Experience = {
-      id: editingExp?.id || Date.now().toString(),
+    const payload = {
       role: formData.get('role') as string,
       company: formData.get('company') as string,
       startDate: formData.get('startDate') as string,
@@ -102,18 +164,54 @@ export default function CandidateProfilePage() {
       description: formData.get('description') as string,
     }
 
-    if (editingExp) {
-      setWorkHistory(prev => prev.map(exp => exp.id === editingExp.id ? newExp : exp))
-    } else {
-      setWorkHistory(prev => [newExp, ...prev])
-    }
-    setIsExpModalOpen(false)
-    setEditingExp(null)
+    void (async () => {
+      try {
+        if (editingExp) {
+          const updated = await apiFetch(`/candidate/profile/experience/${editingExp.id}`, {
+            method: 'PATCH',
+            body: payload,
+          })
+          setWorkHistory(prev => prev.map(exp => exp.id === editingExp.id ? {
+            id: String(updated.data._id || editingExp.id),
+            role: updated.data.role,
+            company: updated.data.company,
+            startDate: updated.data.startDate,
+            endDate: updated.data.endDate,
+            description: updated.data.description,
+          } : exp))
+        } else {
+          const created = await apiFetch('/candidate/profile/experience', {
+            method: 'POST',
+            body: payload,
+          })
+          setWorkHistory(prev => [{
+            id: String(created.data._id),
+            role: created.data.role,
+            company: created.data.company,
+            startDate: created.data.startDate,
+            endDate: created.data.endDate,
+            description: created.data.description,
+          }, ...prev])
+        }
+
+        setIsExpModalOpen(false)
+        setEditingExp(null)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to save experience')
+      }
+    })()
   }
 
   const handleDeleteExp = (id: string) => {
     if (confirm('Are you sure you want to delete this experience?')) {
-      setWorkHistory(prev => prev.filter(exp => exp.id !== id))
+      void (async () => {
+        try {
+          await apiFetch(`/candidate/profile/experience/${id}`, { method: 'DELETE' })
+          setWorkHistory(prev => prev.filter(exp => exp.id !== id))
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'Failed to delete experience')
+        }
+      })()
     }
   }
 
@@ -143,7 +241,7 @@ export default function CandidateProfilePage() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-xl bg-white rounded-[2.5rem] p-8 shadow-2xl overflow-hidden"
+              className="relative w-full max-w-xl bg-white rounded-5xl p-8 shadow-2xl overflow-hidden"
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#2a85ff]/5 blur-3xl" />
               <h3 className="text-2xl font-black text-[#070707] mb-6">
@@ -192,9 +290,9 @@ export default function CandidateProfilePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Profile Card */}
-        <div className="lg:col-span-2 bg-white rounded-2xl sm:rounded-[2.5rem] shadow-[0_8px_40px_rgba(0,0,0,0.04)] p-5 sm:p-8 lg:p-10 flex flex-col sm:flex-row items-center gap-6 sm:gap-10">
+        <div className="lg:col-span-2 bg-white rounded-2xl sm:rounded-5xl shadow-[0_8px_40px_rgba(0,0,0,0.04)] p-5 sm:p-8 lg:p-10 flex flex-col sm:flex-row items-center gap-6 sm:gap-10">
           <div className="relative group">
-            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-[#2a85ff] to-[#6eb3ff] flex items-center justify-center ring-[8px] sm:ring-[12px] ring-[#2a85ff]/10">
+            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-linear-to-br from-[#2a85ff] to-[#6eb3ff] flex items-center justify-center ring-8 sm:ring-12 ring-[#2a85ff]/10">
               <span className="text-white text-2xl sm:text-4xl font-extrabold tracking-tight">
                 {fullName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
               </span>
@@ -227,7 +325,7 @@ export default function CandidateProfilePage() {
         </div>
 
         {/* Completion Card */}
-        <div className="bg-[#070707] rounded-2xl sm:rounded-[2.5rem] p-5 sm:p-8 lg:p-10 flex flex-col justify-between relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
+        <div className="bg-[#070707] rounded-2xl sm:rounded-5xl p-5 sm:p-8 lg:p-10 flex flex-col justify-between relative overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
           <div className="absolute top-0 right-0 w-40 h-40 bg-[#2a85ff]/10 blur-[60px] pointer-events-none" />
           
           <div className="flex items-center justify-between mb-5 sm:mb-8">
@@ -245,16 +343,36 @@ export default function CandidateProfilePage() {
           </div>
 
           <div className="grid grid-cols-2 gap-y-3">
-            {COMPLETION_ITEMS.map((item, i) => (
-              <div key={item.id} className="flex items-center gap-2">
-                <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${item.done ? 'bg-[#2a85ff]' : 'bg-white/10'}`}>
-                  {item.done && <Check size={10} color="white" strokeWidth={4} />}
+              <div className="flex items-center gap-2">
+                <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${fullName && location && proTitle ? 'bg-[#2a85ff]' : 'bg-white/10'}`}>
+                  {fullName && location && proTitle && <Check size={10} color="white" strokeWidth={4} />}
                 </div>
-                <span className={`text-[11px] font-bold tracking-tight uppercase {item.done ? 'text-white/80' : 'text-white/30'}`}>
-                  {item.label}
-                </span>
+                <span className={`text-[11px] font-bold tracking-tight uppercase ${fullName && location && proTitle ? 'text-white/80' : 'text-white/30'}`}>Basic Information</span>
               </div>
-            ))}
+              <div className="flex items-center gap-2">
+                <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${skills.length >= 2 ? 'bg-[#2a85ff]' : 'bg-white/10'}`}>
+                  {skills.length >= 2 && <Check size={10} color="white" strokeWidth={4} />}
+                </div>
+                <span className={`text-[11px] font-bold tracking-tight uppercase ${skills.length >= 2 ? 'text-white/80' : 'text-white/30'}`}>Skills</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${workHistory.length >= 1 ? 'bg-[#2a85ff]' : 'bg-white/10'}`}>
+                  {workHistory.length >= 1 && <Check size={10} color="white" strokeWidth={4} />}
+                </div>
+                <span className={`text-[11px] font-bold tracking-tight uppercase ${workHistory.length >= 1 ? 'text-white/80' : 'text-white/30'}`}>Work Experience</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${education ? 'bg-[#2a85ff]' : 'bg-white/10'}`}>
+                  {education && <Check size={10} color="white" strokeWidth={4} />}
+                </div>
+                <span className={`text-[11px] font-bold tracking-tight uppercase ${education ? 'text-white/80' : 'text-white/30'}`}>Education</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${cvUploaded ? 'bg-[#2a85ff]' : 'bg-white/10'}`}>
+                  {cvUploaded && <Check size={10} color="white" strokeWidth={4} />}
+                </div>
+                <span className={`text-[11px] font-bold tracking-tight uppercase ${cvUploaded ? 'text-white/80' : 'text-white/30'}`}>Upload CV</span>
+              </div>
           </div>
         </div>
       </div>
@@ -266,7 +384,7 @@ export default function CandidateProfilePage() {
         <div className="space-y-8">
           
           {/* Availability */}
-          <div className="bg-white rounded-2xl sm:rounded-[2rem] p-5 sm:p-8 shadow-[0_4px_32px_rgba(0,0,0,0.03)] border border-[#e2eaf2]/60">
+          <div className="bg-white rounded-2xl sm:rounded-4xl p-5 sm:p-8 shadow-[0_4px_32px_rgba(0,0,0,0.03)] border border-[#e2eaf2]/60">
             <div className="flex items-center justify-between mb-5 sm:mb-8">
               <h3 className="text-[#070707] font-bold text-lg">Availability</h3>
               <Sparkles size={18} className="text-[#2a85ff]" />
@@ -317,7 +435,7 @@ export default function CandidateProfilePage() {
           </div>
 
           {/* CV Section */}
-          <div className="bg-white rounded-2xl sm:rounded-[2rem] p-5 sm:p-8 shadow-[0_4px_32px_rgba(0,0,0,0.03)] border border-[#e2eaf2]/60">
+          <div className="bg-white rounded-2xl sm:rounded-4xl p-5 sm:p-8 shadow-[0_4px_32px_rgba(0,0,0,0.03)] border border-[#e2eaf2]/60">
             <h3 className="text-[#070707] font-bold text-lg mb-6">Upload Current CV</h3>
             
             {!cvUploaded ? (
@@ -330,7 +448,7 @@ export default function CandidateProfilePage() {
                 </div>
                 <p className="text-[#070707] text-sm font-bold">Drop CV here</p>
                 <p className="text-[#b0bac6] text-[10px]">PDF, DOCX (Max 5MB)</p>
-                <input ref={cvRef} type="file" className="hidden" aria-label="Upload CV file" onChange={() => setCvUploaded(true)} />
+                <input ref={cvRef} type="file" className="hidden" aria-label="Upload CV file" onChange={handleFileUpload} />
               </div>
             ) : (
               <div className="bg-[#f0f5fa] rounded-2xl p-4 flex items-center gap-3 border border-[#2a85ff]/10">
@@ -356,7 +474,7 @@ export default function CandidateProfilePage() {
         <div className="lg:col-span-2 space-y-8">
           
           {/* Basic Information Edit */}
-          <div className="bg-white rounded-2xl sm:rounded-[2rem] p-5 sm:p-8 lg:p-10 shadow-[0_4px_32px_rgba(0,0,0,0.03)] border border-[#e2eaf2]/60">
+          <div className="bg-white rounded-2xl sm:rounded-4xl p-5 sm:p-8 lg:p-10 shadow-[0_4px_32px_rgba(0,0,0,0.03)] border border-[#e2eaf2]/60">
             <div className="flex items-center justify-between mb-5 sm:mb-8">
               <h2 className="text-[#070707] font-extrabold text-xl sm:text-2xl tracking-tight">Basic Information</h2>
               <button className="px-5 py-2 rounded-full text-xs font-bold text-[#2a85ff] bg-[#e8f1ff] hover:bg-[#d0e4ff] transition-all cursor-pointer">Edit</button>
@@ -413,11 +531,23 @@ export default function CandidateProfilePage() {
                   <ExternalLink size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-[#b0bac6]" />
                 </div>
               </div>
+              <div className="md:col-span-2 space-y-2">
+                <label className="text-[11px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">Education Background</label>
+                <div className="relative">
+                  <input 
+                    value={education}
+                    onChange={e => setEducation(e.target.value)}
+                    placeholder="e.g. BSc Computer Science, MIT 2018-2022"
+                    aria-label="Education"
+                    className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-2xl px-5 py-3.5 text-sm font-semibold text-[#070707] focus:outline-none focus:border-[#2a85ff]/50 focus:ring-4 focus:ring-[#2a85ff]/5 transition-all"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Skills Section */}
-          <div className="bg-white rounded-2xl sm:rounded-[2rem] p-5 sm:p-8 lg:p-10 shadow-[0_4px_32px_rgba(0,0,0,0.03)] border border-[#e2eaf2]/60">
+          <div className="bg-white rounded-2xl sm:rounded-4xl p-5 sm:p-8 lg:p-10 shadow-[0_4px_32px_rgba(0,0,0,0.03)] border border-[#e2eaf2]/60">
             <div className="flex items-center justify-between mb-5 sm:mb-8">
               <h2 className="text-[#070707] font-extrabold text-xl sm:text-2xl tracking-tight">Skills & Core Competencies</h2>
               <button className="px-5 py-2 rounded-full text-xs font-bold text-[#2a85ff] bg-[#e8f1ff] hover:bg-[#d0e4ff] transition-all cursor-pointer">Manage</button>
@@ -436,7 +566,7 @@ export default function CandidateProfilePage() {
                   </button>
                 </div>
               ))}
-              <div className="relative flex-1 min-w-[200px]">
+              <div className="relative flex-1 min-w-50">
                 <input 
                   value={skillInput}
                   onChange={e => setSkillInput(e.target.value)}
@@ -450,12 +580,12 @@ export default function CandidateProfilePage() {
           </div>
 
           {/* Work Experience Section */}
-          <div className="bg-white rounded-2xl sm:rounded-[2rem] p-5 sm:p-8 lg:p-10 shadow-[0_4px_32px_rgba(0,0,0,0.03)] border border-[#e2eaf2]/60">
+          <div className="bg-white rounded-2xl sm:rounded-4xl p-5 sm:p-8 lg:p-10 shadow-[0_4px_32px_rgba(0,0,0,0.03)] border border-[#e2eaf2]/60">
             <div className="flex items-center justify-between mb-6 sm:mb-10 gap-3">
               <h2 className="text-[#070707] font-extrabold text-xl sm:text-2xl tracking-tight">Work History</h2>
               <button 
                 onClick={() => { setEditingExp(null); setIsExpModalOpen(true); }}
-                className="flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold text-white bg-[#070707] hover:bg-[#202020] transition-all cursor-pointer flex-shrink-0"
+                className="flex items-center gap-2 px-4 sm:px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold text-white bg-[#070707] hover:bg-[#202020] transition-all cursor-pointer shrink-0"
               >
                 <Plus size={16} strokeWidth={2.5} />
                 <span className="hidden sm:inline">Add Experience</span>
@@ -467,11 +597,11 @@ export default function CandidateProfilePage() {
               {workHistory.length > 0 ? (
                 workHistory.map((exp, idx) => (
                   <div key={exp.id} className="relative pl-10 group">
-                    <div className={`absolute left-0 top-2 bottom-0 w-px ${idx === workHistory.length - 1 ? 'h-0' : 'bg-gradient-to-b from-[#2a85ff] to-[#e2eaf2]'}`} />
-                    <div className="absolute left-[-5px] top-2 w-[11px] h-[11px] rounded-full bg-[#2a85ff] ring-4 ring-[#e8f1ff]" />
+                    <div className={`absolute left-0 top-2 bottom-0 w-px ${idx === workHistory.length - 1 ? 'h-0' : 'bg-linear-to-b from-[#2a85ff] to-[#e2eaf2]'}`} />
+                    <div className="absolute -left-1.25 top-2 w-2.75 h-2.75 rounded-full bg-[#2a85ff] ring-4 ring-[#e8f1ff]" />
                     
                     <div className="flex flex-wrap items-start justify-between gap-4">
-                      <div className="flex-1 min-w-[200px]">
+                      <div className="flex-1 min-w-50">
                         <h4 className="text-[#070707] text-xl font-bold">{exp.role}</h4>
                         <div className="flex items-center gap-3 mt-1">
                           <p className="text-[#2a85ff] font-bold">{exp.company}</p>
@@ -520,10 +650,12 @@ export default function CandidateProfilePage() {
             <button className="px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl text-sm sm:text-base font-bold text-[#5a6a7a] bg-white border border-[#e2eaf2] hover:bg-[#f0f5fa] transition-all cursor-pointer shadow-sm text-center">
               Discard
             </button>
-            <button onClick={handleSave} className="px-8 sm:px-10 py-3.5 sm:py-4 rounded-2xl text-sm sm:text-base font-bold text-white bg-[#2a85ff] hover:bg-[#1a75ef] shadow-[0_8px_24px_rgba(42,133,255,0.4)] hover:scale-[1.02] transition-all cursor-pointer text-center">
-              Save Changes
+            <button onClick={() => { void handleSave() }} className="px-8 sm:px-10 py-3.5 sm:py-4 rounded-2xl text-sm sm:text-base font-bold text-white bg-[#2a85ff] hover:bg-[#1a75ef] shadow-[0_8px_24px_rgba(42,133,255,0.4)] hover:scale-[1.02] transition-all cursor-pointer text-center">
+              {saving ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
+
+          {error ? <p className="text-sm font-bold text-[#dc2626]">{error}</p> : null}
 
         </div>
       </div>
@@ -531,3 +663,4 @@ export default function CandidateProfilePage() {
     </div>
   )
 }
+
