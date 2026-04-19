@@ -18,3 +18,4 @@ export default function Badge({ type, label }: BadgeProps) {
     </span>
   );
 }
+

@@ -4,6 +4,9 @@ import React, { useState } from 'react'
 import { Sparkles, Eye, EyeOff, CheckCircle, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useRouter } from 'next/navigation'
+import { apiFetch, setSession } from '../../utils/api-client'
+import { useToast } from '../components/ui/Toast'
 
 type Role = 'company' | 'candidate'
 type Tab = 'signin' | 'create'
@@ -62,11 +65,14 @@ function InputField({
 }
 
 export default function RankrAuth() {
+  const router = useRouter()
   const [role, setRole] = useState<Role>('company')
   const [tab, setTab] = useState<Tab>('signin')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
 
+  const { showToast } = useToast()
   const [showPw, setShowPw] = useState(false)
-  const [showConfirmPw, setShowConfirmPw] = useState(false)
 
   const [signInEmail, setSignInEmail] = useState('')
   const [signInPw, setSignInPw] = useState('')
@@ -78,6 +84,52 @@ export default function RankrAuth() {
   const [createPw, setCreatePw] = useState('')
   const [confirmPw, setConfirmPw] = useState('')
 
+  const handleSubmit = async () => {
+    try {
+      setError('')
+      setSubmitting(true)
+
+      if (tab === 'signin') {
+        const result = await apiFetch('/auth/login', {
+          method: 'POST',
+          auth: false,
+          body: {
+            email: signInEmail,
+            password: signInPw,
+          },
+        })
+
+        setSession({ token: result.data.token, user: result.data.user })
+        router.push(result.data.user.role === 'candidate' ? '/candidate' : '/dashboard')
+        return
+      }
+
+      if (createPw !== confirmPw) {
+        throw new Error('Passwords do not match')
+      }
+
+      const isCandidate = role === 'candidate'
+      const result = await apiFetch('/auth/register', {
+        method: 'POST',
+        auth: false,
+        body: {
+          role: isCandidate ? 'candidate' : 'recruiter',
+          fullName: isCandidate ? fullName : fullName || companyName,
+          email: isCandidate ? createEmail : workEmail,
+          password: createPw,
+          companyName: isCandidate ? undefined : companyName,
+        },
+      })
+
+      setSession({ token: result.data.token, user: result.data.user })
+      router.push(result.data.user.role === 'candidate' ? '/candidate' : '/dashboard')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to authenticate')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   return (
     <div className="min-h-screen flex bg-white">
 
@@ -86,7 +138,7 @@ export default function RankrAuth() {
         <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-[#2a85ff]/10 blur-[120px] pointer-events-none" />
         <div className="absolute bottom-1/3 left-0 w-64 h-64 rounded-full bg-[#2a85ff]/5 blur-[100px] pointer-events-none" />
 
-        <div className="px-12 pt-12 flex-shrink-0">
+        <div className="px-12 pt-12 shrink-0">
           <Link href="/" className="inline-flex items-center gap-2.5 group">
             <div className="w-10 h-10 rounded-xl bg-[#2a85ff] flex items-center justify-center transition-transform group-hover:scale-110">
               <Sparkles size={20} color="white" strokeWidth={2.2} />
@@ -101,10 +153,10 @@ export default function RankrAuth() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <h1 className="text-white font-black text-5xl xl:text-7xl leading-[1] tracking-tighter mb-6">
+            <h1 className="text-white font-black text-5xl xl:text-7xl leading-none tracking-tighter mb-6">
               The smarter way<br />to hire.
             </h1>
-            <p className="text-white/40 text-lg xl:text-xl leading-relaxed mb-12 max-w-[420px]">
+            <p className="text-white/40 text-lg xl:text-xl leading-relaxed mb-12 max-w-105">
               AI screening that ranks every candidate and explains every decision based on performance.
             </p>
 
@@ -117,7 +169,7 @@ export default function RankrAuth() {
                   transition={{ delay: 0.2 + i * 0.1 }}
                   className="flex items-start gap-4"
                 >
-                  <div className="w-6 h-6 rounded-full bg-[#2a85ff]/20 border border-[#2a85ff]/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div className="w-6 h-6 rounded-full bg-[#2a85ff]/20 border border-[#2a85ff]/30 flex items-center justify-center shrink-0 mt-0.5">
                     <CheckCircle size={13} color="#2a85ff" strokeWidth={3} />
                   </div>
                   <span className="text-white/70 text-base font-medium">{feat}</span>
@@ -127,15 +179,12 @@ export default function RankrAuth() {
           </motion.div>
         </div>
 
-        <div className="flex-shrink-0 h-64 relative overflow-hidden">
+        <div className="shrink-0 h-64 relative overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="https://uxcanvas.ai/api/generated-images/a41dbe01-2ec5-4de6-bde6-a96289ed1c5f/9bf07167-e189-46c3-9b0b-84e832c5a707"
             alt=""
-            className="absolute inset-0 w-full h-full object-cover object-top grayscale brightness-50"
-            style={{
-              maskImage: 'linear-gradient(to bottom, transparent 0%, black 40%, black 80%, transparent 100%)',
-              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 40%, black 80%, transparent 100%)',
-            }}
+            className="auth-side-mask absolute inset-0 w-full h-full object-cover object-top grayscale brightness-50"
           />
         </div>
       </div>
@@ -144,7 +193,7 @@ export default function RankrAuth() {
       <div className="flex-1 lg:w-1/2 flex flex-col items-center justify-center p-6 sm:p-12">
         
         {/* Mobile Header */}
-        <div className="lg:hidden w-full max-w-[420px] mb-12 flex items-center justify-between">
+        <div className="lg:hidden w-full max-w-105 mb-12 flex items-center justify-between">
           <Link href="/" className="inline-flex items-center gap-2">
             <div className="w-9 h-9 rounded-xl bg-[#2a85ff] flex items-center justify-center">
               <Sparkles size={18} color="white" />
@@ -154,7 +203,7 @@ export default function RankrAuth() {
           <Link href="/" className="text-sm font-bold text-[#8a9ab0] hover:text-[#070707]">Back</Link>
         </div>
 
-        <div className="w-full max-w-[420px] flex flex-col gap-8">
+        <div className="w-full max-w-105 flex flex-col gap-8">
           
           {/* Role selector */}
           <div className="flex rounded-2xl border border-[#e2eaf2] p-1.5 gap-1 bg-[#f0f5fa]">
@@ -226,21 +275,29 @@ export default function RankrAuth() {
                     </>
                   )}
                   <InputField type="password" label="Password" placeholder="••••••••" value={createPw} onChange={setCreatePw} />
+                  <InputField
+                    type="password"
+                    label="Confirm Password"
+                    placeholder="••••••••"
+                    value={confirmPw}
+                    onChange={setConfirmPw}
+                  />
                 </>
               )}
 
-              <Link
-                href={role === 'company' ? '/dashboard' : '/candidate'}
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={submitting}
                 className="w-full flex items-center justify-center gap-3 py-4.5 rounded-full text-base font-black text-white bg-[#2a85ff] hover:bg-[#1a75ef] shadow-xl shadow-[#2a85ff]/20 transition-all hover:-translate-y-0.5"
               >
-                {tab === 'signin' ? 'Sign In' : 'Create Account'}
+                {submitting ? 'Please wait...' : (tab === 'signin' ? 'Sign In' : 'Create Account')}
                 <ArrowRight size={20} />
-              </Link>
-
-              <button className="w-full h-14 flex items-center justify-center gap-3 rounded-full border border-[#e2eaf2] text-[#3c4a5c] font-bold text-sm hover:bg-[#f0f5fa] transition-all">
-                <GoogleIcon />
-                Continue with Google
               </button>
+
+              {error ? (
+                <p className="text-[#dc2626] text-sm font-bold">{error}</p>
+              ) : null}
             </motion.div>
           </AnimatePresence>
 
@@ -258,3 +315,4 @@ export default function RankrAuth() {
     </div>
   )
 }
+

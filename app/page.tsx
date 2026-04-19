@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Sparkles, ChevronRight, Play, Globe, Shield, Zap, ArrowRight, Briefcase, User } from 'lucide-react'
+import { Sparkles, Play, Globe, Shield, Zap, ArrowRight, Briefcase, User } from 'lucide-react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import Navbar from './components/Navbar'
@@ -21,12 +21,12 @@ export default function RankrLanding() {
         {/* HERO SECTION */}
         <section className="relative pt-32 pb-20 sm:pt-48 sm:pb-40 overflow-hidden">
           {/* Background effects */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-[1400px] h-full pointer-events-none">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-350 h-full pointer-events-none">
             <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-[#2a85ff]/10 blur-[120px]" />
             <div className="absolute bottom-[20%] right-[-5%] w-[40%] h-[40%] rounded-full bg-[#2a85ff]/5 blur-[100px]" />
           </div>
 
-          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 relative z-10 text-center">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 text-center">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -39,7 +39,7 @@ export default function RankrLanding() {
 
               <h1 className="text-white font-extrabold text-5xl sm:text-7xl md:text-8xl lg:text-9xl leading-[0.95] tracking-tight mb-8 sm:mb-10">
                 Hire without<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2a85ff] via-[#6eb3ff] to-[#2a85ff] bg-[length:200%_auto] animate-gradient-flow px-2 italic">sorting.</span>
+                <span className="text-transparent bg-clip-text bg-linear-to-r from-[#2a85ff] via-[#6eb3ff] to-[#2a85ff] bg-size-\[200%_auto\] animate-gradient-flow px-2 italic">sorting.</span>
               </h1>
 
               <p className="text-white/50 text-base sm:text-xl md:text-2xl max-w-2xl mx-auto leading-relaxed mb-10 sm:mb-14 px-4 sm:px-0">
@@ -61,8 +61,8 @@ export default function RankrLanding() {
         </section>
 
         {/* STATS SECTION */}
-        <section className="py-20 border-y border-white/5 bg-white/[0.01]">
-          <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+        <section className="py-20 border-y border-white/5 bg-white/1">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-12 sm:gap-12 text-center">
               {STATS.map((stat, i) => (
                 <motion.div
@@ -83,13 +83,14 @@ export default function RankrLanding() {
 
         {/* PRODUCT PREVIEW */}
         <section className="py-24 sm:py-48 relative overflow-hidden">
-          <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
-            <div className="relative rounded-[2rem] sm:rounded-[3rem] p-0.5 bg-gradient-to-br from-white/20 via-white/5 to-white/20 overflow-hidden shadow-2xl">
-              <div className="bg-[#0f0f12] rounded-[1.95rem] sm:rounded-[2.95rem] overflow-hidden aspect-[16/10] sm:aspect-[16/9] relative">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="relative rounded-4xl sm:rounded-[3rem] p-0.5 bg-linear-to-br from-white/20 via-white/5 to-white/20 overflow-hidden shadow-2xl">
+              <div className="bg-[#0f0f12] rounded-[1.95rem] sm:rounded-[2.95rem] overflow-hidden aspect-16/10 sm:aspect-video relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="https://uxcanvas.ai/api/generated-images/a41dbe01-2ec5-4de6-bde6-a96289ed1c5f/9bf07167-e189-46c3-9b0b-84e832c5a707"
                   alt="Rankr Dashboard Interface"
-                  className="w-full h-full object-cover opacity-60 grayscale-[40%]"
+                  className="w-full h-full object-cover opacity-60 grayscale-40"
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <motion.button 
@@ -101,7 +102,7 @@ export default function RankrLanding() {
                   </motion.button>
                 </div>
                 {/* Overlay details */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#070707] via-transparent to-transparent pointer-events-none" />
+                <div className="absolute inset-0 bg-linear-to-t from-[#070707] via-transparent to-transparent pointer-events-none" />
                 <div className="absolute bottom-10 left-10 hidden md:block">
                   <div className="flex gap-4">
                     <div className="px-5 py-3 rounded-2xl bg-white/10 backdrop-blur-xl border border-white/10">
@@ -120,8 +121,8 @@ export default function RankrLanding() {
         </section>
 
         {/* FEATURES GRID */}
-        <section className="py-24 sm:py-32 relative bg-white/[0.01]">
-          <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+        <section className="py-24 sm:py-32 relative bg-white/1">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="flex flex-col lg:flex-row gap-16 lg:items-center">
               <div className="flex-1">
                 <h2 className="text-white text-4xl sm:text-6xl font-extrabold tracking-tight mb-12">
@@ -148,6 +149,7 @@ export default function RankrLanding() {
                 </div>
               </div>
               <div className="flex-1 relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                  <img 
                   src="https://uxcanvas.ai/api/generated-images/a41dbe01-2ec5-4de6-bde6-a96289ed1c5f/9bf07167-e189-46c3-9b0b-84e832c5a707"
                   alt="Feature showcase"
@@ -163,8 +165,8 @@ export default function RankrLanding() {
         </section>
 
         {/* NEW FEATURES SHOWCASE */}
-        <section className="py-24 sm:py-32 relative bg-white/[0.02] border-t border-white/5">
-          <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+        <section className="py-24 sm:py-32 relative bg-white/2 border-t border-white/5">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-16">
               <h2 className="text-white text-4xl sm:text-6xl font-black tracking-tight mb-4">New Features Showcase</h2>
               <p className="text-white/40 text-lg">Quick access to the latest updates I just implemented for you.</p>
@@ -172,14 +174,14 @@ export default function RankrLanding() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {/* Feature 1: Jobs */}
-              <Link href="/candidate/jobs" className="group relative p-8 rounded-[2.5rem] bg-white/5 border border-white/10 hover:border-[#2a85ff]/50 hover:bg-white/[0.08] transition-all overflow-hidden">
+              <Link href="/candidate/jobs" className="group relative p-8 rounded-5xl bg-white/5 border border-white/10 hover:border-[#2a85ff]/50 hover:bg-white/8 transition-all overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#2a85ff]/5 blur-3xl group-hover:bg-[#2a85ff]/20 transition-all" />
                 <div className="w-16 h-16 rounded-2xl bg-[#2a85ff]/20 flex items-center justify-center text-[#2a85ff] mb-6 border border-[#2a85ff]/30 group-hover:scale-110 transition-transform">
                   <Briefcase size={32} />
                 </div>
                 <h3 className="text-white text-2xl font-bold mb-3 group-hover:text-[#2a85ff] transition-colors">Smart Job Matches</h3>
                 <p className="text-white/40 text-sm leading-relaxed mb-6">
-                  Check out the expanded job list, new search filters, and functional "View Smart Matches" filtering.
+                  Check out the expanded job list, new search filters, and functional &ldquo;View Smart Matches&rdquo; filtering.
                 </p>
                 <div className="inline-flex items-center gap-2 text-[#2a85ff] text-sm font-bold">
                   Explore Jobs <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
@@ -187,7 +189,7 @@ export default function RankrLanding() {
               </Link>
 
               {/* Feature 2: Profile */}
-              <Link href="/candidate/profile" className="group relative p-8 rounded-[2.5rem] bg-white/5 border border-white/10 hover:border-[#2a85ff]/50 hover:bg-white/[0.08] transition-all overflow-hidden">
+              <Link href="/candidate/profile" className="group relative p-8 rounded-5xl bg-white/5 border border-white/10 hover:border-[#2a85ff]/50 hover:bg-white/8 transition-all overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#2a85ff]/5 blur-3xl group-hover:bg-[#2a85ff]/20 transition-all" />
                 <div className="w-16 h-16 rounded-2xl bg-[#2a85ff]/20 flex items-center justify-center text-[#2a85ff] mb-6 border border-[#2a85ff]/30 group-hover:scale-110 transition-transform">
                   <User size={32} />
@@ -202,7 +204,7 @@ export default function RankrLanding() {
               </Link>
 
               {/* Feature 3: AI Screening */}
-              <Link href="/screening" className="group relative p-8 rounded-[2.5rem] bg-white/5 border border-white/10 hover:border-[#2a85ff]/50 hover:bg-white/[0.08] transition-all overflow-hidden">
+              <Link href="/screening" className="group relative p-8 rounded-5xl bg-white/5 border border-white/10 hover:border-[#2a85ff]/50 hover:bg-white/8 transition-all overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-[#2a85ff]/5 blur-3xl group-hover:bg-[#2a85ff]/20 transition-all" />
                 <div className="w-16 h-16 rounded-2xl bg-[#2a85ff]/20 flex items-center justify-center text-[#2a85ff] mb-6 border border-[#2a85ff]/30 group-hover:scale-110 transition-transform">
                   <Sparkles size={32} />
@@ -224,7 +226,7 @@ export default function RankrLanding() {
       </main>
 
       <footer className="py-24 sm:py-32 border-t border-white/5">
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex flex-col md:flex-row justify-between items-start gap-16 md:gap-0">
             <div className="flex flex-col gap-8">
               <Link href="/" className="flex items-center gap-2.5">
@@ -276,3 +278,4 @@ export default function RankrLanding() {
     </div>
   )
 }
+

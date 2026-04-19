@@ -73,6 +73,18 @@ body {
   overflow-x: hidden;
 }
 
+.dashboard-hero-mask {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 70%, transparent 100%), linear-gradient(to left, black 55%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 70%, transparent 100%), linear-gradient(to left, black 55%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+}
+
+.auth-side-mask {
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 40%, black 80%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 40%, black 80%, transparent 100%);
+}
+
 ::-webkit-scrollbar {
   width: 8px;
 }

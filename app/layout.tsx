@@ -14,14 +14,21 @@ export const metadata: Metadata = {
   description: 'AI-powered talent screening platform for faster and smarter hiring.',
 }
 
+import { ToastProvider } from './components/ui/Toast'
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className={`${poppins.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+    <html lang="en" className={`${poppins.variable} h-full antialiased`} suppressHydrationWarning={true}>
+      <body className="min-h-full flex flex-col font-sans" suppressHydrationWarning={true}>
+        <ToastProvider>
+          {children}
+        </ToastProvider>
+      </body>
     </html>
   )
 }
+
