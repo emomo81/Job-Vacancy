@@ -8,14 +8,18 @@ import { getBadgeClasses } from '../../../utils/colorUtils'; // Import badge sty
 import { getScoreRangeColorClass } from '../../../utils/colorUtils'; // Import score range color utility
 import { Candidate, Recommendation, Source } from '../../../utils/candidate-types'; // Import base Candidate type
 
-// Helper to derive initials from name
-const getInitials = (name: string): string => {
-  const parts = name.split(' ');
-  // Take the first letter of the first two parts if available, otherwise first letter of the first part
-  if (parts.length >= 2) {
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-  }
-  return parts[0][0].toUpperCase();
+const getScoreBarWidthClass = (score: number): string => {
+  if (score >= 100) return 'w-full';
+  if (score >= 90) return 'w-11/12';
+  if (score >= 80) return 'w-10/12';
+  if (score >= 70) return 'w-9/12';
+  if (score >= 60) return 'w-8/12';
+  if (score >= 50) return 'w-7/12';
+  if (score >= 40) return 'w-6/12';
+  if (score >= 30) return 'w-5/12';
+  if (score >= 20) return 'w-4/12';
+  if (score >= 10) return 'w-3/12';
+  return 'w-2/12';
 };
 
 // Define the extended candidate type for this card, including fields used in the UI
@@ -62,7 +66,7 @@ export default function CandidateResultCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
       onClick={() => onSelect(candidate.id)}
-      className={`bg-white rounded-[2rem] p-6 shadow-sm hover:shadow-xl transition-all cursor-pointer border-2
+      className={`bg-white rounded-4xl p-6 shadow-sm hover:shadow-xl transition-all cursor-pointer border-2
         ${isSelected ? 'border-[#2a85ff]' : 'border-transparent'}
         flex flex-col justify-between h-full`}
     >
@@ -81,7 +85,7 @@ export default function CandidateResultCard({
 
       {/* Candidate Info Row */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[#2a85ff] to-[#6eb3ff] flex items-center justify-center text-white font-bold text-lg">
+        <div className="w-11 h-11 rounded-full bg-linear-to-br from-[#2a85ff] to-[#6eb3ff] flex items-center justify-center text-white font-bold text-lg">
           {candidate.initials}
         </div>
         <div>
@@ -94,10 +98,8 @@ export default function CandidateResultCard({
       <div className="flex items-end gap-3 mb-6">
         <span className="text-[#2a85ff] text-3xl font-black leading-none">{candidate.score}</span>
         <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden mb-1">
-          {/* Using inline style for the score bar width and color class from util */}
           <div
-            className={`h-full ${getScoreRangeColorClass(candidate.score)} rounded-full`}
-            style={{ width: `${candidate.score}%` }}
+            className={`h-full ${getScoreRangeColorClass(candidate.score)} ${getScoreBarWidthClass(candidate.score)} rounded-full`}
           ></div>
         </div>
       </div>
@@ -119,7 +121,7 @@ export default function CandidateResultCard({
       {/* Additional Info Row (Experience Level and Recommendation Badge) */}
       <div className="mt-4 flex items-center justify-between">
         {/* Recommendation Badge */}
-        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${getBadgeClasses(badgeType.toUpperCase() as any).replace('bg-gray-100 text-gray-800 border border-gray-400', '') /* Remove base if overridden */}`}>
+        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border ${getBadgeClasses(badgeType.toUpperCase() as 'HIRE' | 'CONSIDER' | 'PASS').replace('bg-gray-100 text-gray-800 border border-gray-400', '') /* Remove base if overridden */}`}>
             {candidate.recommendation}
         </span>
         {/* Experience Level */}

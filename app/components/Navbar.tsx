@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Sparkles, Bell, User, Menu, X } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
+import { apiFetch, clearSession, getSessionUser } from '../../utils/api-client'
 
 interface NavbarProps {
   type?: 'landing' | 'app'
@@ -14,16 +15,82 @@ const NAV_LINKS = ['Jobs', 'Candidates', 'Shortlists', 'Settings']
 
 export default function Navbar({ type = 'landing', activeNav }: NavbarProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [sessionUser, setSessionUser] = useState(() => getSessionUser())
+  const [organizationName, setOrganizationName] = useState('')
+  const [shortlistTotal, setShortlistTotal] = useState(0)
+
+  const sessionRoleLabel = sessionUser?.role === 'candidate'
+    ? 'Candidate'
+    : sessionUser?.role === 'admin'
+      ? 'Admin'
+      : 'Recruiter'
+
+  useEffect(() => {
+    const syncSession = () => setSessionUser(getSessionUser())
+    syncSession()
+    window.addEventListener('storage', syncSession)
+    window.addEventListener('rankr:session-changed', syncSession)
+    return () => {
+      window.removeEventListener('storage', syncSession)
+      window.removeEventListener('rankr:session-changed', syncSession)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!sessionUser?.role) return
+
+    void (async () => {
+      try {
+        const profile = await apiFetch('/settings/profile-summary')
+        if (profile?.data?.organizationName) {
+          setOrganizationName(String(profile.data.organizationName))
+        }
+      } catch {
+        setOrganizationName('')
+      }
+    })()
+
+    if (sessionUser.role === 'recruiter' || sessionUser.role === 'admin') {
+      void (async () => {
+        try {
+          const stats = await apiFetch('/recruiter/applications')
+          setShortlistTotal(Number(stats?.data?.shortlistTotal || 0))
+        } catch {
+          setShortlistTotal(0)
+        }
+      })()
+    }
+  }, [sessionUser?.role])
+
+  const appHref = sessionUser?.role === 'candidate' ? '/candidate/jobs' : '/dashboard'
+  const isCandidateUser = sessionUser?.role === 'candidate'
+  const notificationsHref = sessionUser?.role === 'candidate'
+    ? '/candidate/notifications'
+    : '/dashboard/notifications'
+
+  const handleLogout = () => {
+    clearSession()
+    setIsOpen(false)
+  }
 
   const getHref = (link: string) => {
+    if (isCandidateUser) {
+      if (link === 'Jobs') return '/candidate/jobs'
+      if (link === 'Candidates') return '/candidate/jobs'
+      if (link === 'Shortlists') return '/candidate/applications'
+      if (link === 'Settings') return '/settings'
+    }
+
     if (link === 'Jobs') return '/dashboard'
     if (link === 'Shortlists') return '/results'
-    return `/${link.toLowerCase()}`
+    if (link === 'Candidates') return '/candidates#applicants'
+    if (link === 'Settings') return '/settings'
+    return '/dashboard'
   }
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#070707]/80 backdrop-blur-md border-b border-white/5">
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 flex items-center justify-between h-16 sm:h-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16 sm:h-20">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 select-none group">
           <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-[#2a85ff] flex items-center justify-center shadow-[0_4px_16px_rgba(42,133,255,0.4)] transition-transform group-hover:scale-110">
@@ -67,26 +134,37 @@ export default function Navbar({ type = 'landing', activeNav }: NavbarProps) {
         <div className="flex items-center gap-3 sm:gap-5">
           {type === 'app' ? (
             <>
-              <button className="relative text-white/60 hover:text-white transition-colors p-2" aria-label="Notifications">
+              <Link href={notificationsHref} className="relative text-white/60 hover:text-white transition-colors p-2" aria-label="Notifications">
                 <Bell size={20} />
                 <span className="absolute top-2 right-2 w-2 h-2 bg-[#2a85ff] rounded-full border border-[#070707]"></span>
-              </button>
+              </Link>
               <Link href="/settings" className="hidden sm:flex items-center gap-3 pl-2 border-l border-white/10 cursor-pointer group">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#2a85ff] to-[#6eb3ff] flex items-center justify-center group-hover:ring-2 group-hover:ring-[#2a85ff]/50 transition-all">
+                <div className="w-8 h-8 rounded-full bg-linear-to-br from-[#2a85ff] to-[#6eb3ff] flex items-center justify-center group-hover:ring-2 group-hover:ring-[#2a85ff]/50 transition-all">
                   <User size={15} color="white" strokeWidth={2} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-white text-xs font-bold leading-none group-hover:text-[#2a85ff] transition-colors">Recruiter</span>
-                  <span className="text-white/40 text-[10px] mt-0.5">Acme Corp</span>
+                  <span className="text-white text-xs font-bold leading-none group-hover:text-[#2a85ff] transition-colors" suppressHydrationWarning>{sessionUser?.fullName || 'Recruiter'}</span>
+                  <span className="text-white/40 text-[10px] mt-0.5" suppressHydrationWarning>{sessionRoleLabel || 'Organization'}</span>
                 </div>
               </Link>
             </>
           ) : (
             <div className="hidden sm:flex items-center gap-4">
-              <Link href="/auth" className="text-white/70 hover:text-white text-sm font-semibold transition-colors">Log in</Link>
-              <Link href="/auth" className="px-5 py-2.5 rounded-full bg-white text-[#070707] text-sm font-bold hover:bg-white/90 transition-all shadow-xl">
-                Get Started
-              </Link>
+              {sessionUser ? (
+                <>
+                  <Link href={appHref} className="text-white/70 hover:text-white text-sm font-semibold transition-colors">Open App</Link>
+                  <button onClick={handleLogout} className="px-5 py-2.5 rounded-full bg-white text-[#070707] text-sm font-bold hover:bg-white/90 transition-all shadow-xl cursor-pointer">
+                    Log out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link href="/auth" className="text-white/70 hover:text-white text-sm font-semibold transition-colors">Log in</Link>
+                  <Link href="/auth" className="px-5 py-2.5 rounded-full bg-white text-[#070707] text-sm font-bold hover:bg-white/90 transition-all shadow-xl">
+                    Get Started
+                  </Link>
+                </>
+              )}
             </div>
           )}
 
@@ -120,7 +198,9 @@ export default function Navbar({ type = 'landing', activeNav }: NavbarProps) {
                       activeNav === link ? 'text-[#2a85ff]' : 'text-white/60'
                     }`}
                   >
-                    {link}
+                    {link === 'Candidates' && shortlistTotal > 0
+                      ? `Candidates (${shortlistTotal} shortlisted)`
+                      : link}
                   </Link>
                 ))
               ) : (
@@ -129,10 +209,21 @@ export default function Navbar({ type = 'landing', activeNav }: NavbarProps) {
                   <Link href="#pricing" onClick={() => setIsOpen(false)} className="text-lg font-bold text-white/60">Pricing</Link>
                   <Link href="#resources" onClick={() => setIsOpen(false)} className="text-lg font-bold text-white/60">Resources</Link>
                   <div className="h-px bg-white/5 my-2" />
-                  <Link href="/auth" onClick={() => setIsOpen(false)} className="text-lg font-bold text-white/60">Log in</Link>
-                  <Link href="/auth" onClick={() => setIsOpen(false)} className="w-full py-4 rounded-2xl bg-[#2a85ff] text-white text-center font-bold">
-                    Get Started
-                  </Link>
+                  {sessionUser ? (
+                    <>
+                      <Link href={appHref} onClick={() => setIsOpen(false)} className="text-lg font-bold text-white/60">Open App</Link>
+                      <button onClick={handleLogout} className="w-full py-4 rounded-2xl bg-[#2a85ff] text-white text-center font-bold cursor-pointer">
+                        Log out
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link href="/auth" onClick={() => setIsOpen(false)} className="text-lg font-bold text-white/60">Log in</Link>
+                      <Link href="/auth" onClick={() => setIsOpen(false)} className="w-full py-4 rounded-2xl bg-[#2a85ff] text-white text-center font-bold">
+                        Get Started
+                      </Link>
+                    </>
+                  )}
                 </>
               )}
             </div>
@@ -142,3 +233,4 @@ export default function Navbar({ type = 'landing', activeNav }: NavbarProps) {
     </header>
   )
 }
+
