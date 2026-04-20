@@ -20,6 +20,7 @@ router.post('/', requireAuth, requireRole(['recruiter', 'admin']), async (req: R
       description,
       niceToHave,
       location,
+      deadline,
     } = req.body;
 
     if (!title || title.trim().length < 3) {
@@ -48,6 +49,7 @@ router.post('/', requireAuth, requireRole(['recruiter', 'admin']), async (req: R
       description: description || '',
       niceToHave: niceToHave || '',
       location: location || '',
+      deadline: deadline ? new Date(deadline) : null,
       status: 'open',
     });
 
@@ -78,6 +80,7 @@ router.patch('/:jobId', requireAuth, requireRole(['recruiter', 'admin']), async 
           description: req.body.description,
           niceToHave: req.body.niceToHave,
           location: req.body.location,
+          deadline: req.body.deadline ? new Date(req.body.deadline) : null,
           status: req.body.status,
         },
       },
