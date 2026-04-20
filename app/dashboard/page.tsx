@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useMemo, useState } from 'react'
-import { ArrowRight, ChevronDown, Clock, MapPin, Minus, Pencil, Plus, Sparkles, Tag, X } from 'lucide-react'
+import { ArrowRight, CalendarClock, ChevronDown, Clock, MapPin, Minus, Pencil, Plus, Sparkles, Tag, X } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Navbar from '../components/Navbar'
 import { apiFetch, setCurrentJobId } from '../../utils/api-client'
@@ -24,6 +24,7 @@ type DashboardJob = {
   description: string
   niceToHave: string
   location: string
+  deadline?: string
   status: string
   createdAt?: string
   shortlistedCount?: number
@@ -43,6 +44,7 @@ const emptyForm = {
   description: '',
   niceToHave: '',
   location: '',
+  deadline: '',
 }
 
 function formatDate(value?: string): string {
@@ -119,6 +121,7 @@ export default function RankrDashboard() {
           niceToHave: readString(job.niceToHave, ''),
           location: readString(job.location, 'Remote'),
           status: readString(job.status, 'open'),
+          deadline: typeof job.deadline === 'string' ? job.deadline : undefined,
           createdAt: typeof job.createdAt === 'string' ? job.createdAt : undefined,
           shortlistedCount: applicantJobMap.get(String(job._id || job.id || '')) || 0,
         }))
@@ -169,6 +172,7 @@ export default function RankrDashboard() {
       description: job.description,
       niceToHave: job.niceToHave,
       location: job.location,
+      deadline: job.deadline ? job.deadline.slice(0, 10) : '',
     })
     setPanel('new-job')
   }
@@ -193,6 +197,7 @@ export default function RankrDashboard() {
         description: form.description,
         niceToHave: form.niceToHave,
         location: form.location || (form.employmentType === 'Remote' ? 'Remote' : ''),
+        deadline: form.deadline || null,
       }
 
       const result = editingJobId
@@ -213,6 +218,7 @@ export default function RankrDashboard() {
         niceToHave: savedJob.niceToHave || form.niceToHave,
         location: savedJob.location || form.location,
         status: savedJob.status || 'open',
+        deadline: savedJob.deadline ?? form.deadline ?? undefined,
         createdAt: savedJob.createdAt,
         shortlistedCount: 0,
       }
@@ -438,6 +444,20 @@ export default function RankrDashboard() {
                           <div className="flex items-center gap-2 text-sm text-[#5a6a7a]"><Clock size={16} className="text-[#2a85ff]" /> {selectedJob.minYearsExperience}+ years</div>
                           <div className="flex items-center gap-2 text-sm text-[#5a6a7a]"><Tag size={16} className="text-[#2a85ff]" /> {selectedJob.department}</div>
                         </div>
+                        {selectedJob.deadline && (
+                          <div className={`mt-4 inline-flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold border ${
+                            new Date(selectedJob.deadline) < new Date()
+                              ? 'bg-red-50 text-red-600 border-red-200'
+                              : new Date(selectedJob.deadline) <= new Date(Date.now() + 7 * 86400000)
+                              ? 'bg-amber-50 text-amber-700 border-amber-200'
+                              : 'bg-[#f0f9f4] text-[#16a34a] border-[#bbf7d0]'
+                          }`}>
+                            <CalendarClock size={15} />
+                            {new Date(selectedJob.deadline) < new Date()
+                              ? `Deadline passed · ${formatDate(selectedJob.deadline)}`
+                              : `Closes ${formatDate(selectedJob.deadline)}`}
+                          </div>
+                        )}
                       </div>
                     </>
                   ) : (
@@ -558,6 +578,25 @@ export default function RankrDashboard() {
                   <div className="flex flex-col gap-3">
                     <label className="text-sm font-bold text-[#070707] tracking-tight">Location</label>
                     <input value={form.location} onChange={(e) => setForm((prev) => ({ ...prev, location: e.target.value }))} placeholder="Remote or city" className="w-full border border-[#e2eaf2] rounded-2xl px-5 py-3.5 text-sm text-[#070707] placeholder-[#b0bac6] focus:outline-none focus:border-[#2a85ff] focus:ring-4 focus:ring-[#2a85ff]/5 transition-all bg-[#fcfdfe]" />
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    <label className="text-sm font-bold text-[#070707] tracking-tight flex items-center gap-2">
+                      <CalendarClock size={15} className="text-[#2a85ff]" />
+                      Application Deadline
+                      <span className="text-[#b0bac6] font-medium">(optional)</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={form.deadline}
+                      min={new Date().toISOString().slice(0, 10)}
+                      onChange={(e) => setForm((prev) => ({ ...prev, deadline: e.target.value }))}
+                      className="w-full border border-[#e2eaf2] rounded-2xl px-5 py-3.5 text-sm text-[#070707] placeholder-[#b0bac6] focus:outline-none focus:border-[#2a85ff] focus:ring-4 focus:ring-[#2a85ff]/5 transition-all bg-[#fcfdfe] cursor-pointer"
+                    />
+                    {form.deadline && (
+                      <p className="text-[11px] text-[#8a9ab0] font-medium">
+                        Closes {new Date(form.deadline + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                      </p>
+                    )}
                   </div>
                 </div>
 
