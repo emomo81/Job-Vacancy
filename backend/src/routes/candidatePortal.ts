@@ -6,12 +6,66 @@ import Notification from '../models/Notification';
 import User from '../models/User';
 import multer from 'multer';
 import pdfParse from 'pdf-parse';
+import mammoth from 'mammoth';
+import config from '../config';
 import { requireAuth, requireRole } from '../middleware/auth';
 import { ok, fail } from '../utils/apiResponse';
 
 const router: Router = express.Router();
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
+
+async function extractTextFromImage(buffer: Buffer, mimeType: string): Promise<string> {
+  if (!config.geminiApiKey) return '';
+  const base64 = buffer.toString('base64');
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${config.geminiModel}:generateContent?key=${config.geminiApiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [
+          { inlineData: { mimeType, data: base64 } },
+          { text: 'Extract all text from this CV/resume image. Return only the raw text, no formatting.' }
+        ]}],
+        generationConfig: { temperature: 0 }
+      })
+    }
+  );
+  if (!response.ok) return '';
+  const body = await response.json();
+  return body?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+async function parseProfileFromCV(text: string): Promise<any> {
+  if (!config.geminiApiKey || !text.trim()) return null;
+  const prompt = `Extract structured profile data from this CV/resume text. Return strict JSON only, no markdown.
+Schema: {"fullName":string,"professionalTitle":string,"location":string,"yearsExperience":number,"skills":string[],"education":string,"experiences":[{"role":string,"company":string,"startDate":string,"endDate":string,"description":string}]}
+Rules: yearsExperience must be a number. skills must be a flat array. education is a single summary string. Use null for unknown fields.
+
+CV Text:
+${text.slice(0, 8000)}`;
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${config.geminiModel}:generateContent?key=${config.geminiApiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.1 }
+      })
+    }
+  );
+  if (!response.ok) return null;
+  const body = await response.json();
+  const raw = body?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  try {
+    return JSON.parse(raw.replace(/```json|```/g, '').trim());
+  } catch {
+    return null;
+  }
+}
+
 function computeMatch(job: any, profile: any): number {
   const requiredSkills = (job.requiredSkills || []).map((s: string) => s.toLowerCase());
   const candidateSkills = (profile.skills || []).map((s: string) => s.toLowerCase());
@@ -126,15 +180,31 @@ router.post('/candidate/profile/cv', requireAuth, requireRole(['candidate', 'adm
     if (!profile) return fail(res, 404, 'NOT_FOUND', 'Profile not found');
 
     let extractedText = '';
-    if (req.file.mimetype === 'application/pdf') {
+    const mime = req.file.mimetype;
+
+    if (mime === 'application/pdf') {
       try {
         const data = await (pdfParse as any)(req.file.buffer);
         extractedText = data.text;
       } catch (e) {
         console.error('PDF parsing error', e);
       }
-    } else {
-      extractedText = req.file.buffer.toString('utf-8');
+    } else if (
+      mime === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      mime === 'application/msword'
+    ) {
+      try {
+        const result = await mammoth.extractRawText({ buffer: req.file.buffer });
+        extractedText = result.value;
+      } catch (e) {
+        console.error('DOCX parsing error', e);
+      }
+    } else if (mime.startsWith('image/')) {
+      try {
+        extractedText = await extractTextFromImage(req.file.buffer, mime);
+      } catch (e) {
+        console.error('Image OCR error', e);
+      }
     }
 
     profile.cv = {
@@ -143,10 +213,24 @@ router.post('/candidate/profile/cv', requireAuth, requireRole(['candidate', 'adm
       uploadedAt: new Date(),
       extractedText: extractedText.trim()
     };
+
+    const parsed = await parseProfileFromCV(extractedText);
+    if (parsed) {
+      if (parsed.fullName) profile.fullName = parsed.fullName;
+      if (parsed.professionalTitle) profile.professionalTitle = parsed.professionalTitle;
+      if (parsed.location) profile.location = parsed.location;
+      if (typeof parsed.yearsExperience === 'number') profile.yearsExperience = parsed.yearsExperience;
+      if (Array.isArray(parsed.skills) && parsed.skills.length) profile.skills = parsed.skills;
+      if (parsed.education) profile.education = parsed.education;
+      if (Array.isArray(parsed.experiences) && parsed.experiences.length) {
+        profile.experiences = parsed.experiences;
+      }
+    }
+
     profile.completionPct = calculateCompletion(profile);
     await profile.save();
 
-    return ok(res, profile.cv);
+    return ok(res, { cv: profile.cv, parsed });
   } catch (error: any) {
     return fail(res, 500, 'INTERNAL_ERROR', error.message);
   }
@@ -168,6 +252,7 @@ router.get('/candidate/jobs', requireAuth, requireRole(['candidate', 'admin']), 
       type: job.employmentType,
       salary: 'Competitive',
       posted: job.createdAt,
+      deadline: job.deadline ?? null,
       match: profile ? computeMatch(job, profile) : 50,
       tags: (job.requiredSkills || []).slice(0, 4),
       requiredSkills: job.requiredSkills || [],
