@@ -1,69 +1,153 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Rankr — AI-Powered Talent Screening
 
-## Getting Started
+Rankr automates recruitment by running AI-driven candidate screening with Google Gemini. Recruiters create jobs, upload candidate pools, and get ranked results with reasoning in seconds. Candidates get a portal to browse open roles and track applications.
 
-First, run the development server:
+**Stack:** Next.js 16 · Express.js · MongoDB Atlas · Google Gemini API
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Prerequisites
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Node.js 20+** — [nodejs.org](https://nodejs.org)
+- **MongoDB Atlas** account — [cloud.mongodb.com](https://cloud.mongodb.com) (free tier works)
+- **Google Gemini API key** — [aistudio.google.com](https://aistudio.google.com)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Run Full Stack Locally
+## Local Development
 
-Frontend runs on port `3000` and backend runs on port `4000`.
-
-1. Frontend env:
-Copy `.env.local.example` to `.env.local`.
-
-2. Backend env:
-Copy `backend/.env.example` to `backend/.env` and set `MONGODB_URI`.
-
-3. Install backend deps:
+### 1. Install dependencies
 
 ```bash
-cd backend
+# Frontend (from repo root)
 npm install
+
+# Backend
+cd backend && npm install && cd ..
 ```
 
-4. Start backend:
+### 2. Configure environment variables
+
+**Frontend** — copy `.env.example` to `.env.local`:
+
+```bash
+cp .env.example .env.local
+```
+
+`.env.local` needs no changes for local dev (defaults point to `localhost:4000`).
+
+**Backend** — copy `backend/.env.example` to `backend/.env`:
+
+```bash
+cp backend/.env.example backend/.env
+```
+
+Open `backend/.env` and fill in:
+
+```
+MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/rankr
+JWT_ACCESS_SECRET=<any long random string>
+JWT_REFRESH_SECRET=<another long random string>
+GEMINI_API_KEY=<your Gemini API key>
+```
+
+### 3. Start both servers
+
+**Terminal 1 — Backend** (port 4000):
 
 ```bash
 cd backend
 npm run dev
 ```
 
-5. Start frontend (new terminal from repo root):
+**Terminal 2 — Frontend** (port 3000):
 
 ```bash
 npm run dev
 ```
 
-6. Test flow:
-Open `/auth`, create a recruiter account, create a job, import candidates, run screening, and open results.
+### 4. Test the app
 
-## Learn More
+| Role | Start at | Flow |
+|------|----------|------|
+| Recruiter | `/auth` → create recruiter account | Dashboard → create job → Candidates → import pool → Screening → run → Results |
+| Candidate | `/auth` → create candidate account | `/candidate/jobs` → browse & apply |
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Architecture:** Frontend (Next.js) on **Vercel** · Backend (Express) on **Render**
 
-## Deploy on Vercel
+### Step 1 — Deploy Backend to Render
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Push this repo to GitHub
+2. Go to [render.com](https://render.com) → **New** → **Blueprint** — Render will detect `render.yaml` automatically
+   - Or go to **New Web Service**, connect the repo, and configure manually:
+     - **Root Directory:** `backend`
+     - **Build Command:** `npm install`
+     - **Start Command:** `npm run start`
+     - **Node Version:** 20
+3. Add these environment variables in Render → Settings → Environment:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Variable | Value |
+|----------|-------|
+| `MONGODB_URI` | Your Atlas connection string |
+| `JWT_ACCESS_SECRET` | Long random string |
+| `JWT_REFRESH_SECRET` | Long random string |
+| `GEMINI_API_KEY` | Your Gemini API key |
+| `CLIENT_URL` | Your Vercel frontend URL (add after Step 2) |
+| `GEMINI_MODEL` | `gemini-2.5-flash` |
+| `JWT_ACCESS_EXPIRES` | `15m` |
+| `JWT_REFRESH_EXPIRES` | `7d` |
+
+4. Note the service URL — e.g. `https://rankr-backend.onrender.com`
+
+> **Free tier note:** Render free services spin down after 15 min of inactivity. The first request after sleep takes ~30s. Upgrade to a paid plan to avoid this.
+
+---
+
+### Step 2 — Deploy Frontend to Vercel
+
+1. Go to [vercel.com](https://vercel.com) → **Add New Project** → import the repo
+2. Vercel auto-detects Next.js — no framework config needed
+3. Add one environment variable in Vercel → Settings → Environment Variables:
+
+| Variable | Value |
+|----------|-------|
+| `NEXT_PUBLIC_API_BASE_URL` | `https://rankr-backend.onrender.com/api/v1` |
+
+4. Deploy
+
+---
+
+### Step 3 — Connect them
+
+After both are live:
+- In Render, update `CLIENT_URL` to your Vercel URL (e.g. `https://rankr.vercel.app`)
+- Trigger a redeploy on Render so CORS picks up the new origin
+
+---
+
+## Environment Variables Reference
+
+### Frontend (`.env.local`)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `NEXT_PUBLIC_API_BASE_URL` | `http://localhost:4000/api/v1` | Backend API base URL |
+| `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | Public app URL |
+
+### Backend (`backend/.env`)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `MONGODB_URI` | Yes | MongoDB Atlas connection string |
+| `JWT_ACCESS_SECRET` | Yes | Secret for signing access tokens |
+| `JWT_REFRESH_SECRET` | Yes | Secret for signing refresh tokens |
+| `GEMINI_API_KEY` | Yes | Google Gemini API key |
+| `CLIENT_URL` | Yes | Frontend URL (for CORS) |
+| `PORT` | No — default `4000` | Backend server port |
+| `GEMINI_MODEL` | No — default `gemini-2.5-flash` | Gemini model ID |
+| `JWT_ACCESS_EXPIRES` | No — default `15m` | Access token lifetime |
+| `JWT_REFRESH_EXPIRES` | No — default `7d` | Refresh token lifetime |
