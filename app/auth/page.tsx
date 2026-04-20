@@ -99,6 +99,11 @@ export default function RankrAuth() {
           },
         })
 
+        const expectedRole = role === 'candidate' ? 'candidate' : 'recruiter'
+        if (result.data.user.role !== expectedRole) {
+          throw new Error('Invalid email or password')
+        }
+
         setSession({ token: result.data.token, user: result.data.user })
         router.push(result.data.user.role === 'candidate' ? '/candidate' : '/dashboard')
         return
