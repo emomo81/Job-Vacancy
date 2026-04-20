@@ -8,7 +8,19 @@
       "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('Dynamic:', json.dumps\\(d.get\\('dynamicRoutes',[]\\), indent=2\\)\\); print\\('Static:', json.dumps\\(d.get\\('staticRoutes',[]\\), indent=2\\)\\)\")",
       "Bash(node -e ':*)",
       "Bash(node -e \" const fs = require\\('fs'\\); const path = require\\('path'\\); const projectRoot = 'C:/Users/emomo/OneDrive/Desktop/Real Projects/Job-Vacancy'; // Find the Next.js function that determines the app dir const files = [ 'node_modules/next/dist/lib/find-pages-dir.js', 'node_modules/next/dist/server/config.js', ]; files.forEach\\(f => { const full = path.join\\(projectRoot, f\\); if \\(fs.existsSync\\(full\\)\\) { const content = fs.readFileSync\\(full, 'utf8'\\); const match = content.match\\(/src.{0,200}app|app.{0,200}src/g\\); if \\(match\\) console.log\\(f, ':', match.slice\\(0,3\\).join\\('\\\\n'\\)\\); } }\\); \")",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(npx tsc *)",
+      "Bash(npm show *)",
+      "Bash(mongod --version)",
+      "Bash(mongosh --eval \"db.runCommand\\({ping:1}\\)\" --quiet)",
+      "Bash(npm run *)",
+      "Read(//tmp/**)",
+      "Bash(npx tsx *)",
+      "Bash(curl -s http://localhost:4000/api/v1/health)",
+      "Bash(curl -s -X POST http://localhost:4000/api/v1/auth/login -H 'Content-Type: application/json' -d '{\"email\":\"admin@aims.com\",\"password\":\"test123\"}')",
+      "Bash(nslookup cluster0.hhx1puk.mongodb.net)",
+      "Bash(nslookup _mongodb._tcp.cluster0.hhx1puk.mongodb.net)",
+      "Bash(ping -n 2 cluster0.hhx1puk.mongodb.net)"
     ]
   }
 }
