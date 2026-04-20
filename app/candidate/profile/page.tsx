@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { apiFetch } from '../../../utils/api-client'
+import { useToast } from '../../components/ui/Toast'
 
 const COMPLETION_ITEMS = [
   { id: 'info', label: 'Basic Information', done: true },
@@ -28,6 +29,7 @@ interface Experience {
 }
 
 export default function CandidateProfilePage() {
+  const { showToast } = useToast()
   // Load initial data from localStorage if exists
   const [fullName, setFullName] = useState('New Candidate')
   const [proTitle, setProTitle] = useState('Product Engineer')
@@ -48,6 +50,7 @@ export default function CandidateProfilePage() {
   const [remote, setRemote] = useState(true)
   const [fulltime, setFulltime] = useState(true)
   const [cvUploaded, setCvUploaded] = useState(false)
+  const [cvParsing, setCvParsing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   
@@ -100,6 +103,8 @@ export default function CandidateProfilePage() {
     if (education.trim()) score += 20;
     if (cvUploaded) score += 20;
     setCompletionPct(score);
+    localStorage.setItem('rankr_profile_completion', String(score));
+    window.dispatchEvent(new CustomEvent('rankr:completion-updated', { detail: { completion: score } }));
   }, [fullName, proTitle, location, skills, workHistory, education, cvUploaded])
 
   const handleSave = async () => {
@@ -141,15 +146,41 @@ export default function CandidateProfilePage() {
     const formData = new FormData()
     formData.append('cv', file)
     try {
-      await apiFetch('/candidate/profile/cv', {
+      setCvParsing(true)
+      setError('')
+      const result = await apiFetch('/candidate/profile/cv', {
         method: 'POST',
         isFormData: true,
         body: formData,
       })
       setCvUploaded(true)
-      alert("CV parsed and uploaded successfully!")
+
+      const parsed = result.data?.parsed
+      if (parsed) {
+        if (parsed.fullName) setFullName(parsed.fullName)
+        if (parsed.professionalTitle) setProTitle(parsed.professionalTitle)
+        if (parsed.location) setLocation(parsed.location)
+        if (typeof parsed.yearsExperience === 'number') setYearsExp(parsed.yearsExperience)
+        if (Array.isArray(parsed.skills) && parsed.skills.length) setSkills(parsed.skills)
+        if (parsed.education) setEducation(parsed.education)
+        if (Array.isArray(parsed.experiences) && parsed.experiences.length) {
+          setWorkHistory(parsed.experiences.map((exp: any, idx: number) => ({
+            id: String(exp._id || `parsed-${idx}-${Date.now()}`),
+            role: exp.role || '',
+            company: exp.company || '',
+            startDate: exp.startDate || '',
+            endDate: exp.endDate || '',
+            description: exp.description || '',
+          })))
+        }
+        showToast('CV scanned — profile auto-filled. Review and save your changes.', 'success')
+      } else {
+        showToast('CV uploaded. No extractable data found — fill in manually.', 'success')
+      }
     } catch {
-      alert('Failed to upload CV. Max 5MB PDF.')
+      setError('Failed to upload CV. Max 5MB · PDF, DOCX, or image.')
+    } finally {
+      setCvParsing(false)
     }
   }
 
@@ -439,16 +470,18 @@ export default function CandidateProfilePage() {
             <h3 className="text-[#070707] font-bold text-lg mb-6">Upload Current CV</h3>
             
             {!cvUploaded ? (
-              <div 
-                onClick={() => cvRef.current?.click()}
-                className="border-2 border-dashed border-[#d0dce8] rounded-2xl p-8 flex flex-col items-center gap-3 hover:border-[#2a85ff]/50 hover:bg-[#f8fbff] transition-all cursor-pointer text-center"
+              <div
+                onClick={() => !cvParsing && cvRef.current?.click()}
+                className={`border-2 border-dashed rounded-2xl p-8 flex flex-col items-center gap-3 transition-all text-center ${cvParsing ? 'border-[#2a85ff]/40 bg-[#f0f8ff] cursor-wait' : 'border-[#d0dce8] hover:border-[#2a85ff]/50 hover:bg-[#f8fbff] cursor-pointer'}`}
               >
                 <div className="w-12 h-12 rounded-xl bg-[#f0f5fa] flex items-center justify-center text-[#b0bac6]">
-                  <Upload size={20} />
+                  {cvParsing ? <Sparkles size={20} className="text-[#2a85ff] animate-pulse" /> : <Upload size={20} />}
                 </div>
-                <p className="text-[#070707] text-sm font-bold">Drop CV here</p>
-                <p className="text-[#b0bac6] text-[10px]">PDF, DOCX (Max 5MB)</p>
-                <input ref={cvRef} type="file" className="hidden" aria-label="Upload CV file" onChange={handleFileUpload} />
+                <p className="text-[#070707] text-sm font-bold">
+                  {cvParsing ? 'Scanning CV with AI...' : 'Drop CV here'}
+                </p>
+                <p className="text-[#b0bac6] text-[10px]">PDF, DOCX, or image (Max 5MB)</p>
+                <input ref={cvRef} type="file" accept=".pdf,.doc,.docx,image/jpeg,image/png,image/jpg,image/webp" className="hidden" aria-label="Upload CV file" onChange={handleFileUpload} />
               </div>
             ) : (
               <div className="bg-[#f0f5fa] rounded-2xl p-4 flex items-center gap-3 border border-[#2a85ff]/10">
