@@ -14,12 +14,27 @@ export interface SharedJobData {
   type: string
   salary: string
   posted: string
+  deadline?: string | null
   match: number
   tags: string[]
   requiredSkills: string[]
   minYearsExperience: number
   description: string
   niceToHave: string
+}
+
+export function formatDeadline(value?: string | null): { label: string; urgent: boolean; expired: boolean } | null {
+  if (!value) return null
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return null
+  const now = new Date()
+  const diff = date.getTime() - now.getTime()
+  const days = Math.ceil(diff / 86400000)
+  if (days < 0) return { label: 'Deadline passed', urgent: false, expired: true }
+  if (days === 0) return { label: 'Closes today', urgent: true, expired: false }
+  if (days === 1) return { label: 'Closes tomorrow', urgent: true, expired: false }
+  if (days <= 7) return { label: `Closes in ${days} days`, urgent: true, expired: false }
+  return { label: `Closes ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`, urgent: false, expired: false }
 }
 
 export function normalizeEmploymentType(value: string): string {
