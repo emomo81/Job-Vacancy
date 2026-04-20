@@ -10,36 +10,21 @@ import ScreeningResult from '../models/ScreeningResult';
 import ScreeningRun from '../models/ScreeningRun';
 import Shortlist from '../models/Shortlist';
 import Notification from '../models/Notification';
-import { scoreCandidate } from '../services/geminiService';
+import { batchScoreCandidates } from '../services/geminiService';
+import { parseCsvBuffer, parseExcelBuffer, parsePdfBuffer, parseDocxBuffer, parseRankrJsonBuffer, ParsedCandidate } from '../services/fileParserService';
 import { requireAuth, requireRole } from '../middleware/auth'
 import { ok, fail } from '../utils/apiResponse'
 
 const router: Router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+});
 
 function toArray(input: any): any[] {
   if (!input) return [];
   if (Array.isArray(input)) return input;
   return String(input).split(',').map((v) => v.trim()).filter(Boolean);
-}
-
-function pseudoCandidates(source: string, count: number): any[] {
-  const candidates = [];
-  for (let i = 0; i < count; i += 1) {
-    const idx = Math.floor(Math.random() * 10000);
-    candidates.push({
-      source,
-      fullName: `Candidate ${idx}`,
-      professionalTitle: source === 'rankr' ? 'Rankr Talent' : 'External Applicant',
-      location: 'Remote',
-      yearsExperience: Math.floor(Math.random() * 10) + 1,
-      skills: ['JavaScript', 'TypeScript', 'Node.js', 'React'].sort(() => 0.5 - Math.random()).slice(0, 3),
-      education: 'Bachelor\'s',
-      summary: 'Imported candidate profile',
-      completionPct: 60,
-    });
-  }
-  return candidates;
 }
 
 router.get('/recruiter/applications', requireAuth, requireRole(['recruiter', 'admin']), async (req: Request, res: Response) => {
@@ -111,32 +96,65 @@ router.get('/recruiter/applications', requireAuth, requireRole(['recruiter', 'ad
   }
 });
 
-async function importCandidates({ jobId, userId, source, count }: { jobId: any; userId: any; source: string; count: number }): Promise<number> {
-  const profiles = await CandidateProfile.insertMany(pseudoCandidates(source, count));
+async function persistParsedCandidates(jobId: any, userId: any, parsed: ParsedCandidate[]): Promise<{ imported: number; skipped: number }> {
+  if (!parsed.length) return { imported: 0, skipped: 0 };
+
+  const profiles = await CandidateProfile.insertMany(parsed.map((p) => ({
+    source: p.source,
+    fullName: p.fullName,
+    professionalTitle: p.professionalTitle,
+    location: p.location,
+    yearsExperience: p.yearsExperience,
+    skills: p.skills,
+    education: p.education,
+    summary: p.summary,
+    completionPct: p.completionPct,
+    cv: p.cv || { fileName: '', storageUrl: '', uploadedAt: null, extractedText: '' },
+  })));
+
   const poolDocs = profiles.map((profile) => ({
     jobId,
     candidateProfileId: profile._id,
-    source,
+    source: profile.source,
     addedBy: userId,
     status: 'pending_screening',
   }));
-  await JobCandidatePool.insertMany(poolDocs);
-  return profiles.length;
+
+  const applicationDocs = profiles.map((profile) => ({
+    jobId,
+    candidateProfileId: profile._id,
+    candidateUserId: null,
+    status: 'applied',
+    matchScore: 0,
+    feedback: 'Imported candidate — pending AI screening.',
+    appliedAt: new Date(),
+  }));
+
+  await Promise.all([
+    JobCandidatePool.insertMany(poolDocs),
+    Application.insertMany(applicationDocs),
+  ]);
+
+  return { imported: profiles.length, skipped: 0 };
 }
 
 router.post('/jobs/:jobId/candidates/import/rankr-json', requireAuth, requireRole(['recruiter', 'admin']), upload.single('file'), async (req: Request, res: Response) => {
   try {
     const job = await Job.findById(req.params.jobId).lean();
     if (!job) return fail(res, 404, 'NOT_FOUND', 'Job not found');
+    if (!req.file) return fail(res, 400, 'VALIDATION_ERROR', 'No file uploaded');
 
-    const imported = await importCandidates({
-      jobId: job._id,
-      userId: req.user._id,
-      source: 'rankr',
-      count: 6,
-    });
+    let parsed: ParsedCandidate[] = [];
+    try {
+      parsed = await parseRankrJsonBuffer(req.file.buffer);
+    } catch (e: any) {
+      return fail(res, 400, 'PARSE_ERROR', `Invalid Rankr JSON: ${e.message}`);
+    }
 
-    return ok(res, { imported });
+    if (!parsed.length) return fail(res, 400, 'EMPTY_FILE', 'No valid candidates found in file');
+
+    const result = await persistParsedCandidates(job._id, req.user._id, parsed);
+    return ok(res, result);
   } catch (error: any) {
     return fail(res, 500, 'INTERNAL_ERROR', error.message);
   }
@@ -146,33 +164,60 @@ router.post('/jobs/:jobId/candidates/import/external-csv', requireAuth, requireR
   try {
     const job = await Job.findById(req.params.jobId).lean();
     if (!job) return fail(res, 404, 'NOT_FOUND', 'Job not found');
+    if (!req.file) return fail(res, 400, 'VALIDATION_ERROR', 'No file uploaded');
 
-    const imported = await importCandidates({
-      jobId: job._id,
-      userId: req.user._id,
-      source: 'external',
-      count: 4,
-    });
+    const mime = req.file.mimetype || '';
+    const name = req.file.originalname?.toLowerCase() || '';
+    const isExcel = mime.includes('spreadsheetml') || mime.includes('excel') || name.endsWith('.xlsx') || name.endsWith('.xls');
 
-    return ok(res, { imported });
+    let parsed: ParsedCandidate[] = [];
+    try {
+      parsed = isExcel ? parseExcelBuffer(req.file.buffer) : parseCsvBuffer(req.file.buffer);
+    } catch (e: any) {
+      return fail(res, 400, 'PARSE_ERROR', `Could not parse file: ${e.message}`);
+    }
+
+    if (!parsed.length) {
+      return fail(res, 400, 'EMPTY_FILE', 'No valid candidate rows found. Expected headers: Full Name, Title, Location, Years of Experience, Skills, Education, Summary');
+    }
+
+    const result = await persistParsedCandidates(job._id, req.user._id, parsed);
+    return ok(res, result);
   } catch (error: any) {
     return fail(res, 500, 'INTERNAL_ERROR', error.message);
   }
 });
 
-router.post('/jobs/:jobId/candidates/import/external-pdf', requireAuth, requireRole(['recruiter', 'admin']), upload.single('file'), async (req: Request, res: Response) => {
+router.post('/jobs/:jobId/candidates/import/external-pdf', requireAuth, requireRole(['recruiter', 'admin']), upload.array('files', 20), async (req: Request, res: Response) => {
   try {
     const job = await Job.findById(req.params.jobId).lean();
     if (!job) return fail(res, 404, 'NOT_FOUND', 'Job not found');
 
-    const imported = await importCandidates({
-      jobId: job._id,
-      userId: req.user._id,
-      source: 'external',
-      count: 4,
-    });
+    const files = (req.files as Express.Multer.File[]) || [];
+    if (!files.length && (req as any).file) files.push((req as any).file);
+    if (!files.length) return fail(res, 400, 'VALIDATION_ERROR', 'No files uploaded');
 
-    return ok(res, { imported });
+    const parsed: ParsedCandidate[] = [];
+    const failed: string[] = [];
+
+    for (const file of files) {
+      const name = file.originalname?.toLowerCase() || '';
+      const isDocx = name.endsWith('.docx') || file.mimetype?.includes('wordprocessingml');
+      try {
+        const candidate = isDocx
+          ? await parseDocxBuffer(file.buffer, file.originalname)
+          : await parsePdfBuffer(file.buffer, file.originalname);
+        if (candidate) parsed.push(candidate);
+        else failed.push(file.originalname);
+      } catch (e) {
+        failed.push(file.originalname);
+      }
+    }
+
+    if (!parsed.length) return fail(res, 400, 'EMPTY_FILE', 'No candidates could be extracted from uploaded resumes');
+
+    const result = await persistParsedCandidates(job._id, req.user._id, parsed);
+    return ok(res, { ...result, failed });
   } catch (error: any) {
     return fail(res, 500, 'INTERNAL_ERROR', error.message);
   }
@@ -342,47 +387,48 @@ router.post('/jobs/:jobId/analyze-applications', requireAuth, requireRole(['recr
       progressPct: 0,
     });
 
-    let processed = 0;
-    const screeningResults: any[] = [];
+    const candidates = applications
+      .map((app) => app.candidateProfileId as any)
+      .filter(Boolean);
 
-    const evalPromises = applications.map(async (app) => {
-      try {
-        const candidate: any = app.candidateProfileId;
-        if (!candidate) return null;
-
-        const result = await scoreCandidate(job, candidate);
-
-        app.matchScore = result.score;
-        app.feedback = result.reasoning;
-        app.status = 'in_review';
-        app.updatedAt = new Date();
-        await app.save();
-
-        return {
-          screeningRunId: run._id,
-          jobId: job._id,
-          candidateProfileId: candidate._id,
-          score: result.score,
-          recommendation: result.recommendation,
-          matchedSkills: result.matchedSkills || [],
-          strengths: result.strengths || [],
-          gaps: result.gaps || [],
-          reasoning: result.reasoning || '',
-          rank: 0,
-          source: candidate.source || 'external',
-        };
-      } catch (e) {
-        console.error(`Error processing candidate in application ${app._id}:`, e);
-        return null;
-      }
+    const evaluations = await batchScoreCandidates(job, candidates, {
+      batchSize: 8,
+      onProgress: async (done, total) => {
+        run.processedCandidates = done;
+        run.progressPct = Math.round((done / Math.max(1, total)) * 100);
+        await run.save();
+      },
     });
 
-    const evaluatedResults = await Promise.all(evalPromises);
-    for (const res of evaluatedResults) {
-      if (res) {
-        screeningResults.push(res);
-        processed++;
-      }
+    const screeningResults: any[] = [];
+    let processed = 0;
+
+    for (const app of applications) {
+      const candidate: any = app.candidateProfileId;
+      if (!candidate) continue;
+      const result = evaluations.get(String(candidate._id));
+      if (!result) continue;
+
+      app.matchScore = result.score;
+      app.feedback = result.reasoning;
+      app.status = 'in_review';
+      app.updatedAt = new Date();
+      await app.save();
+
+      screeningResults.push({
+        screeningRunId: run._id,
+        jobId: job._id,
+        candidateProfileId: candidate._id,
+        score: result.score,
+        recommendation: result.recommendation,
+        matchedSkills: result.matchedSkills || [],
+        strengths: result.strengths || [],
+        gaps: result.gaps || [],
+        reasoning: result.reasoning || '',
+        rank: 0,
+        source: candidate.source || 'external',
+      });
+      processed++;
     }
 
     if (screeningResults.length > 0) {
