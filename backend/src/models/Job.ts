@@ -13,6 +13,7 @@ export interface IJob extends Document {
   description: string;
   niceToHave: string;
   location: string;
+  deadline: Date | null;
   status: 'draft' | 'open' | 'closed' | 'archived';
   createdAt: Date;
   updatedAt: Date;
@@ -32,6 +33,7 @@ const jobSchema = new Schema<IJob>(
     description: { type: String, default: '' },
     niceToHave: { type: String, default: '' },
     location: { type: String, default: '' },
+    deadline: { type: Date, default: null },
     status: { type: String, enum: ['draft', 'open', 'closed', 'archived'], default: 'open' },
   },
   { timestamps: true }
