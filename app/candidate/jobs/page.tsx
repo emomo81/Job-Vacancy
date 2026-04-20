@@ -2,23 +2,25 @@
 
 import React, { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  ArrowRight, 
-  Building2, 
-  Clock, 
-  Filter, 
-  MapPin, 
-  Search, 
-  Sparkles, 
-  Briefcase, 
-  CheckCircle2, 
-  X 
+import {
+  ArrowRight,
+  Building2,
+  CalendarClock,
+  Clock,
+  Filter,
+  MapPin,
+  Search,
+  Sparkles,
+  Briefcase,
+  CheckCircle2,
+  X
 } from 'lucide-react'
 import { apiFetch } from '../../../utils/api-client'
 import {
   SharedJobData,
   normalizeEmploymentType,
   formatPostedDate,
+  formatDeadline,
   buildInitials,
   getTypeLabel,
   getTagTone
@@ -71,6 +73,7 @@ export default function BrowseJobsPage() {
             minYearsExperience: Number(job.minYearsExperience || 0),
             description: job.description || '',
             niceToHave: job.niceToHave || '',
+            deadline: job.deadline ?? null,
           } satisfies CandidateJobCard
         })
 
@@ -232,6 +235,16 @@ export default function BrowseJobsPage() {
                     <div className="flex items-center gap-1.5"><MapPin size={14} />{job.location}</div>
                     <div className="flex items-center gap-1.5"><Briefcase size={14} />{job.salary}</div>
                     <div className="flex items-center gap-1.5"><Clock size={14} />{job.posted}</div>
+                    {(() => {
+                      const dl = formatDeadline(job.deadline)
+                      if (!dl) return null
+                      return (
+                        <div className={`flex items-center gap-1.5 font-semibold ${dl.expired ? 'text-red-500' : dl.urgent ? 'text-amber-600' : 'text-[#16a34a]'}`}>
+                          <CalendarClock size={14} />
+                          {dl.label}
+                        </div>
+                      )
+                    })()}
                   </div>
 
                   <div className="flex flex-wrap gap-2 mt-4">
