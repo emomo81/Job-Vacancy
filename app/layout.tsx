@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 }
 
 import { ToastProvider } from './components/ui/Toast'
+import Providers from '../store/Providers'
 
 export default function RootLayout({
   children,
@@ -24,9 +25,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${poppins.variable} h-full antialiased`} suppressHydrationWarning={true}>
       <body className="min-h-full flex flex-col font-sans" suppressHydrationWarning={true}>
-        <ToastProvider>
-          {children}
-        </ToastProvider>
+        <Providers>
+          <ToastProvider>
+            {children}
+          </ToastProvider>
+        </Providers>
       </body>
     </html>
   )
