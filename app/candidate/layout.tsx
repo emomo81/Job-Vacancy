@@ -9,7 +9,7 @@ import {
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { clearSession } from '../../utils/api-client'
-import { useAppSelector } from '../../store'
+import { useAppSelector } from '@/store'
 
 const poppins = Poppins({
   subsets: ['latin'],

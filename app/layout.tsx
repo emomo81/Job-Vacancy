@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 }
 
 import { ToastProvider } from './components/ui/Toast'
-import Providers from '../store/Providers'
+import Providers from '@/store/Providers'
 
 export default function RootLayout({
   children,
