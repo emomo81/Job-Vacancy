@@ -6,7 +6,7 @@ import CandidateProfile from '../models/CandidateProfile';
 import ScreeningRun from '../models/ScreeningRun';
 import ScreeningResult from '../models/ScreeningResult';
 import Notification from '../models/Notification';
-import { scoreCandidate } from '../services/geminiService';
+import { batchScoreCandidates } from '../services/geminiService';
 import { requireAuth, requireRole } from '../middleware/auth';
 import { ok, fail } from '../utils/apiResponse';
 
@@ -37,11 +37,19 @@ async function runScreeningAsync(runId: any, userId: any): Promise<void> {
 
   await ScreeningResult.deleteMany({ screeningRunId: run._id });
 
-  for (let i = 0; i < candidates.length; i += 1) {
-    const candidate = candidates[i];
-    const result = await scoreCandidate(job, candidate);
+  const evaluations = await batchScoreCandidates(job, candidates, {
+    batchSize: 8,
+    onProgress: async (done, total) => {
+      run.processedCandidates = done;
+      run.progressPct = Math.round((done / Math.max(1, total)) * 100);
+      await run.save();
+    },
+  });
 
-    await ScreeningResult.create({
+  const resultDocs = candidates.map((candidate) => {
+    const result = evaluations.get(String(candidate._id));
+    if (!result) return null;
+    return {
       screeningRunId: run._id,
       jobId: job._id,
       candidateProfileId: candidate._id,
@@ -53,17 +61,17 @@ async function runScreeningAsync(runId: any, userId: any): Promise<void> {
       reasoning: result.reasoning,
       rank: 0,
       source: candidate.source || 'external',
-    });
+    };
+  }).filter(Boolean);
 
-    await JobCandidatePool.updateOne(
-      { jobId: job._id, candidateProfileId: candidate._id },
-      { $set: { status: 'screened' } }
-    );
-
-    run.processedCandidates = i + 1;
-    run.progressPct = Math.round(((i + 1) / Math.max(1, candidates.length)) * 100);
-    await run.save();
+  if (resultDocs.length) {
+    await ScreeningResult.insertMany(resultDocs);
   }
+
+  await JobCandidatePool.updateMany(
+    { jobId: job._id, candidateProfileId: { $in: candidates.map((c) => c._id) } },
+    { $set: { status: 'screened' } }
+  );
 
   const ranked = await ScreeningResult.find({ screeningRunId: run._id }).sort({ score: -1 }).lean();
   for (let i = 0; i < ranked.length; i += 1) {
