@@ -1,14 +1,15 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Poppins } from 'next/font/google'
-import { 
-  Sparkles, FileText, User as UserIcon, 
+import {
+  Sparkles, FileText, User as UserIcon,
   Bell, Search, LogOut, Menu, X
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { clearSession } from '../../utils/api-client'
+import { useAppSelector } from '../../store'
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -25,17 +26,9 @@ const CANDIDATE_NAV = [
 export default function CandidateLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   
-  // Initialize with fallback to prevent hydration mismatch
-  // suppressHydrationWarning attribute will be added to the element that renders this value
-  const [userName] = useState(() => {
-    if (typeof window === 'undefined') return 'New Candidate'
-    return localStorage.getItem('rankr_user_name') || 'New Candidate'
-  })
-  const [completion] = useState(() => {
-    if (typeof window === 'undefined') return 75
-    const storedCompletion = localStorage.getItem('rankr_profile_completion')
-    return storedCompletion ? Number.parseInt(storedCompletion, 10) : 75
-  })
+  const profile = useAppSelector((s) => s.profile)
+  const userName = profile.fullName || 'New Candidate'
+  const completion = profile.completion
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   return (
