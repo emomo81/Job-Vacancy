@@ -1,9 +1,9 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react'
-import { Briefcase, Users, RefreshCw, Sparkles, MapPin, CalendarDays, BadgeCheck } from 'lucide-react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { Briefcase, Users, RefreshCw, Sparkles, MapPin, CalendarDays, BadgeCheck, Upload, FileText } from 'lucide-react'
 import Navbar from '../components/Navbar'
-import { apiFetch, setCurrentJobId } from '../../utils/api-client'
+import { apiFetch, getToken, getApiBase, setCurrentJobId } from '../../utils/api-client'
 import { useRouter } from 'next/navigation'
 
 type JobItem = {
@@ -85,6 +85,9 @@ export default function CandidatesPage() {
   const [unshortlistingAppId, setUnshortlistingAppId] = useState('')
   const [activeTab, setActiveTab] = useState<'all' | 'shortlisted'>('all')
   const [selectedCandidate, setSelectedCandidate] = useState<ApplicantItem | null>(null)
+  const [importing, setImporting] = useState(false)
+  const [importResult, setImportResult] = useState<{ imported: number; skipped: number } | null>(null)
+  const csvInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     let mounted = true
@@ -262,6 +265,33 @@ export default function CandidatesPage() {
     }
   }
 
+  const handleImportCsv = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !selectedJob) return
+    e.target.value = ''
+
+    setImporting(true)
+    setImportResult(null)
+    setError('')
+
+    try {
+      const form = new FormData()
+      form.append('file', file)
+      const response = await fetch(
+        `${getApiBase()}/jobs/${selectedJob.id}/candidates/import/external-csv`,
+        { method: 'POST', headers: { Authorization: `Bearer ${getToken()}` }, body: form }
+      )
+      const payload = await response.json()
+      if (!response.ok || !payload?.success) throw new Error(payload?.error?.message || 'Import failed')
+      setImportResult(payload.data)
+      await handleRefresh()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to import file')
+    } finally {
+      setImporting(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#f3f7fb]">
       <Navbar type="app" activeNav="Candidates" />
@@ -312,6 +342,18 @@ export default function CandidatesPage() {
         {error && (
           <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
             {error}
+          </div>
+        )}
+
+        {importResult && (
+          <div className="mt-4 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            <FileText size={16} className="shrink-0" />
+            <span>
+              <strong>{importResult.imported}</strong> candidate{importResult.imported !== 1 ? 's' : ''} imported successfully.
+              {importResult.skipped > 0 && <> {importResult.skipped} row{importResult.skipped !== 1 ? 's' : ''} skipped (missing name).</>}
+              {' '}Click <strong>Analyze with AI</strong> to score them.
+            </span>
+            <button type="button" onClick={() => setImportResult(null)} className="ml-auto text-emerald-600 hover:text-emerald-800">✕</button>
           </div>
         )}
 
@@ -394,16 +436,35 @@ export default function CandidatesPage() {
                 </div>
               </div>
               {selectedJob && (
-                <button
-                  type="button"
-                  onClick={() => handleAnalyze(selectedJob.id)}
-                  disabled={analyzingJobId === selectedJob.id}
-                  className="inline-flex items-center gap-2 rounded-full bg-[#ff3366] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-pink-100 transition-all hover:bg-[#e6295b] hover:scale-105 active:scale-95 disabled:opacity-50"
-                  title="Analyze applied users"
-                >
-                  {analyzingJobId === selectedJob.id ? <RefreshCw className="animate-spin" size={16} /> : <Sparkles size={16} />}
-                  Analyze with AI
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <input
+                    ref={csvInputRef}
+                    type="file"
+                    accept=".csv,.xlsx,.xls"
+                    className="hidden"
+                    onChange={handleImportCsv}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => csvInputRef.current?.click()}
+                    disabled={importing}
+                    className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:scale-105 active:scale-95 disabled:opacity-50"
+                    title="Upload CSV or Excel with candidate data"
+                  >
+                    {importing ? <RefreshCw className="animate-spin" size={16} /> : <Upload size={16} />}
+                    {importing ? 'Importing...' : 'Import CSV'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAnalyze(selectedJob.id)}
+                    disabled={analyzingJobId === selectedJob.id}
+                    className="inline-flex items-center gap-2 rounded-full bg-[#ff3366] px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-pink-100 transition-all hover:bg-[#e6295b] hover:scale-105 active:scale-95 disabled:opacity-50"
+                    title="Analyze applied users"
+                  >
+                    {analyzingJobId === selectedJob.id ? <RefreshCw className="animate-spin" size={16} /> : <Sparkles size={16} />}
+                    Analyze with AI
+                  </button>
+                </div>
               )}
             </div>
 
