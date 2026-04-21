@@ -3,9 +3,9 @@
 import React, { useEffect } from 'react'
 import { Provider } from 'react-redux'
 
-import { store, useAppDispatch } from '@/store'
-import { setCredentials, clearCredentials } from '@/store/slices/authSlice'
-import { setProfile, setCompletion } from '@/store/slices/profileSlice'
+import { store, useAppDispatch } from './index'
+import { setCredentials, clearCredentials } from './slices/authSlice'
+import { setProfile, setCompletion } from './slices/profileSlice'
 
 function HydrateLegacyStorage() {
   const dispatch = useAppDispatch()
