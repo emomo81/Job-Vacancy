@@ -8,13 +8,18 @@ import { connectDb } from './db';
 
 async function bootstrap(): Promise<void> {
   try {
+    console.log('Connecting to MongoDB...');
     await connectDb();
+    console.log('MongoDB connected ✓');
     app.listen(config.port, () => {
       console.log(`Backend listening on http://localhost:${config.port}`);
     });
-  } catch (error) {
-    console.error('Failed to start backend:', error);
-    process.exit(1);
+  } catch (error: any) {
+    console.error('=== STARTUP FAILED ===');
+    console.error('Reason:', error?.message ?? error);
+    console.error('Stack:', error?.stack);
+    // flush stdout/stderr before exiting
+    process.stdout.write('', () => process.exit(1));
   }
 }
 
