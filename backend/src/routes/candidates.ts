@@ -11,6 +11,7 @@ import ScreeningRun from '../models/ScreeningRun';
 import Shortlist from '../models/Shortlist';
 import Notification from '../models/Notification';
 import { batchScoreCandidates } from '../services/geminiService';
+import { notifyShortlisted } from '../services/twilioService';
 import { parseCsvBuffer, parseExcelBuffer, parsePdfBuffer, parseDocxBuffer, parseRankrJsonBuffer, ParsedCandidate } from '../services/fileParserService';
 import { requireAuth, requireRole } from '../middleware/auth'
 import { ok, fail } from '../utils/apiResponse'
@@ -314,6 +315,8 @@ router.post('/jobs/:jobId/shortlist', requireAuth, requireRole(['recruiter', 'ad
     if (!candidateProfileId) return fail(res, 400, 'VALIDATION_ERROR', 'candidateProfileId is required');
 
     const existing = await Shortlist.findOne({ jobId: req.params.jobId, candidateProfileId });
+    let notificationResult = null;
+
     if (!existing) {
       await Shortlist.create({
         jobId: req.params.jobId,
@@ -329,7 +332,7 @@ router.post('/jobs/:jobId/shortlist', requireAuth, requireRole(['recruiter', 'ad
         { new: true }
       );
 
-      // Notify candidate if possible
+      // In-app notification
       if (application?.candidateUserId) {
         await Notification.create({
           userId: application.candidateUserId,
@@ -338,12 +341,35 @@ router.post('/jobs/:jobId/shortlist', requireAuth, requireRole(['recruiter', 'ad
           message: 'Congratulations! Your application has been shortlisted by the recruiter.',
           meta: { jobId: req.params.jobId, applicationId: application._id.toString() },
           isRead: false,
-          createdAt: new Date()
+          createdAt: new Date(),
+        });
+      }
+
+      // SMS + WhatsApp notification via Twilio
+      const [profile, job] = await Promise.all([
+        CandidateProfile.findById(candidateProfileId).lean(),
+        Job.findById(req.params.jobId).lean(),
+      ]);
+
+      if (profile && job && (profile.phone || profile.whatsappNumber)) {
+        const latestResult = await ScreeningResult.findOne({
+          jobId: job._id,
+          candidateProfileId: profile._id,
+        }).sort({ createdAt: -1 }).lean();
+
+        notificationResult = await notifyShortlisted({
+          candidateName: profile.fullName,
+          phone: profile.phone || '',
+          whatsappNumber: profile.whatsappNumber || '',
+          jobTitle: job.title,
+          companyName: 'Rankr',
+          skills: profile.skills || [],
+          score: latestResult?.score ?? 0,
         });
       }
     }
 
-    return ok(res, { shortlisted: true });
+    return ok(res, { shortlisted: true, notification: notificationResult });
   } catch (error: any) {
     return fail(res, 500, 'INTERNAL_ERROR', error.message);
   }
@@ -476,11 +502,35 @@ router.post('/applications/:id/shortlist', requireAuth, requireRole(['recruiter'
         message: 'Congratulations! Your application was shortlisted by the recruiter.',
         meta: { applicationId: app._id.toString() },
         isRead: false,
-        createdAt: new Date()
+        createdAt: new Date(),
       });
     }
 
-    return ok(res, { success: true });
+    // SMS + WhatsApp notification via Twilio
+    let notificationResult = null;
+    const [profile, job] = await Promise.all([
+      CandidateProfile.findById(app.candidateProfileId).lean(),
+      Job.findById(app.jobId).lean(),
+    ]);
+
+    if (profile && job && (profile.phone || profile.whatsappNumber)) {
+      const latestResult = await ScreeningResult.findOne({
+        jobId: job._id,
+        candidateProfileId: profile._id,
+      }).sort({ createdAt: -1 }).lean();
+
+      notificationResult = await notifyShortlisted({
+        candidateName: profile.fullName,
+        phone: profile.phone || '',
+        whatsappNumber: profile.whatsappNumber || '',
+        jobTitle: job.title,
+        companyName: 'Rankr',
+        skills: profile.skills || [],
+        score: latestResult?.score ?? app.matchScore ?? 0,
+      });
+    }
+
+    return ok(res, { success: true, notification: notificationResult });
   } catch (error: any) {
     return fail(res, 500, 'INTERNAL_ERROR', error.message);
   }

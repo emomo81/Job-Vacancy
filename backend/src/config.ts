@@ -10,6 +10,10 @@ interface Config {
   geminiApiKey: string;
   geminiModel: string;
   clientUrl: string;
+  twilioAccountSid: string;
+  twilioAuthToken: string;
+  twilioFromPhone: string;
+  twilioWhatsAppFrom: string;
 }
 
 const config: Config = {
@@ -22,6 +26,10 @@ const config: Config = {
   geminiApiKey: process.env.GEMINI_API_KEY || '',
   geminiModel: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
   clientUrl: process.env.CLIENT_URL || 'http://localhost:3000',
+  twilioAccountSid: process.env.TWILIO_ACCOUNT_SID || '',
+  twilioAuthToken: process.env.TWILIO_AUTH_TOKEN || '',
+  twilioFromPhone: process.env.TWILIO_FROM_PHONE || '',
+  twilioWhatsAppFrom: process.env.TWILIO_WHATSAPP_FROM || 'whatsapp:+14155238886',
 };
 
 export default config;

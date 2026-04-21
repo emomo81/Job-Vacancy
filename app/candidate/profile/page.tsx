@@ -3,8 +3,8 @@
 import React, { useState, useRef, useEffect } from 'react'
 import {
   MapPin, Upload, FileText,
-  Plus, X, Briefcase, Check, 
-  ExternalLink, Minus, Sparkles
+  Plus, X, Briefcase, Check,
+  ExternalLink, Minus, Sparkles, Phone, MessageCircle
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { apiFetch } from '../../../utils/api-client'
@@ -36,6 +36,8 @@ export default function CandidateProfilePage() {
   const [location, setLocation] = useState('Kigali, Rwanda')
   const [yearsExp, setYearsExp] = useState(2)
   const [linkedin, setLinkedin] = useState('')
+  const [phone, setPhone] = useState('')
+  const [whatsappNumber, setWhatsappNumber] = useState('')
   const [skills, setSkills] = useState<string[]>(['TypeScript', 'React'])
   const [education, setEducation] = useState('')
   const [completionPct, setCompletionPct] = useState(0)
@@ -88,6 +90,8 @@ export default function CandidateProfilePage() {
         setCompletionPct(Number(p.completionPct || 0))
         setCvUploaded(Boolean(p.cv?.uploadedAt))
         setEducation(p.education || '')
+        setPhone(p.phone || '')
+        setWhatsappNumber(p.whatsappNumber || '')
       } catch {
         const savedName = localStorage.getItem('rankr_user_name')
         if (savedName) setFullName(savedName)
@@ -119,6 +123,8 @@ export default function CandidateProfilePage() {
           location,
           yearsExperience: yearsExp,
           linkedinUrl: linkedin,
+          phone,
+          whatsappNumber,
           skills,
           education,
           completionPct,
@@ -567,7 +573,7 @@ export default function CandidateProfilePage() {
               <div className="md:col-span-2 space-y-2">
                 <label className="text-[11px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">Education Background</label>
                 <div className="relative">
-                  <input 
+                  <input
                     value={education}
                     onChange={e => setEducation(e.target.value)}
                     placeholder="e.g. BSc Computer Science, MIT 2018-2022"
@@ -576,6 +582,51 @@ export default function CandidateProfilePage() {
                   />
                 </div>
               </div>
+
+              {/* Contact for notifications */}
+              <div className="md:col-span-2">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="h-px flex-1 bg-[#e2eaf2]" />
+                  <span className="text-[10px] font-bold text-[#8a9ab0] uppercase tracking-wider px-2">Notification Contacts</span>
+                  <div className="h-px flex-1 bg-[#e2eaf2]" />
+                </div>
+                <p className="text-[11px] text-[#8a9ab0] mb-5 leading-relaxed">
+                  Add your phone numbers so recruiters can notify you via <strong>SMS</strong> and <strong>WhatsApp</strong> when you&apos;re shortlisted for a role.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">Phone Number (SMS)</label>
+                    <div className="relative">
+                      <input
+                        value={phone}
+                        onChange={e => setPhone(e.target.value)}
+                        placeholder="+250 788 000 000"
+                        aria-label="Phone number for SMS"
+                        type="tel"
+                        className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-2xl px-5 py-3.5 pl-12 text-sm font-semibold text-[#070707] focus:outline-none focus:border-[#2a85ff]/50 focus:ring-4 focus:ring-[#2a85ff]/5 transition-all"
+                      />
+                      <Phone size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-[#b0bac6]" />
+                    </div>
+                    <p className="text-[10px] text-[#b0bac6] px-1">International format, e.g. +250788000000</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">WhatsApp Number</label>
+                    <div className="relative">
+                      <input
+                        value={whatsappNumber}
+                        onChange={e => setWhatsappNumber(e.target.value)}
+                        placeholder="+250 788 000 000"
+                        aria-label="WhatsApp number"
+                        type="tel"
+                        className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-2xl px-5 py-3.5 pl-12 text-sm font-semibold text-[#070707] focus:outline-none focus:border-[#2a85ff]/50 focus:ring-4 focus:ring-[#2a85ff]/5 transition-all"
+                      />
+                      <MessageCircle size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-[#25D366]" />
+                    </div>
+                    <p className="text-[10px] text-[#b0bac6] px-1">Can be same as phone number</p>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
 
