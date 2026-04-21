@@ -15,11 +15,10 @@ async function bootstrap(): Promise<void> {
       console.log(`Backend listening on http://localhost:${config.port}`);
     });
   } catch (error: any) {
-    console.error('=== STARTUP FAILED ===');
-    console.error('Reason:', error?.message ?? error);
-    console.error('Stack:', error?.stack);
-    // flush stdout/stderr before exiting
-    process.stdout.write('', () => process.exit(1));
+    // Write to stdout so Render captures it (stderr is not always shown)
+    process.stdout.write(`=== STARTUP FAILED ===\n`);
+    process.stdout.write(`Reason: ${error?.message ?? error}\n`);
+    process.stdout.write(`Stack: ${error?.stack ?? 'none'}\n`, () => process.exit(1));
   }
 }
 
