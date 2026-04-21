@@ -14,9 +14,9 @@ interface Config {
   twilioAuthToken: string;
   twilioFromPhone: string;
   twilioWhatsAppFrom: string;
-  sendgridApiKey: string;
-  sendgridFromEmail: string;
-  sendgridFromName: string;
+  gmailUser: string;
+  gmailAppPassword: string;
+  emailFromName: string;
   atApiKey: string;
   atUsername: string;
   atSenderId: string;
@@ -36,9 +36,9 @@ const config: Config = {
   twilioAuthToken: process.env.TWILIO_AUTH_TOKEN || '',
   twilioFromPhone: process.env.TWILIO_FROM_PHONE || '',
   twilioWhatsAppFrom: process.env.TWILIO_WHATSAPP_FROM || 'whatsapp:+14155238886',
-  sendgridApiKey: process.env.SENDGRID_API_KEY || '',
-  sendgridFromEmail: process.env.SENDGRID_FROM_EMAIL || '',
-  sendgridFromName: process.env.SENDGRID_FROM_NAME || 'Rankr Hiring Team',
+  gmailUser: process.env.GMAIL_USER || '',
+  gmailAppPassword: process.env.GMAIL_APP_PASSWORD || '',
+  emailFromName: process.env.EMAIL_FROM_NAME || 'Rankr Hiring Team',
   atApiKey: process.env.AT_API_KEY || '',
   atUsername: process.env.AT_USERNAME || 'sandbox',
   atSenderId: process.env.AT_SENDER_ID ?? '',
