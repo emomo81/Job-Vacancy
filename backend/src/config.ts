@@ -17,6 +17,9 @@ interface Config {
   sendgridApiKey: string;
   sendgridFromEmail: string;
   sendgridFromName: string;
+  atApiKey: string;
+  atUsername: string;
+  atSenderId: string;
 }
 
 const config: Config = {
@@ -36,6 +39,9 @@ const config: Config = {
   sendgridApiKey: process.env.SENDGRID_API_KEY || '',
   sendgridFromEmail: process.env.SENDGRID_FROM_EMAIL || '',
   sendgridFromName: process.env.SENDGRID_FROM_NAME || 'Rankr Hiring Team',
+  atApiKey: process.env.AT_API_KEY || '',
+  atUsername: process.env.AT_USERNAME || 'sandbox',
+  atSenderId: process.env.AT_SENDER_ID || 'RANKR',
 };
 
 export default config;

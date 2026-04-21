@@ -1,12 +1,26 @@
 import twilio from 'twilio';
 import sgMail from '@sendgrid/mail';
+import AfricasTalking from 'africastalking';
 import config from '../config';
 
-// ── Twilio client ─────────────────────────────────────────────────────────────
+// ── Africa's Talking client ───────────────────────────────────────────────────
+
+let atSmsClient: any = null;
+
+function getAtClient() {
+  if (!config.atApiKey) return null;
+  if (!atSmsClient) {
+    const at = (AfricasTalking as any)({ apiKey: config.atApiKey, username: config.atUsername });
+    atSmsClient = at.SMS;
+  }
+  return atSmsClient;
+}
+
+// ── Twilio client (fallback) ──────────────────────────────────────────────────
 
 let twilioClient: ReturnType<typeof twilio> | null = null;
 
-function getClient() {
+function getTwilioClient() {
   if (!config.twilioAccountSid || !config.twilioAuthToken) return null;
   if (!twilioClient) {
     twilioClient = twilio(config.twilioAccountSid, config.twilioAuthToken);
@@ -285,15 +299,36 @@ export async function sendEmail(params: {
   }
 }
 
-// ── SMS ───────────────────────────────────────────────────────────────────────
+// ── SMS (Africa's Talking → Twilio fallback) ──────────────────────────────────
 
 export async function sendSms(to: string, body: string): Promise<{ success: boolean; sid?: string; error?: string }> {
-  const client = getClient();
-  if (!client) return { success: false, error: 'Twilio not configured' };
+  const atClient = getAtClient();
+
+  // Africa's Talking — preferred
+  if (atClient) {
+    try {
+      const result = await atClient.send({
+        to: [normalizePhone(to)],
+        message: body,
+        ...(config.atUsername !== 'sandbox' && config.atSenderId ? { from: config.atSenderId } : {}),
+      });
+      const recipient = result?.SMSMessageData?.Recipients?.[0];
+      if (recipient?.statusCode === 101 || recipient?.status === 'Success') {
+        return { success: true, sid: recipient.messageId };
+      }
+      throw new Error(recipient?.status || 'AT send failed');
+    } catch (err: any) {
+      return { success: false, error: `AT: ${err?.message || 'SMS send failed'}` };
+    }
+  }
+
+  // Twilio fallback
+  const twilioClient = getTwilioClient();
+  if (!twilioClient) return { success: false, error: 'No SMS provider configured (set AT_API_KEY or Twilio vars)' };
   if (!config.twilioFromPhone) return { success: false, error: 'TWILIO_FROM_PHONE not set' };
 
   try {
-    const msg = await client.messages.create({
+    const msg = await twilioClient.messages.create({
       body,
       from: config.twilioFromPhone,
       to: normalizePhone(to),
@@ -304,10 +339,10 @@ export async function sendSms(to: string, body: string): Promise<{ success: bool
   }
 }
 
-// ── WhatsApp ──────────────────────────────────────────────────────────────────
+// ── WhatsApp (Twilio) ─────────────────────────────────────────────────────────
 
 export async function sendWhatsApp(to: string, body: string): Promise<{ success: boolean; sid?: string; error?: string }> {
-  const client = getClient();
+  const client = getTwilioClient();
   if (!client) return { success: false, error: 'Twilio not configured' };
 
   try {
