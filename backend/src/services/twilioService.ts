@@ -79,10 +79,15 @@ export async function generateShortlistMessage(params: {
 
     if (!response.ok) throw new Error('Gemini request failed');
     const body = await response.json();
-    const text = String(body?.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
-    // Validate the response actually contains key info before using it
+
+    // gemini-2.5-flash returns thinking chunks first (thought: true) —
+    // skip those and find the actual output part
+    const parts: any[] = body?.candidates?.[0]?.content?.parts || [];
+    const outputPart = parts.find((p: any) => !p.thought) ?? parts[parts.length - 1];
+    const text = String(outputPart?.text || '').trim();
+
     if (!text || !text.includes(firstName) || text.length < 80) {
-      console.warn('[Gemini SMS] response too short or missing name, using fallback');
+      console.warn('[Gemini SMS] unusable response, using fallback. Got:', text.slice(0, 60));
       return fallback;
     }
     return text;
@@ -141,7 +146,9 @@ async function generateEmailBody(params: {
 
     if (!response.ok) throw new Error('Gemini request failed');
     const body = await response.json();
-    const text = String(body?.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+    const parts: any[] = body?.candidates?.[0]?.content?.parts || [];
+    const outputPart = parts.find((p: any) => !p.thought) ?? parts[parts.length - 1];
+    const text = String(outputPart?.text || '').trim();
     if (!text) throw new Error('Empty response');
     return text;
   } catch {
