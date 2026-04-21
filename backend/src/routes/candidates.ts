@@ -557,4 +557,21 @@ router.post('/applications/:id/shortlist', requireAuth, requireRole(['recruiter'
   }
 });
 
+router.delete('/applications/:id/shortlist', requireAuth, requireRole(['recruiter', 'admin']), async (req: Request, res: Response) => {
+  try {
+    const app = await Application.findById(req.params.id);
+    if (!app) return fail(res, 404, 'NOT_FOUND', 'Application not found');
+
+    app.status = 'applied';
+    app.updatedAt = new Date();
+    await app.save();
+
+    await Shortlist.deleteOne({ jobId: app.jobId, candidateProfileId: app.candidateProfileId });
+
+    return ok(res, { shortlisted: false });
+  } catch (error: any) {
+    return fail(res, 500, 'INTERNAL_ERROR', error.message);
+  }
+});
+
 export default router;
