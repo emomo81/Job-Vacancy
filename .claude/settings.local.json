@@ -21,7 +21,15 @@
       "Bash(nslookup cluster0.hhx1puk.mongodb.net)",
       "Bash(nslookup _mongodb._tcp.cluster0.hhx1puk.mongodb.net)",
       "Bash(ping -n 2 cluster0.hhx1puk.mongodb.net)",
-      "Bash(xargs grep *)"
+      "Bash(xargs grep *)",
+      "Bash(npm list *)",
+      "Bash(cat .env.local)",
+      "Bash(cat .env)",
+      "Bash(node -e \"const AT = require\\('africastalking'\\); console.log\\(typeof AT\\)\")",
+      "Bash(npm i *)",
+      "Bash(echo \"EXIT:$?\")",
+      "mcp__Desktop_Commander__list_sessions",
+      "mcp__Desktop_Commander__start_process"
     ]
   }
 }
