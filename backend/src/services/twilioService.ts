@@ -46,23 +46,22 @@ export async function generateShortlistMessage(params: {
   const firstName = candidateName.split(' ')[0];
   const topSkills = skills.slice(0, 3).join(', ') || 'your skills';
 
+  // Keep under 160 chars — Rwanda rejects multi-part SMS from shared shortcodes
+  const skill1 = skills[0] || 'your skills';
   const fallback =
-    `Congratulations ${firstName}! Your application for the ${jobTitle} role at ${companyName} ` +
-    `has been shortlisted with a ${score}% match score. Your expertise in ${topSkills} stood out. ` +
-    `Our team will contact you soon with next steps. - ${companyName} Hiring Team`;
+    `Hi ${firstName}, you have been shortlisted for the ${jobTitle} role at ${companyName}! ` +
+    `Match: ${score}%. Skills: ${skill1} stood out. Our team will contact you soon.`;
 
   if (!config.geminiApiKey) return fallback;
 
   const prompt =
-    `Write a single SMS shortlist notification. It MUST include ALL of the following:\n` +
-    `1. Address the candidate by first name: ${firstName}\n` +
-    `2. Congratulate them on being shortlisted\n` +
-    `3. Mention the exact job title: ${jobTitle}\n` +
-    `4. Mention the company: ${companyName}\n` +
-    `5. Include their AI match score: ${score}%\n` +
-    `6. Mention 1-2 of their top skills: ${topSkills}\n` +
-    `7. Say the team will be in touch soon\n` +
-    `Rules: plain text only, no emojis, no markdown, no quotes, under 320 characters, one paragraph.`;
+    `Write a shortlist SMS notification. STRICT RULES:\n` +
+    `- Under 155 characters total (HARD LIMIT — single SMS segment)\n` +
+    `- Plain text only, no emojis, no markdown, no quotes\n` +
+    `- Must include: candidate first name (${firstName}), job title (${jobTitle}), ` +
+    `company (${companyName}), match score (${score}%), one top skill (${skill1})\n` +
+    `- End with: team will be in touch\n` +
+    `Output only the message, nothing else.`;
 
   try {
     const response = await fetch(
@@ -90,8 +89,12 @@ export async function generateShortlistMessage(params: {
     const outputPart = parts.find((p: any) => !p.thought) ?? parts[parts.length - 1];
     const text = String(outputPart?.text || '').trim();
 
-    if (!text || !text.includes(firstName) || text.length < 80) {
+    if (!text || !text.includes(firstName) || text.length < 50) {
       console.warn('[Gemini SMS] unusable response, using fallback. Got:', text.slice(0, 60));
+      return fallback;
+    }
+    if (text.length > 155) {
+      console.warn('[Gemini SMS] too long (' + text.length + ' chars), using fallback');
       return fallback;
     }
     return text;
