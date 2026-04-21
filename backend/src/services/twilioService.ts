@@ -314,7 +314,7 @@ function buildEmailHtml(params: {
 
               <!-- CTA -->
               <div style="margin:32px 0;text-align:center;">
-                <a href="https://rankr.app/candidate/applications" style="display:inline-block;background:#2a85ff;color:#ffffff;font-size:15px;font-weight:800;border-radius:12px;padding:16px 40px;text-decoration:none;letter-spacing:-0.2px;">
+                <a href="${config.clientUrl}/candidate/applications" style="display:inline-block;background:#2a85ff;color:#ffffff;font-size:15px;font-weight:800;border-radius:12px;padding:16px 40px;text-decoration:none;letter-spacing:-0.2px;">
                   View My Applications →
                 </a>
               </div>
