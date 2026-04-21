@@ -117,11 +117,43 @@ export default function RankrResults() {
 
       if (isShortlisted) {
         await apiFetch(`/jobs/${jobId}/shortlist/${candidateId}`, { method: 'DELETE' })
+        showToast('Removed from shortlist', 'info')
       } else {
-        await apiFetch(`/jobs/${jobId}/shortlist`, {
+        const res = await apiFetch(`/jobs/${jobId}/shortlist`, {
           method: 'POST',
           body: { candidateProfileId: candidateId },
         })
+
+        // Show per-channel notification feedback
+        const n = res?.data?.notification as {
+          email?: { sent: boolean; error?: string } | null
+          sms?: { sent: boolean; sid?: string; error?: string } | null
+          whatsapp?: { sent: boolean; sid?: string; error?: string } | null
+        } | null | undefined
+
+        if (n) {
+          const sent: string[] = []
+          const failed: string[] = []
+
+          if (n.email?.sent)   sent.push('📧 Email')
+          else if (n.email)    failed.push(`📧 Email (${n.email.error ?? 'failed'})`)
+
+          if (n.sms?.sent)     sent.push('📱 SMS')
+          else if (n.sms)      failed.push(`📱 SMS (${n.sms.error ?? 'failed'})`)
+
+          if (n.whatsapp?.sent) sent.push('💬 WhatsApp')
+          else if (n.whatsapp)  failed.push(`💬 WhatsApp (${n.whatsapp.error ?? 'failed'})`)
+
+          if (sent.length > 0) {
+            showToast(`Shortlisted ✓ — Notified via ${sent.join(', ')}`, 'success')
+          } else if (failed.length > 0) {
+            showToast(`Shortlisted ✓ — Notification failed: ${failed.join('; ')}`, 'error')
+          } else {
+            showToast('Shortlisted ✓ — No contact details on file; notification skipped', 'info')
+          }
+        } else {
+          showToast('Candidate shortlisted successfully!', 'success')
+        }
       }
 
       setShortlisted((prev) => {
