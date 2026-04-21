@@ -72,7 +72,11 @@ export async function generateShortlistMessage(params: {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.4, maxOutputTokens: 200 },
+          generationConfig: {
+            temperature: 0.4,
+            maxOutputTokens: 512,
+            thinkingConfig: { thinkingBudget: 0 },
+          },
         }),
       }
     );
@@ -139,7 +143,11 @@ async function generateEmailBody(params: {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 350 },
+          generationConfig: {
+            temperature: 0.7,
+            maxOutputTokens: 1024,
+            thinkingConfig: { thinkingBudget: 0 },
+          },
         }),
       }
     );
