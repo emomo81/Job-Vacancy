@@ -41,7 +41,7 @@ const config: Config = {
   sendgridFromName: process.env.SENDGRID_FROM_NAME || 'Rankr Hiring Team',
   atApiKey: process.env.AT_API_KEY || '',
   atUsername: process.env.AT_USERNAME || 'sandbox',
-  atSenderId: process.env.AT_SENDER_ID || 'RANKR',
+  atSenderId: process.env.AT_SENDER_ID ?? '',
 };
 
 export default config;

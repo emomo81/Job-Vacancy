@@ -43,26 +43,26 @@ export async function generateShortlistMessage(params: {
   score: number;
 }): Promise<string> {
   const { candidateName, jobTitle, companyName, skills, score } = params;
+  const firstName = candidateName.split(' ')[0];
+  const topSkills = skills.slice(0, 3).join(', ') || 'your skills';
 
-  if (!config.geminiApiKey) {
-    return (
-      `Dear ${candidateName},\n\n` +
-      `Congratulations! We are pleased to inform you that your application for the ${jobTitle} role at ${companyName} ` +
-      `has been shortlisted. Your profile stood out with a match score of ${score}%.\n\n` +
-      `Our team will be in touch shortly with next steps.\n\nBest regards,\n${companyName} Hiring Team`
-    );
-  }
+  const fallback =
+    `Congratulations ${firstName}! Your application for the ${jobTitle} role at ${companyName} ` +
+    `has been shortlisted with a ${score}% match score. Your expertise in ${topSkills} stood out. ` +
+    `Our team will contact you soon with next steps. - ${companyName} Hiring Team`;
 
-  const prompt = [
-    'Generate a warm, professional, and concise shortlist notification message for a job applicant.',
-    'Keep it under 280 characters (for SMS compatibility). No placeholders. No markdown. Plain text only.',
-    `Candidate: ${candidateName}`,
-    `Job Title: ${jobTitle}`,
-    `Company: ${companyName}`,
-    `Match Score: ${score}%`,
-    `Top Skills: ${skills.slice(0, 4).join(', ')}`,
-    'The message should congratulate them, mention the role, and say the team will be in touch.',
-  ].join('\n');
+  if (!config.geminiApiKey) return fallback;
+
+  const prompt =
+    `Write a single SMS shortlist notification. It MUST include ALL of the following:\n` +
+    `1. Address the candidate by first name: ${firstName}\n` +
+    `2. Congratulate them on being shortlisted\n` +
+    `3. Mention the exact job title: ${jobTitle}\n` +
+    `4. Mention the company: ${companyName}\n` +
+    `5. Include their AI match score: ${score}%\n` +
+    `6. Mention 1-2 of their top skills: ${topSkills}\n` +
+    `7. Say the team will be in touch soon\n` +
+    `Rules: plain text only, no emojis, no markdown, no quotes, under 320 characters, one paragraph.`;
 
   try {
     const response = await fetch(
@@ -72,7 +72,7 @@ export async function generateShortlistMessage(params: {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 150 },
+          generationConfig: { temperature: 0.4, maxOutputTokens: 200 },
         }),
       }
     );
@@ -80,10 +80,15 @@ export async function generateShortlistMessage(params: {
     if (!response.ok) throw new Error('Gemini request failed');
     const body = await response.json();
     const text = String(body?.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
-    if (!text) throw new Error('Empty response');
+    // Validate the response actually contains key info before using it
+    if (!text || !text.includes(firstName) || text.length < 80) {
+      console.warn('[Gemini SMS] response too short or missing name, using fallback');
+      return fallback;
+    }
     return text;
-  } catch {
-    return `Hi ${candidateName}! 🎉 Congrats — your application for ${jobTitle} at ${companyName} has been shortlisted (${score}% match). Our team will reach out soon with next steps!`;
+  } catch (err) {
+    console.error('[Gemini SMS] error:', err);
+    return fallback;
   }
 }
 
@@ -307,17 +312,25 @@ export async function sendSms(to: string, body: string): Promise<{ success: bool
   // Africa's Talking — preferred
   if (atClient) {
     try {
-      const result = await atClient.send({
+      const payload: any = {
         to: [normalizePhone(to)],
         message: body,
-        ...(config.atUsername !== 'sandbox' && config.atSenderId ? { from: config.atSenderId } : {}),
-      });
+      };
+      if (config.atUsername !== 'sandbox' && config.atSenderId) payload.from = config.atSenderId;
+
+      console.log('[AT SMS] sending to', normalizePhone(to), '| username:', config.atUsername);
+      const result = await atClient.send(payload);
+      console.log('[AT SMS] response:', JSON.stringify(result, null, 2));
+
       const recipient = result?.SMSMessageData?.Recipients?.[0];
-      if (recipient?.statusCode === 101 || recipient?.status === 'Success') {
+      const code = recipient?.statusCode;
+      // 101 = Sent, 100 = Processed, 102 = Queued — all are success
+      if (code === 101 || code === 100 || code === 102 || recipient?.status === 'Success') {
         return { success: true, sid: recipient.messageId };
       }
-      throw new Error(recipient?.status || 'AT send failed');
+      throw new Error(`code ${code}: ${recipient?.status || 'unknown'}`);
     } catch (err: any) {
+      console.error('[AT SMS] error:', err?.message || err);
       return { success: false, error: `AT: ${err?.message || 'SMS send failed'}` };
     }
   }
