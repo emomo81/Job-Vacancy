@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import {
   MapPin, Upload, FileText,
   Plus, X, Briefcase, Check,
-  ExternalLink, Minus, Sparkles, Phone, MessageCircle
+  ExternalLink, Minus, Sparkles, Phone, MessageCircle, Mail
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { apiFetch } from '../../../utils/api-client'
@@ -36,6 +36,7 @@ export default function CandidateProfilePage() {
   const [location, setLocation] = useState('Kigali, Rwanda')
   const [yearsExp, setYearsExp] = useState(2)
   const [linkedin, setLinkedin] = useState('')
+  const [contactEmail, setContactEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [whatsappNumber, setWhatsappNumber] = useState('')
   const [skills, setSkills] = useState<string[]>(['TypeScript', 'React'])
@@ -90,6 +91,7 @@ export default function CandidateProfilePage() {
         setCompletionPct(Number(p.completionPct || 0))
         setCvUploaded(Boolean(p.cv?.uploadedAt))
         setEducation(p.education || '')
+        setContactEmail(p.email || '')
         setPhone(p.phone || '')
         setWhatsappNumber(p.whatsappNumber || '')
       } catch {
@@ -123,6 +125,7 @@ export default function CandidateProfilePage() {
           location,
           yearsExperience: yearsExp,
           linkedinUrl: linkedin,
+          email: contactEmail,
           phone,
           whatsappNumber,
           skills,
@@ -591,8 +594,26 @@ export default function CandidateProfilePage() {
                   <div className="h-px flex-1 bg-[#e2eaf2]" />
                 </div>
                 <p className="text-[11px] text-[#8a9ab0] mb-5 leading-relaxed">
-                  Add your phone numbers so recruiters can notify you via <strong>SMS</strong> and <strong>WhatsApp</strong> when you&apos;re shortlisted for a role.
+                  Add your contact details so recruiters can notify you via <strong>Email</strong>, <strong>SMS</strong>, and <strong>WhatsApp</strong> when you&apos;re shortlisted.
                 </p>
+
+                {/* Email field — full width */}
+                <div className="space-y-2 mb-6">
+                  <label className="text-[11px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">Email Address</label>
+                  <div className="relative">
+                    <input
+                      value={contactEmail}
+                      onChange={e => setContactEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      aria-label="Contact email for notifications"
+                      type="email"
+                      className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-2xl px-5 py-3.5 pl-12 text-sm font-semibold text-[#070707] focus:outline-none focus:border-[#2a85ff]/50 focus:ring-4 focus:ring-[#2a85ff]/5 transition-all"
+                    />
+                    <Mail size={16} className="absolute left-5 top-1/2 -translate-y-1/2 text-[#b0bac6]" />
+                  </div>
+                  <p className="text-[10px] text-[#b0bac6] px-1">You&apos;ll receive a beautifully designed shortlist email here</p>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-[11px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">Phone Number (SMS)</label>

@@ -33,6 +33,7 @@ export interface ICandidateProfile extends Document {
   education: string;
   summary: string;
   linkedinUrl: string;
+  email: string;
   phone: string;
   whatsappNumber: string;
   experiences: Experience[];
@@ -71,6 +72,7 @@ const candidateProfileSchema = new Schema<ICandidateProfile>(
     education: { type: String, default: '' },
     summary: { type: String, default: '' },
     linkedinUrl: { type: String, default: '' },
+    email: { type: String, default: '' },
     phone: { type: String, default: '' },
     whatsappNumber: { type: String, default: '' },
     experiences: [experienceSchema],

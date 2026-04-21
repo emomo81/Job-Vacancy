@@ -14,6 +14,9 @@ interface Config {
   twilioAuthToken: string;
   twilioFromPhone: string;
   twilioWhatsAppFrom: string;
+  sendgridApiKey: string;
+  sendgridFromEmail: string;
+  sendgridFromName: string;
 }
 
 const config: Config = {
@@ -30,6 +33,9 @@ const config: Config = {
   twilioAuthToken: process.env.TWILIO_AUTH_TOKEN || '',
   twilioFromPhone: process.env.TWILIO_FROM_PHONE || '',
   twilioWhatsAppFrom: process.env.TWILIO_WHATSAPP_FROM || 'whatsapp:+14155238886',
+  sendgridApiKey: process.env.SENDGRID_API_KEY || '',
+  sendgridFromEmail: process.env.SENDGRID_FROM_EMAIL || '',
+  sendgridFromName: process.env.SENDGRID_FROM_NAME || 'Rankr Hiring Team',
 };
 
 export default config;

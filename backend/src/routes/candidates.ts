@@ -10,6 +10,7 @@ import ScreeningResult from '../models/ScreeningResult';
 import ScreeningRun from '../models/ScreeningRun';
 import Shortlist from '../models/Shortlist';
 import Notification from '../models/Notification';
+import User from '../models/User';
 import { batchScoreCandidates } from '../services/geminiService';
 import { notifyShortlisted } from '../services/twilioService';
 import { parseCsvBuffer, parseExcelBuffer, parsePdfBuffer, parseDocxBuffer, parseRankrJsonBuffer, ParsedCandidate } from '../services/fileParserService';
@@ -345,27 +346,37 @@ router.post('/jobs/:jobId/shortlist', requireAuth, requireRole(['recruiter', 'ad
         });
       }
 
-      // SMS + WhatsApp notification via Twilio
+      // SMS + WhatsApp + Email notification
       const [profile, job] = await Promise.all([
         CandidateProfile.findById(candidateProfileId).lean(),
         Job.findById(req.params.jobId).lean(),
       ]);
 
-      if (profile && job && (profile.phone || profile.whatsappNumber)) {
+      if (profile && job) {
+        // Resolve email: from User account first, then profile field for external candidates
+        let candidateEmail = profile.email || '';
+        if (!candidateEmail && profile.userId) {
+          const user = await User.findById(profile.userId).lean();
+          candidateEmail = user?.email || '';
+        }
+
         const latestResult = await ScreeningResult.findOne({
           jobId: job._id,
           candidateProfileId: profile._id,
         }).sort({ createdAt: -1 }).lean();
 
-        notificationResult = await notifyShortlisted({
-          candidateName: profile.fullName,
-          phone: profile.phone || '',
-          whatsappNumber: profile.whatsappNumber || '',
-          jobTitle: job.title,
-          companyName: 'Rankr',
-          skills: profile.skills || [],
-          score: latestResult?.score ?? 0,
-        });
+        if (candidateEmail || profile.phone || profile.whatsappNumber) {
+          notificationResult = await notifyShortlisted({
+            candidateName: profile.fullName,
+            email: candidateEmail,
+            phone: profile.phone || '',
+            whatsappNumber: profile.whatsappNumber || '',
+            jobTitle: job.title,
+            companyName: 'Rankr',
+            skills: profile.skills || [],
+            score: latestResult?.score ?? 0,
+          });
+        }
       }
     }
 
@@ -506,28 +517,38 @@ router.post('/applications/:id/shortlist', requireAuth, requireRole(['recruiter'
       });
     }
 
-    // SMS + WhatsApp notification via Twilio
+    // SMS + WhatsApp + Email notification
     let notificationResult = null;
     const [profile, job] = await Promise.all([
       CandidateProfile.findById(app.candidateProfileId).lean(),
       Job.findById(app.jobId).lean(),
     ]);
 
-    if (profile && job && (profile.phone || profile.whatsappNumber)) {
+    if (profile && job) {
+      // Resolve email: from User account first, then profile field for external candidates
+      let candidateEmail = profile.email || '';
+      if (!candidateEmail && profile.userId) {
+        const user = await User.findById(profile.userId).lean();
+        candidateEmail = user?.email || '';
+      }
+
       const latestResult = await ScreeningResult.findOne({
         jobId: job._id,
         candidateProfileId: profile._id,
       }).sort({ createdAt: -1 }).lean();
 
-      notificationResult = await notifyShortlisted({
-        candidateName: profile.fullName,
-        phone: profile.phone || '',
-        whatsappNumber: profile.whatsappNumber || '',
-        jobTitle: job.title,
-        companyName: 'Rankr',
-        skills: profile.skills || [],
-        score: latestResult?.score ?? app.matchScore ?? 0,
-      });
+      if (candidateEmail || profile.phone || profile.whatsappNumber) {
+        notificationResult = await notifyShortlisted({
+          candidateName: profile.fullName,
+          email: candidateEmail,
+          phone: profile.phone || '',
+          whatsappNumber: profile.whatsappNumber || '',
+          jobTitle: job.title,
+          companyName: 'Rankr',
+          skills: profile.skills || [],
+          score: latestResult?.score ?? app.matchScore ?? 0,
+        });
+      }
     }
 
     return ok(res, { success: true, notification: notificationResult });
