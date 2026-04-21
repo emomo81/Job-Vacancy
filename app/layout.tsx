@@ -1,6 +1,7 @@
 import React from 'react'
 import type { Metadata } from 'next'
 import { Poppins } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
 const poppins = Poppins({
@@ -30,8 +31,8 @@ export default function RootLayout({
             {children}
           </ToastProvider>
         </Providers>
+        <Analytics />
       </body>
     </html>
   )
 }
-
