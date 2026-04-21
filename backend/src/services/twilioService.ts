@@ -1,19 +1,36 @@
 import twilio from 'twilio';
-import sgMail from '@sendgrid/mail';
-import AfricasTalking from 'africastalking';
+import nodemailer from 'nodemailer';
 import config from '../config';
 
-// ── Africa's Talking client ───────────────────────────────────────────────────
+// ── Africa's Talking — direct REST API (SDK doesn't expose bulkSMSMode) ──────
 
-let atSmsClient: any = null;
-
-function getAtClient() {
-  if (!config.atApiKey) return null;
-  if (!atSmsClient) {
-    const at = (AfricasTalking as any)({ apiKey: config.atApiKey, username: config.atUsername });
-    atSmsClient = at.SMS;
+async function atSmsSend(to: string, message: string): Promise<{ SMSMessageData: { Message: string; Recipients: any[] } }> {
+  // bulkSMSMode=0 → standard/premium route (not the shared AFRICASTKNG bulk shortcode)
+  const params: Record<string, string> = {
+    username: config.atUsername,
+    to: normalizePhone(to),
+    message,
+    bulkSMSMode: '0',
+  };
+  if (config.atUsername !== 'sandbox' && config.atSenderId) {
+    params.from = config.atSenderId;
   }
-  return atSmsClient;
+
+  const res = await fetch('https://api.africastalking.com/version1/messaging', {
+    method: 'POST',
+    headers: {
+      apiKey: config.atApiKey,
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Accept: 'application/json',
+    },
+    body: new URLSearchParams(params).toString(),
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => res.statusText);
+    throw new Error(`AT HTTP ${res.status}: ${text}`);
+  }
+  return res.json();
 }
 
 // ── Twilio client (fallback) ──────────────────────────────────────────────────
@@ -29,11 +46,38 @@ function getTwilioClient() {
 }
 
 function normalizePhone(phone: string): string {
-  const digits = phone.replace(/\D/g, '');
-  return digits.startsWith('+') ? phone.trim() : `+${digits}`;
+  const trimmed = phone.trim();
+  const digits = trimmed.replace(/\D/g, '');
+  return trimmed.startsWith('+') ? trimmed : `+${digits}`;
 }
 
-// ── Gemini: generate personalised shortlist message (plain-text for SMS/WA) ──
+// ── Shared Gemini helper ──────────────────────────────────────────────────────
+
+async function callGemini(prompt: string, maxTokens = 512): Promise<string> {
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${config.geminiModel}:generateContent?key=${config.geminiApiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.4,
+          maxOutputTokens: maxTokens,
+          thinkingConfig: { thinkingBudget: 0 },
+        },
+      }),
+    }
+  );
+  if (!response.ok) throw new Error('Gemini request failed');
+  const body = await response.json();
+  // gemini-2.5-flash may prepend thinking chunks (thought: true) — skip them
+  const parts: any[] = body?.candidates?.[0]?.content?.parts || [];
+  const outputPart = parts.find((p: any) => !p.thought) ?? parts[parts.length - 1];
+  return String(outputPart?.text || '').trim();
+}
+
+// ── Gemini: short SMS notification (≤100 chars, plain text) ──────────────────
 
 export async function generateShortlistMessage(params: {
   candidateName: string;
@@ -44,62 +88,90 @@ export async function generateShortlistMessage(params: {
 }): Promise<string> {
   const { candidateName, jobTitle, companyName, skills, score } = params;
   const firstName = candidateName.split(' ')[0];
-  const topSkills = skills.slice(0, 3).join(', ') || 'your skills';
 
-  // Keep under 160 chars — Rwanda rejects multi-part SMS from shared shortcodes
-  const skill1 = skills[0] || 'your skills';
+  // Keep under 80 chars — Rwanda operators reject "shortlisted" keyword AND longer messages
+  // NEVER use the word "shortlisted" — it triggers carrier content filters on AT bulk shortcode
+  // "Hi Emmanuel, Rankr selected your Data Science application. We'll be in touch." = 78 chars ✓
   const fallback =
-    `Hi ${firstName}, you have been shortlisted for the ${jobTitle} role at ${companyName}! ` +
-    `Match: ${score}%. Skills: ${skill1} stood out. Our team will contact you soon.`;
+    `Hi ${firstName}, ${companyName} selected your ${jobTitle} application. We'll be in touch.`;
 
   if (!config.geminiApiKey) return fallback;
 
   const prompt =
-    `Write a shortlist SMS notification. STRICT RULES:\n` +
-    `- Under 155 characters total (HARD LIMIT — single SMS segment)\n` +
-    `- Plain text only, no emojis, no markdown, no quotes\n` +
-    `- Must include: candidate first name (${firstName}), job title (${jobTitle}), ` +
-    `company (${companyName}), match score (${score}%), one top skill (${skill1})\n` +
-    `- End with: team will be in touch\n` +
-    `Output only the message, nothing else.`;
+    `Write a job application success SMS. HARD RULES:\n` +
+    `- UNDER 80 characters total (count every character including spaces)\n` +
+    `- Start with: Congratulations ${firstName}!\n` +
+    `- Mention: ${jobTitle} role at ${companyName}\n` +
+    `- NEVER use the word "shortlisted" — use "selected" or "chosen" instead\n` +
+    `- End with: Our team will contact you soon.\n` +
+    `- Plain text only — no emojis, no asterisks, no newlines\n` +
+    `Output ONLY the message text, nothing else.`;
 
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${config.geminiModel}:generateContent?key=${config.geminiApiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.4,
-            maxOutputTokens: 512,
-            thinkingConfig: { thinkingBudget: 0 },
-          },
-        }),
-      }
-    );
-
-    if (!response.ok) throw new Error('Gemini request failed');
-    const body = await response.json();
-
-    // gemini-2.5-flash returns thinking chunks first (thought: true) —
-    // skip those and find the actual output part
-    const parts: any[] = body?.candidates?.[0]?.content?.parts || [];
-    const outputPart = parts.find((p: any) => !p.thought) ?? parts[parts.length - 1];
-    const text = String(outputPart?.text || '').trim();
-
-    if (!text || !text.includes(firstName) || text.length < 50) {
-      console.warn('[Gemini SMS] unusable response, using fallback. Got:', text.slice(0, 60));
+    const text = await callGemini(prompt, 256);
+    const lower = text.toLowerCase();
+    if (!text || !text.includes(firstName) || text.length < 30) {
+      console.warn('[Gemini SMS] unusable, using fallback. Got:', text.slice(0, 60));
       return fallback;
     }
-    if (text.length > 155) {
+    if (text.length > 80) {
       console.warn('[Gemini SMS] too long (' + text.length + ' chars), using fallback');
       return fallback;
     }
+    if (lower.includes('shortlist')) {
+      console.warn('[Gemini SMS] contains banned word "shortlist", using fallback');
+      return fallback;
+    }
+    console.log('[Gemini SMS] generated (' + text.length + ' chars):', text);
     return text;
   } catch (err) {
     console.error('[Gemini SMS] error:', err);
+    return fallback;
+  }
+}
+
+// ── Gemini: longer WhatsApp notification (with *bold* markdown) ───────────────
+
+export async function generateWhatsAppMessage(params: {
+  candidateName: string;
+  jobTitle: string;
+  companyName: string;
+  skills: string[];
+  score: number;
+}): Promise<string> {
+  const { candidateName, jobTitle, companyName, skills, score } = params;
+  const firstName = candidateName.split(' ')[0];
+  const topSkills = skills.slice(0, 3).join(', ') || 'your skills';
+
+  // Template that matches the user's desired format
+  const fallback =
+    `Congratulations ${firstName}! Your application for the *${jobTitle}* role at *${companyName}* ` +
+    `has been shortlisted with a *${score}% match score*. ` +
+    `Your expertise in *${topSkills}* stood out. ` +
+    `Our team will contact you soon with next steps. - ${companyName} Hiring Team`;
+
+  if (!config.geminiApiKey) return fallback;
+
+  const prompt =
+    `Write a WhatsApp shortlist notification message. RULES:\n` +
+    `- 2-3 sentences, warm and professional\n` +
+    `- Use *word* for bold (WhatsApp markdown)\n` +
+    `- Start with: Congratulations ${firstName}!\n` +
+    `- Mention: *${jobTitle}* role at *${companyName}*, *${score}% match score*, skills: ${topSkills}\n` +
+    `- End with: Our team will contact you soon with next steps. - ${companyName} Hiring Team\n` +
+    `- No emojis, no newlines within the message\n` +
+    `Output ONLY the message text, nothing else.`;
+
+  try {
+    const text = await callGemini(prompt, 512);
+    if (!text || !text.includes(firstName) || text.length < 80) {
+      console.warn('[Gemini WA] unusable, using fallback. Got:', text.slice(0, 80));
+      return fallback;
+    }
+    console.log('[Gemini WA] generated (' + text.length + ' chars):', text);
+    return text;
+  } catch (err) {
+    console.error('[Gemini WA] error:', err);
     return fallback;
   }
 }
@@ -139,27 +211,7 @@ async function generateEmailBody(params: {
   ].join('\n');
 
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${config.geminiModel}:generateContent?key=${config.geminiApiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 1024,
-            thinkingConfig: { thinkingBudget: 0 },
-          },
-        }),
-      }
-    );
-
-    if (!response.ok) throw new Error('Gemini request failed');
-    const body = await response.json();
-    const parts: any[] = body?.candidates?.[0]?.content?.parts || [];
-    const outputPart = parts.find((p: any) => !p.thought) ?? parts[parts.length - 1];
-    const text = String(outputPart?.text || '').trim();
+    const text = await callGemini(prompt, 1024);
     if (!text) throw new Error('Empty response');
     return text;
   } catch {
@@ -289,7 +341,23 @@ function buildEmailHtml(params: {
 </html>`;
 }
 
-// ── SendGrid email ────────────────────────────────────────────────────────────
+// ── Email via Gmail (Nodemailer) ──────────────────────────────────────────────
+
+let _transporter: nodemailer.Transporter | null = null;
+
+function getTransporter() {
+  if (!config.gmailUser || !config.gmailAppPassword) return null;
+  if (!_transporter) {
+    _transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: config.gmailUser,
+        pass: config.gmailAppPassword,  // 16-char App Password, NOT your Gmail password
+      },
+    });
+  }
+  return _transporter;
+}
 
 export async function sendEmail(params: {
   to: string;
@@ -299,54 +367,56 @@ export async function sendEmail(params: {
   score: number;
   skills: string[];
 }): Promise<{ success: boolean; error?: string }> {
-  if (!config.sendgridApiKey) return { success: false, error: 'SENDGRID_API_KEY not configured' };
-  if (!config.sendgridFromEmail) return { success: false, error: 'SENDGRID_FROM_EMAIL not configured' };
-
-  sgMail.setApiKey(config.sendgridApiKey);
+  const transporter = getTransporter();
+  if (!transporter) return { success: false, error: 'GMAIL_USER or GMAIL_APP_PASSWORD not configured' };
 
   const bodyText = await generateEmailBody(params);
   const html = buildEmailHtml({ ...params, bodyText });
 
   try {
-    await sgMail.send({
+    await transporter.sendMail({
       to: params.to,
-      from: { email: config.sendgridFromEmail, name: config.sendgridFromName },
+      from: `"${config.emailFromName}" <${config.gmailUser}>`,
       subject: `🎉 You've been shortlisted for ${params.jobTitle} at ${params.companyName}!`,
       text: bodyText,
       html,
     });
+    console.log('[Email] sent to', params.to, 'via Gmail');
     return { success: true };
   } catch (err: any) {
-    const message = err?.response?.body?.errors?.[0]?.message || err?.message || 'Email send failed';
-    return { success: false, error: message };
+    console.error('[Email] error:', err?.message);
+    return { success: false, error: err?.message || 'Email send failed' };
   }
 }
 
 // ── SMS (Africa's Talking → Twilio fallback) ──────────────────────────────────
 
 export async function sendSms(to: string, body: string): Promise<{ success: boolean; sid?: string; error?: string }> {
-  const atClient = getAtClient();
-
-  // Africa's Talking — preferred
-  if (atClient) {
+  // Africa's Talking — preferred (direct REST API so we can set bulkSMSMode=0)
+  if (config.atApiKey) {
     try {
-      const payload: any = {
-        to: [normalizePhone(to)],
-        message: body,
-      };
-      if (config.atUsername !== 'sandbox' && config.atSenderId) payload.from = config.atSenderId;
-
-      console.log('[AT SMS] sending to', normalizePhone(to), '| username:', config.atUsername);
-      const result = await atClient.send(payload);
+      console.log(
+        '[AT SMS] sending to', normalizePhone(to),
+        '| username:', config.atUsername,
+        '| chars:', body.length,
+        '| msg:', body
+      );
+      const result = await atSmsSend(to, body);
       console.log('[AT SMS] response:', JSON.stringify(result, null, 2));
 
       const recipient = result?.SMSMessageData?.Recipients?.[0];
       const code = recipient?.statusCode;
+      console.log(
+        '[AT SMS] status:', recipient?.status,
+        '| code:', code,
+        '| network:', recipient?.networkCode,
+        '| cost:', recipient?.cost
+      );
       // 101 = Sent, 100 = Processed, 102 = Queued — all are success
       if (code === 101 || code === 100 || code === 102 || recipient?.status === 'Success') {
         return { success: true, sid: recipient.messageId };
       }
-      throw new Error(`code ${code}: ${recipient?.status || 'unknown'}`);
+      throw new Error(`code ${code}: ${recipient?.status || 'unknown'} (network: ${recipient?.networkCode ?? 'n/a'})`);
     } catch (err: any) {
       console.error('[AT SMS] error:', err?.message || err);
       return { success: false, error: `AT: ${err?.message || 'SMS send failed'}` };
@@ -409,19 +479,22 @@ export async function notifyShortlisted(params: {
 }): Promise<NotificationResult> {
   const { email, phone, whatsappNumber, ...msgParams } = params;
 
-  // SMS and email have different text — generate the short one for SMS/WA first
-  const message = await generateShortlistMessage(msgParams);
+  // Generate channel-specific messages in parallel:
+  //   SMS       — short plain text (≤100 chars) for operator delivery
+  //   WhatsApp  — longer, uses *bold* markdown, includes skills + score detail
+  const [smsMessage, waMessage] = await Promise.all([
+    phone || whatsappNumber ? generateShortlistMessage(msgParams) : Promise.resolve(''),
+    whatsappNumber ? generateWhatsAppMessage(msgParams) : Promise.resolve(''),
+  ]);
 
   const [smsResult, waResult, emailResult] = await Promise.all([
-    phone ? sendSms(phone, message) : Promise.resolve(null),
-    whatsappNumber ? sendWhatsApp(whatsappNumber, message) : Promise.resolve(null),
-    email
-      ? sendEmail({ to: email, ...msgParams })
-      : Promise.resolve(null),
+    phone ? sendSms(phone, smsMessage) : Promise.resolve(null),
+    whatsappNumber ? sendWhatsApp(whatsappNumber, waMessage) : Promise.resolve(null),
+    email ? sendEmail({ to: email, ...msgParams }) : Promise.resolve(null),
   ]);
 
   return {
-    message,
+    message: smsMessage || waMessage,
     email: emailResult ? { sent: emailResult.success, error: emailResult.error } : null,
     sms: smsResult ? { sent: smsResult.success, sid: smsResult.sid, error: smsResult.error } : null,
     whatsapp: waResult ? { sent: waResult.success, sid: waResult.sid, error: waResult.error } : null,
