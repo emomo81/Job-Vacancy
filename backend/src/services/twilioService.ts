@@ -2,15 +2,15 @@ import twilio from 'twilio';
 import nodemailer from 'nodemailer';
 import config from '../config';
 
-// ── Africa's Talking — direct REST API (SDK doesn't expose bulkSMSMode) ──────
+// ── Africa's Talking — direct REST API ───────────────────────────────────────
 
 async function atSmsSend(to: string, message: string): Promise<{ SMSMessageData: { Message: string; Recipients: any[] } }> {
-  // bulkSMSMode=0 → standard/premium route (not the shared AFRICASTKNG bulk shortcode)
+  // bulkSMSMode=1 (bulk/default) — premium mode (0) requires a registered shortcode we don't have
   const params: Record<string, string> = {
     username: config.atUsername,
     to: normalizePhone(to),
     message,
-    bulkSMSMode: '0',
+    bulkSMSMode: '1',
   };
   if (config.atUsername !== 'sandbox' && config.atSenderId) {
     params.from = config.atSenderId;
@@ -89,21 +89,20 @@ export async function generateShortlistMessage(params: {
   const { candidateName, jobTitle, companyName, skills, score } = params;
   const firstName = candidateName.split(' ')[0];
 
-  // Keep under 80 chars — Rwanda operators reject "shortlisted" keyword AND longer messages
-  // NEVER use the word "shortlisted" — it triggers carrier content filters on AT bulk shortcode
-  // "Hi Emmanuel, Rankr selected your Data Science application. We'll be in touch." = 78 chars ✓
+  // CONFIRMED WORKING format on Rwanda MT networks via AT bulk shortcode (79 chars, ✅ Success):
+  // "Hi Emmanuel, Your Rankr Data Science application scored 48%. We'll be in touch."
+  // Rules: no "shortlisted", under 80 chars, plain text
   const fallback =
-    `Hi ${firstName}, ${companyName} selected your ${jobTitle} application. We'll be in touch.`;
+    `Hi ${firstName}, Your ${companyName} ${jobTitle} application scored ${score}%. We'll be in touch.`;
 
   if (!config.geminiApiKey) return fallback;
 
   const prompt =
     `Write a job application success SMS. HARD RULES:\n` +
-    `- UNDER 80 characters total (count every character including spaces)\n` +
-    `- Start with: Congratulations ${firstName}!\n` +
-    `- Mention: ${jobTitle} role at ${companyName}\n` +
-    `- NEVER use the word "shortlisted" — use "selected" or "chosen" instead\n` +
-    `- End with: Our team will contact you soon.\n` +
+    `- UNDER 80 characters total (count every single character)\n` +
+    `- Use this exact pattern: Hi [name], Your [company] [job] application scored [score]%. We'll be in touch.\n` +
+    `- First name: ${firstName}, Company: ${companyName}, Job: ${jobTitle}, Score: ${score}%\n` +
+    `- NEVER use the word "shortlisted" — it triggers spam filters\n` +
     `- Plain text only — no emojis, no asterisks, no newlines\n` +
     `Output ONLY the message text, nothing else.`;
 
