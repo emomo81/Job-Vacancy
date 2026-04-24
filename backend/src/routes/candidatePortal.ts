@@ -39,12 +39,31 @@ async function extractTextFromImage(buffer: Buffer, mimeType: string): Promise<s
 
 async function parseProfileFromCV(text: string): Promise<any> {
   if (!config.geminiApiKey || !text.trim()) return null;
-  const prompt = `Extract structured profile data from this CV/resume text. Return strict JSON only, no markdown.
-Schema: {"fullName":string,"professionalTitle":string,"location":string,"yearsExperience":number,"skills":string[],"education":string,"experiences":[{"role":string,"company":string,"startDate":string,"endDate":string,"description":string}]}
-Rules: yearsExperience must be a number. skills must be a flat array. education is a single summary string. Use null for unknown fields.
+  const prompt = `Extract structured profile data from this CV/resume text. Return ONLY a valid JSON object, no markdown, no commentary.
+Schema:
+{
+  "fullName": string,
+  "professionalTitle": string,
+  "location": string,
+  "yearsExperience": number,
+  "summary": string,
+  "skills": string[],
+  "education": string,
+  "email": string,
+  "phone": string,
+  "linkedinUrl": string,
+  "githubUrl": string,
+  "experiences": [{"role":string,"company":string,"startDate":string,"endDate":string,"description":string,"technologies":string[]}]
+}
+Rules:
+- yearsExperience must be a number (infer from work history dates if not stated)
+- skills must be a flat array of strings (no objects)
+- education is a single summary string (degree, institution, year)
+- summary is a 2-3 sentence professional summary
+- Use empty string or 0 or [] for unknown fields, never null
 
 CV Text:
-${text.slice(0, 8000)}`;
+${text.slice(0, 10000)}`;
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${config.geminiModel}:generateContent?key=${config.geminiApiKey}`,
     {
@@ -52,7 +71,7 @@ ${text.slice(0, 8000)}`;
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.1 }
+        generationConfig: { temperature: 0.1, responseMimeType: 'application/json' }
       })
     }
   );
@@ -106,11 +125,13 @@ router.get('/candidate/profile', requireAuth, requireRole(['candidate', 'admin']
 
 router.patch('/candidate/profile', requireAuth, requireRole(['candidate', 'admin']), async (req: Request, res: Response) => {
   try {
-    const update = req.body;
-    let profile = await CandidateProfile.findOne({ userId: req.user._id });
+    const profile = await CandidateProfile.findOne({ userId: req.user._id });
     if (!profile) return fail(res, 404, 'NOT_FOUND', 'Profile not found');
 
-    Object.assign(profile, update);
+    const allowed = ['fullName', 'professionalTitle', 'location', 'yearsExperience', 'summary', 'linkedinUrl', 'githubUrl', 'portfolioUrl', 'email', 'phone', 'whatsappNumber', 'skills', 'education', 'availabilityStatus', 'availabilityType', 'avatarUrl', 'visibility'];
+    for (const key of allowed) {
+      if (req.body[key] !== undefined) (profile as any)[key] = req.body[key];
+    }
     profile.completionPct = calculateCompletion(profile);
     await profile.save();
     return ok(res, profile);
@@ -121,11 +142,11 @@ router.patch('/candidate/profile', requireAuth, requireRole(['candidate', 'admin
 
 router.post('/candidate/profile/experience', requireAuth, requireRole(['candidate', 'admin']), async (req: Request, res: Response) => {
   try {
-    const { role, company, startDate, endDate, description } = req.body;
+    const { role, company, startDate, endDate, description, technologies, isCurrent } = req.body;
     const profile = await CandidateProfile.findOne({ userId: req.user._id });
     if (!profile) return fail(res, 404, 'NOT_FOUND', 'Profile not found');
 
-    (profile.experiences as any).push({ role, company, startDate, endDate, description });
+    (profile.experiences as any).push({ role, company, startDate, endDate, description, technologies: technologies || [], isCurrent: isCurrent || false });
     profile.completionPct = calculateCompletion(profile);
     await profile.save();
     return ok(res, (profile.experiences as any)[(profile.experiences as any).length - 1]);
@@ -147,6 +168,8 @@ router.patch('/candidate/profile/experience/:experienceId', requireAuth, require
     exp.startDate = req.body.startDate ?? exp.startDate;
     exp.endDate = req.body.endDate ?? exp.endDate;
     exp.description = req.body.description ?? exp.description;
+    if (Array.isArray(req.body.technologies)) exp.technologies = req.body.technologies;
+    if (req.body.isCurrent !== undefined) exp.isCurrent = req.body.isCurrent;
     await profile.save();
 
     return ok(res, exp);
@@ -222,8 +245,21 @@ router.post('/candidate/profile/cv', requireAuth, requireRole(['candidate', 'adm
       if (typeof parsed.yearsExperience === 'number') profile.yearsExperience = parsed.yearsExperience;
       if (Array.isArray(parsed.skills) && parsed.skills.length) profile.skills = parsed.skills;
       if (parsed.education) profile.education = parsed.education;
+      if (parsed.summary) profile.summary = parsed.summary;
+      if (parsed.email) profile.email = parsed.email;
+      if (parsed.phone) profile.phone = parsed.phone;
+      if (parsed.linkedinUrl) profile.linkedinUrl = parsed.linkedinUrl;
+      if (parsed.githubUrl) profile.githubUrl = parsed.githubUrl;
       if (Array.isArray(parsed.experiences) && parsed.experiences.length) {
-        profile.experiences = parsed.experiences;
+        profile.experiences = parsed.experiences.map((exp: any) => ({
+          role: exp.role || '',
+          company: exp.company || '',
+          startDate: exp.startDate || '',
+          endDate: exp.endDate || '',
+          description: exp.description || '',
+          technologies: Array.isArray(exp.technologies) ? exp.technologies : [],
+          isCurrent: exp.isCurrent || false,
+        }));
       }
     }
 
@@ -390,6 +426,148 @@ router.delete('/candidate/applications/:id', requireAuth, requireRole(['candidat
     if (!app) return fail(res, 404, 'NOT_FOUND', 'Application not found or unauthorized');
 
     return ok(res, { success: true, message: 'Application withdrawn successfully' });
+  } catch (error: any) {
+    return fail(res, 500, 'INTERNAL_ERROR', error.message);
+  }
+});
+
+// ── LANGUAGES ────────────────────────────────────────────────────────────────
+
+router.post('/candidate/profile/language', requireAuth, requireRole(['candidate', 'admin']), async (req: Request, res: Response) => {
+  try {
+    const { name, proficiency } = req.body;
+    if (!name) return fail(res, 400, 'VALIDATION_ERROR', 'Language name is required');
+    const profile = await CandidateProfile.findOne({ userId: req.user._id });
+    if (!profile) return fail(res, 404, 'NOT_FOUND', 'Profile not found');
+    (profile.languages as any).push({ name, proficiency: proficiency || 'Fluent' });
+    await profile.save();
+    return ok(res, (profile.languages as any)[(profile.languages as any).length - 1]);
+  } catch (error: any) {
+    return fail(res, 500, 'INTERNAL_ERROR', error.message);
+  }
+});
+
+router.patch('/candidate/profile/language/:languageId', requireAuth, requireRole(['candidate', 'admin']), async (req: Request, res: Response) => {
+  try {
+    const profile = await CandidateProfile.findOne({ userId: req.user._id });
+    if (!profile) return fail(res, 404, 'NOT_FOUND', 'Profile not found');
+    const lang = (profile.languages as any).id(req.params.languageId);
+    if (!lang) return fail(res, 404, 'NOT_FOUND', 'Language not found');
+    if (req.body.name) lang.name = req.body.name;
+    if (req.body.proficiency) lang.proficiency = req.body.proficiency;
+    await profile.save();
+    return ok(res, lang);
+  } catch (error: any) {
+    return fail(res, 500, 'INTERNAL_ERROR', error.message);
+  }
+});
+
+router.delete('/candidate/profile/language/:languageId', requireAuth, requireRole(['candidate', 'admin']), async (req: Request, res: Response) => {
+  try {
+    const profile = await CandidateProfile.findOne({ userId: req.user._id });
+    if (!profile) return fail(res, 404, 'NOT_FOUND', 'Profile not found');
+    const lang = (profile.languages as any).id(req.params.languageId);
+    if (!lang) return fail(res, 404, 'NOT_FOUND', 'Language not found');
+    lang.deleteOne();
+    await profile.save();
+    return ok(res, { deleted: true });
+  } catch (error: any) {
+    return fail(res, 500, 'INTERNAL_ERROR', error.message);
+  }
+});
+
+// ── CERTIFICATIONS ────────────────────────────────────────────────────────────
+
+router.post('/candidate/profile/certification', requireAuth, requireRole(['candidate', 'admin']), async (req: Request, res: Response) => {
+  try {
+    const { name, issuer, issueDate, imageUrl } = req.body;
+    if (!name) return fail(res, 400, 'VALIDATION_ERROR', 'Certification name is required');
+    const profile = await CandidateProfile.findOne({ userId: req.user._id });
+    if (!profile) return fail(res, 404, 'NOT_FOUND', 'Profile not found');
+    (profile.certifications as any).push({ name, issuer: issuer || '', issueDate: issueDate || '', imageUrl: imageUrl || '' });
+    await profile.save();
+    return ok(res, (profile.certifications as any)[(profile.certifications as any).length - 1]);
+  } catch (error: any) {
+    return fail(res, 500, 'INTERNAL_ERROR', error.message);
+  }
+});
+
+router.patch('/candidate/profile/certification/:certificationId', requireAuth, requireRole(['candidate', 'admin']), async (req: Request, res: Response) => {
+  try {
+    const profile = await CandidateProfile.findOne({ userId: req.user._id });
+    if (!profile) return fail(res, 404, 'NOT_FOUND', 'Profile not found');
+    const cert = (profile.certifications as any).id(req.params.certificationId);
+    if (!cert) return fail(res, 404, 'NOT_FOUND', 'Certification not found');
+    if (req.body.name) cert.name = req.body.name;
+    if (req.body.issuer !== undefined) cert.issuer = req.body.issuer;
+    if (req.body.issueDate !== undefined) cert.issueDate = req.body.issueDate;
+    if (req.body.imageUrl !== undefined) cert.imageUrl = req.body.imageUrl;
+    await profile.save();
+    return ok(res, cert);
+  } catch (error: any) {
+    return fail(res, 500, 'INTERNAL_ERROR', error.message);
+  }
+});
+
+router.delete('/candidate/profile/certification/:certificationId', requireAuth, requireRole(['candidate', 'admin']), async (req: Request, res: Response) => {
+  try {
+    const profile = await CandidateProfile.findOne({ userId: req.user._id });
+    if (!profile) return fail(res, 404, 'NOT_FOUND', 'Profile not found');
+    const cert = (profile.certifications as any).id(req.params.certificationId);
+    if (!cert) return fail(res, 404, 'NOT_FOUND', 'Certification not found');
+    cert.deleteOne();
+    await profile.save();
+    return ok(res, { deleted: true });
+  } catch (error: any) {
+    return fail(res, 500, 'INTERNAL_ERROR', error.message);
+  }
+});
+
+// ── PROJECTS ─────────────────────────────────────────────────────────────────
+
+router.post('/candidate/profile/project', requireAuth, requireRole(['candidate', 'admin']), async (req: Request, res: Response) => {
+  try {
+    const { name, description, technologies, role, link, startDate, endDate } = req.body;
+    if (!name) return fail(res, 400, 'VALIDATION_ERROR', 'Project name is required');
+    const profile = await CandidateProfile.findOne({ userId: req.user._id });
+    if (!profile) return fail(res, 404, 'NOT_FOUND', 'Profile not found');
+    (profile.projects as any).push({ name, description: description || '', technologies: technologies || [], role: role || '', link: link || '', startDate: startDate || '', endDate: endDate || '' });
+    await profile.save();
+    return ok(res, (profile.projects as any)[(profile.projects as any).length - 1]);
+  } catch (error: any) {
+    return fail(res, 500, 'INTERNAL_ERROR', error.message);
+  }
+});
+
+router.patch('/candidate/profile/project/:projectId', requireAuth, requireRole(['candidate', 'admin']), async (req: Request, res: Response) => {
+  try {
+    const profile = await CandidateProfile.findOne({ userId: req.user._id });
+    if (!profile) return fail(res, 404, 'NOT_FOUND', 'Profile not found');
+    const proj = (profile.projects as any).id(req.params.projectId);
+    if (!proj) return fail(res, 404, 'NOT_FOUND', 'Project not found');
+    if (req.body.name) proj.name = req.body.name;
+    if (req.body.description !== undefined) proj.description = req.body.description;
+    if (Array.isArray(req.body.technologies)) proj.technologies = req.body.technologies;
+    if (req.body.role !== undefined) proj.role = req.body.role;
+    if (req.body.link !== undefined) proj.link = req.body.link;
+    if (req.body.startDate !== undefined) proj.startDate = req.body.startDate;
+    if (req.body.endDate !== undefined) proj.endDate = req.body.endDate;
+    await profile.save();
+    return ok(res, proj);
+  } catch (error: any) {
+    return fail(res, 500, 'INTERNAL_ERROR', error.message);
+  }
+});
+
+router.delete('/candidate/profile/project/:projectId', requireAuth, requireRole(['candidate', 'admin']), async (req: Request, res: Response) => {
+  try {
+    const profile = await CandidateProfile.findOne({ userId: req.user._id });
+    if (!profile) return fail(res, 404, 'NOT_FOUND', 'Profile not found');
+    const proj = (profile.projects as any).id(req.params.projectId);
+    if (!proj) return fail(res, 404, 'NOT_FOUND', 'Project not found');
+    proj.deleteOne();
+    await profile.save();
+    return ok(res, { deleted: true });
   } catch (error: any) {
     return fail(res, 500, 'INTERNAL_ERROR', error.message);
   }
