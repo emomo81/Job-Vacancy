@@ -1,4 +1,4 @@
-# Rankr-AI-Powered Talent Screening
+# Rankr — AI-Powered Talent Screening
 
 Rankr automates recruitment by running AI-driven candidate screening with Google Gemini. Recruiters create jobs, upload candidate pools (CSV, Excel, or PDF resumes), and get ranked results with reasoning in seconds. Candidates get a portal to browse open roles, apply, upload a CV, and track applications.
 
