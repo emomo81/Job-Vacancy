@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { Secret } from 'jsonwebtoken';
 import config from '../config';
-import User from '../models/User';
+import User, { IUser } from '../models/User';
 import { fail } from '../utils/apiResponse';
 
 interface TokenPayload {
@@ -13,7 +13,7 @@ interface TokenPayload {
 declare global {
   namespace Express {
     interface Request {
-      user?: any;
+      user: IUser;
     }
   }
 }
