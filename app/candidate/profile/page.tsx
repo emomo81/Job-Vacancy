@@ -128,9 +128,22 @@ export default function CandidateProfilePage() {
   const [cvParsing, setCvParsing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [langError, setLangError] = useState('')
+  const [langSaving, setLangSaving] = useState(false)
 
   const cvRef = useRef<HTMLInputElement>(null)
   const avatarInputRef = useRef<HTMLInputElement>(null)
+
+  // Tracks last saved state for Discard
+  const savedProfile = useRef({
+    fullName: 'New Candidate', proTitle: 'Product Engineer', location: 'Kigali, Rwanda',
+    yearsExp: 2, summary: '', linkedin: '', githubUrl: '', portfolioUrl: '',
+    contactEmail: '', phone: '', whatsappNumber: '', skills: ['TypeScript', 'React'],
+    education: '', avatarUrl: '', availability: 'open' as 'open' | 'closed',
+    remote: true, fulltime: true,
+    availabilityStatus: 'Available' as typeof availabilityStatus,
+    availabilityType: 'Full-time' as typeof availabilityType,
+  })
 
   // Close language dropdown when clicking outside
   useEffect(() => {
@@ -142,6 +155,16 @@ export default function CandidateProfilePage() {
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [])
+
+  // Ensure language modal fields are populated when it opens
+  useEffect(() => {
+    if (!isLangModalOpen) return
+    setLangSearch(editingLang?.name ?? '')
+    setLangProficiency(editingLang?.proficiency ?? 'Fluent')
+    setLangDropdownOpen(false)
+    setLangError('')
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLangModalOpen])
 
   useEffect(() => {
     void (async () => {
@@ -165,11 +188,39 @@ export default function CandidateProfilePage() {
         setCvUploaded(Boolean(p.cv?.uploadedAt))
         setAvatarUrl(p.avatarUrl || '')
 
-        if (p.visibility?.openToWork === false) setAvailability('closed')
-        setRemote(p.visibility?.remote ?? true)
-        setFulltime(p.visibility?.fulltime ?? true)
-        if (p.availabilityStatus) setAvailabilityStatus(p.availabilityStatus)
-        if (p.availabilityType) setAvailabilityType(p.availabilityType)
+        const loadedAvailability = p.visibility?.openToWork === false ? 'closed' : 'open'
+        const loadedRemote = p.visibility?.remote ?? true
+        const loadedFulltime = p.visibility?.fulltime ?? true
+        const loadedStatus = p.availabilityStatus || 'Available'
+        const loadedType = p.availabilityType || 'Full-time'
+        setAvailability(loadedAvailability)
+        setRemote(loadedRemote)
+        setFulltime(loadedFulltime)
+        setAvailabilityStatus(loadedStatus)
+        setAvailabilityType(loadedType)
+
+        // Snapshot for Discard
+        savedProfile.current = {
+          fullName: p.fullName || 'New Candidate',
+          proTitle: p.professionalTitle || 'Product Engineer',
+          location: p.location || 'Kigali, Rwanda',
+          yearsExp: Number(p.yearsExperience || 0),
+          summary: p.summary || '',
+          linkedin: p.linkedinUrl || '',
+          githubUrl: p.githubUrl || '',
+          portfolioUrl: p.portfolioUrl || '',
+          contactEmail: p.email || '',
+          phone: p.phone || '',
+          whatsappNumber: p.whatsappNumber || '',
+          skills: Array.isArray(p.skills) ? p.skills : [],
+          education: p.education || '',
+          avatarUrl: p.avatarUrl || '',
+          availability: loadedAvailability,
+          remote: loadedRemote,
+          fulltime: loadedFulltime,
+          availabilityStatus: loadedStatus,
+          availabilityType: loadedType,
+        }
 
         setWorkHistory(
           (p.experiences || []).map((exp: any, idx: number) => ({
@@ -264,12 +315,42 @@ export default function CandidateProfilePage() {
       })
       localStorage.setItem('rankr_user_name', fullName)
       localStorage.setItem('rankr_profile_completion', completionPct.toString())
+      savedProfile.current = {
+        fullName, proTitle, location, yearsExp, summary, linkedin, githubUrl,
+        portfolioUrl, contactEmail, phone, whatsappNumber, skills, education,
+        avatarUrl, availability, remote, fulltime, availabilityStatus, availabilityType,
+      }
       showToast('Profile saved successfully!', 'success')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save profile')
     } finally {
       setSaving(false)
     }
+  }
+
+  const handleDiscard = () => {
+    const s = savedProfile.current
+    setFullName(s.fullName)
+    setProTitle(s.proTitle)
+    setLocation(s.location)
+    setYearsExp(s.yearsExp)
+    setSummary(s.summary)
+    setLinkedin(s.linkedin)
+    setGithubUrl(s.githubUrl)
+    setPortfolioUrl(s.portfolioUrl)
+    setContactEmail(s.contactEmail)
+    setPhone(s.phone)
+    setWhatsappNumber(s.whatsappNumber)
+    setSkills(s.skills)
+    setEducation(s.education)
+    setAvatarUrl(s.avatarUrl)
+    setAvailability(s.availability)
+    setRemote(s.remote)
+    setFulltime(s.fulltime)
+    setAvailabilityStatus(s.availabilityStatus)
+    setAvailabilityType(s.availabilityType)
+    setError('')
+    showToast('Changes discarded', 'success')
   }
 
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -306,6 +387,11 @@ export default function CandidateProfilePage() {
         if (typeof parsed.yearsExperience === 'number') setYearsExp(parsed.yearsExperience)
         if (Array.isArray(parsed.skills) && parsed.skills.length) setSkills(parsed.skills)
         if (parsed.education) setEducation(parsed.education)
+        if (parsed.summary) setSummary(parsed.summary)
+        if (parsed.email) setContactEmail(parsed.email)
+        if (parsed.phone) setPhone(parsed.phone)
+        if (parsed.linkedinUrl) setLinkedin(parsed.linkedinUrl)
+        if (parsed.githubUrl) setGithubUrl(parsed.githubUrl)
         if (Array.isArray(parsed.experiences) && parsed.experiences.length) {
           setWorkHistory(parsed.experiences.map((exp: any, idx: number) => ({
             id: String(exp._id || `parsed-${idx}-${Date.now()}`),
@@ -314,8 +400,8 @@ export default function CandidateProfilePage() {
             startDate: exp.startDate || '',
             endDate: exp.endDate || '',
             description: exp.description || '',
-            technologies: [],
-            isCurrent: false,
+            technologies: Array.isArray(exp.technologies) ? exp.technologies : [],
+            isCurrent: exp.isCurrent || false,
           })))
         }
         showToast('CV scanned — profile auto-filled. Review and save your changes.', 'success')
@@ -646,7 +732,7 @@ export default function CandidateProfilePage() {
                       onChange={e => { setLangSearch(e.target.value); setLangDropdownOpen(true) }}
                       onFocus={() => setLangDropdownOpen(true)}
                       required
-                      className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#2a85ff]"
+                      className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold text-[#070707] focus:outline-none focus:border-[#2a85ff]"
                       placeholder="Search or type a language..."
                       autoComplete="off"
                     />
@@ -980,7 +1066,7 @@ export default function CandidateProfilePage() {
                 <button onClick={() => setCvUploaded(false)} aria-label="Remove CV" className="text-[#b0bac6] hover:text-[#5a6a7a] transition-colors cursor-pointer p-1"><X size={14} /></button>
               </div>
             )}
-            <button className="w-full mt-4 py-3 rounded-xl text-sm font-bold text-[#2a85ff] bg-[#e8f1ff] hover:bg-[#d0e4ff] transition-all cursor-pointer">
+            <button onClick={() => cvRef.current?.click()} className="w-full mt-4 py-3 rounded-xl text-sm font-bold text-[#2a85ff] bg-[#e8f1ff] hover:bg-[#d0e4ff] transition-all cursor-pointer">
               {cvUploaded ? 'Update CV' : 'Select File'}
             </button>
           </div>
@@ -1281,7 +1367,7 @@ export default function CandidateProfilePage() {
 
           {/* Final Actions */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 pt-4">
-            <button className="px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl text-sm sm:text-base font-bold text-[#5a6a7a] bg-white border border-[#e2eaf2] hover:bg-[#f0f5fa] transition-all cursor-pointer shadow-sm text-center">
+            <button onClick={handleDiscard} className="px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl text-sm sm:text-base font-bold text-[#5a6a7a] bg-white border border-[#e2eaf2] hover:bg-[#f0f5fa] transition-all cursor-pointer shadow-sm text-center">
               Discard
             </button>
             <button onClick={() => { void handleSave() }} className="px-8 sm:px-10 py-3.5 sm:py-4 rounded-2xl text-sm sm:text-base font-bold text-white bg-[#2a85ff] hover:bg-[#1a75ef] shadow-[0_8px_24px_rgba(42,133,255,0.4)] hover:scale-[1.02] transition-all cursor-pointer text-center">
