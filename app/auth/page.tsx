@@ -104,7 +104,7 @@ export default function RankrAuth() {
           throw new Error('Invalid email or password')
         }
 
-        setSession({ token: result.data.token, user: result.data.user })
+        setSession({ token: result.data.token, refreshToken: result.data.refreshToken, user: result.data.user })
         router.push(result.data.user.role === 'candidate' ? '/candidate' : '/dashboard')
         return
       }
@@ -126,7 +126,7 @@ export default function RankrAuth() {
         },
       })
 
-      setSession({ token: result.data.token, user: result.data.user })
+      setSession({ token: result.data.token, refreshToken: result.data.refreshToken, user: result.data.user })
       router.push(result.data.user.role === 'candidate' ? '/candidate' : '/dashboard')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to authenticate')
