@@ -29,7 +29,9 @@
       "Bash(npm i *)",
       "Bash(echo \"EXIT:$?\")",
       "mcp__Desktop_Commander__list_sessions",
-      "mcp__Desktop_Commander__start_process"
+      "mcp__Desktop_Commander__start_process",
+      "Bash(npm audit *)",
+      "Bash(node -e \"const d=require\\('fs'\\).readFileSync\\('/dev/stdin','utf8'\\); const j=JSON.parse\\(d\\); const vulns=j.vulnerabilities||{}; Object.entries\\(vulns\\).forEach\\(\\([k,v]\\)=>console.log\\(k,v.severity,v.via?.map?.\\(x=>typeof x==='string'?x:x.title\\).join\\(', '\\)\\)\\)\")"
     ]
   }
 }
