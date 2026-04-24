@@ -16,6 +16,7 @@ async function runScreeningAsync(runId: any, userId: any): Promise<void> {
   const run = await ScreeningRun.findById(runId);
   if (!run) return;
 
+  try {
   const job = await Job.findById(run.jobId).lean();
   if (!job) {
     run.status = 'failed';
@@ -90,12 +91,27 @@ async function runScreeningAsync(runId: any, userId: any): Promise<void> {
     message: `${job.title} screening completed with ${ranked.length} evaluated candidates.`,
     meta: { jobId: job._id.toString(), runId: run._id.toString() },
   });
+  } catch (err: any) {
+    console.error('[Screening] runScreeningAsync error:', err?.message);
+    try {
+      const run2 = await ScreeningRun.findById(runId);
+      if (run2 && run2.status !== 'completed') {
+        run2.status = 'failed';
+        run2.errorMessage = err?.message || 'Unknown error';
+        run2.finishedAt = new Date();
+        await run2.save();
+      }
+    } catch { /* ignore secondary failure */ }
+  }
 }
 
 router.post('/jobs/:jobId/screening-runs', requireAuth, requireRole(['recruiter', 'admin']), async (req: Request, res: Response) => {
   try {
     const job = await Job.findById(req.params.jobId).lean();
     if (!job) return fail(res, 404, 'NOT_FOUND', 'Job not found');
+    if (req.user.role !== 'admin' && String((job as any).organizationId) !== String(req.user.organizationId)) {
+      return fail(res, 403, 'FORBIDDEN', 'Access denied');
+    }
 
     const run = await ScreeningRun.create({
       jobId: job._id,
