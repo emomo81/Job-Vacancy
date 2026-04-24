@@ -667,11 +667,11 @@ export default function CandidateProfilePage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">Role / Title</label>
-                    <input name="role" defaultValue={editingExp?.role} required className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#2a85ff]" placeholder="e.g. Senior Backend Engineer" />
+                    <input name="role" defaultValue={editingExp?.role} required className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold text-[#070707] focus:outline-none focus:border-[#2a85ff]" placeholder="e.g. Senior Backend Engineer" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">Company</label>
-                    <input name="company" defaultValue={editingExp?.company} required className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#2a85ff]" placeholder="e.g. Google" />
+                    <input name="company" defaultValue={editingExp?.company} required className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold text-[#070707] focus:outline-none focus:border-[#2a85ff]" placeholder="e.g. Google" />
                   </div>
                 </div>
                 <div className="flex items-center gap-3 px-1">
@@ -683,16 +683,16 @@ export default function CandidateProfilePage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">Start Date</label>
-                    <input name="startDate" defaultValue={editingExp?.startDate} required className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#2a85ff]" placeholder="e.g. Jan 2021" />
+                    <input type="date" name="startDate" defaultValue={editingExp?.startDate} required className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold text-[#070707] focus:outline-none focus:border-[#2a85ff]" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">End Date</label>
-                    <input name="endDate" defaultValue={expIsCurrent ? 'Present' : editingExp?.endDate} disabled={expIsCurrent} className={`w-full border rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#2a85ff] ${expIsCurrent ? 'bg-[#f0f5fa] text-[#8a9ab0] border-[#e2eaf2]' : 'bg-[#f8fbff] border-[#e2eaf2]'}`} placeholder="e.g. Dec 2023" />
+                    <input type="date" name="endDate" defaultValue={expIsCurrent ? '' : editingExp?.endDate} disabled={expIsCurrent} className={`w-full border rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#2a85ff] ${expIsCurrent ? 'bg-[#f0f5fa] text-[#8a9ab0] border-[#e2eaf2]' : 'bg-[#f8fbff] text-[#070707] border-[#e2eaf2]'}`} />
                   </div>
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">Description / Achievements</label>
-                  <textarea name="description" defaultValue={editingExp?.description} required rows={4} className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#2a85ff] resize-none" placeholder="Describe your key impact..." />
+                  <textarea name="description" defaultValue={editingExp?.description} required rows={4} className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold text-[#070707] focus:outline-none focus:border-[#2a85ff] resize-none" placeholder="Describe your key impact..." />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">Technologies Used</label>
@@ -703,7 +703,7 @@ export default function CandidateProfilePage() {
                       </span>
                     ))}
                   </div>
-                  <input value={expTechInput} onChange={e => setExpTechInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && expTechInput.trim()) { e.preventDefault(); if (!expTechs.includes(expTechInput.trim())) setExpTechs(prev => [...prev, expTechInput.trim()]); setExpTechInput('') } }} className="w-full bg-[#f8fbff] border border-dashed border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#2a85ff]" placeholder="Type a technology and press Enter..." />
+                  <input value={expTechInput} onChange={e => setExpTechInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && expTechInput.trim()) { e.preventDefault(); if (!expTechs.includes(expTechInput.trim())) setExpTechs(prev => [...prev, expTechInput.trim()]); setExpTechInput('') } }} className="w-full bg-[#f8fbff] border border-dashed border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold text-[#070707] focus:outline-none focus:border-[#2a85ff]" placeholder="Type a technology and press Enter..." />
                 </div>
                 <div className="flex gap-3 pt-4">
                   <button type="button" onClick={() => setIsExpModalOpen(false)} className="flex-1 py-3.5 rounded-xl text-sm font-bold text-[#5a6a7a] bg-[#f0f5fa] hover:bg-[#e2eaf2] transition-all">Cancel</button>
@@ -802,15 +802,15 @@ export default function CandidateProfilePage() {
               <form onSubmit={handleCertSave} className="space-y-5">
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">Certification Name</label>
-                  <input name="name" defaultValue={editingCert?.name} required className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#2a85ff]" placeholder="e.g. AWS Solutions Architect" />
+                  <input name="name" defaultValue={editingCert?.name} required className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold text-[#070707] focus:outline-none focus:border-[#2a85ff]" placeholder="e.g. AWS Solutions Architect" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">Issuing Organization</label>
-                  <input name="issuer" defaultValue={editingCert?.issuer} className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#2a85ff]" placeholder="e.g. Amazon Web Services" />
+                  <input name="issuer" defaultValue={editingCert?.issuer} className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold text-[#070707] focus:outline-none focus:border-[#2a85ff]" placeholder="e.g. Amazon Web Services" />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">Issue Date (YYYY-MM)</label>
-                  <input name="issueDate" defaultValue={editingCert?.issueDate} className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#2a85ff]" placeholder="e.g. 2023-06" />
+                  <input type="date" name="issueDate" defaultValue={editingCert?.issueDate} className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold text-[#070707] focus:outline-none focus:border-[#2a85ff]" />
                 </div>
                 {/* Certificate image upload */}
                 <div className="space-y-2">
@@ -858,16 +858,16 @@ export default function CandidateProfilePage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">Project Name</label>
-                    <input name="name" defaultValue={editingProj?.name} required className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#2a85ff]" placeholder="e.g. E-commerce Platform" />
+                    <input name="name" defaultValue={editingProj?.name} required className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold text-[#070707] focus:outline-none focus:border-[#2a85ff]" placeholder="e.g. E-commerce Platform" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">Your Role</label>
-                    <input name="role" defaultValue={editingProj?.role} className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#2a85ff]" placeholder="e.g. Lead Developer" />
+                    <input name="role" defaultValue={editingProj?.role} className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold text-[#070707] focus:outline-none focus:border-[#2a85ff]" placeholder="e.g. Lead Developer" />
                   </div>
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">Description</label>
-                  <textarea name="description" defaultValue={editingProj?.description} rows={3} className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#2a85ff] resize-none" placeholder="What did this project do? What was your impact?" />
+                  <textarea name="description" defaultValue={editingProj?.description} rows={3} className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold text-[#070707] focus:outline-none focus:border-[#2a85ff] resize-none" placeholder="What did this project do? What was your impact?" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">Technologies</label>
@@ -878,20 +878,20 @@ export default function CandidateProfilePage() {
                       </span>
                     ))}
                   </div>
-                  <input value={projTechInput} onChange={e => setProjTechInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && projTechInput.trim()) { e.preventDefault(); if (!projTechs.includes(projTechInput.trim())) setProjTechs(prev => [...prev, projTechInput.trim()]); setProjTechInput('') } }} className="w-full bg-[#f8fbff] border border-dashed border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#2a85ff]" placeholder="Type a technology and press Enter..." />
+                  <input value={projTechInput} onChange={e => setProjTechInput(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && projTechInput.trim()) { e.preventDefault(); if (!projTechs.includes(projTechInput.trim())) setProjTechs(prev => [...prev, projTechInput.trim()]); setProjTechInput('') } }} className="w-full bg-[#f8fbff] border border-dashed border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold text-[#070707] focus:outline-none focus:border-[#2a85ff]" placeholder="Type a technology and press Enter..." />
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">Project Link</label>
-                  <input name="link" defaultValue={editingProj?.link} className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#2a85ff]" placeholder="https://github.com/..." />
+                  <input name="link" defaultValue={editingProj?.link} className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold text-[#070707] focus:outline-none focus:border-[#2a85ff]" placeholder="https://github.com/..." />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">Start Date</label>
-                    <input name="startDate" defaultValue={editingProj?.startDate} className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#2a85ff]" placeholder="e.g. 2023-01" />
+                    <input type="date" name="startDate" defaultValue={editingProj?.startDate} className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold text-[#070707] focus:outline-none focus:border-[#2a85ff]" />
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-bold text-[#8a9ab0] uppercase tracking-wider px-1">End Date</label>
-                    <input name="endDate" defaultValue={editingProj?.endDate} className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-[#2a85ff]" placeholder="e.g. 2023-06" />
+                    <input type="date" name="endDate" defaultValue={editingProj?.endDate} className="w-full bg-[#f8fbff] border border-[#e2eaf2] rounded-xl px-4 py-3 text-sm font-semibold text-[#070707] focus:outline-none focus:border-[#2a85ff]" />
                   </div>
                 </div>
                 <div className="flex gap-3 pt-4">
