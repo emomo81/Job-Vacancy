@@ -144,6 +144,9 @@ router.post('/jobs/:jobId/candidates/import/rankr-json', requireAuth, requireRol
   try {
     const job = await Job.findById(req.params.jobId).lean();
     if (!job) return fail(res, 404, 'NOT_FOUND', 'Job not found');
+    if (req.user.role !== 'admin' && String((job as any).organizationId) !== String(req.user.organizationId)) {
+      return fail(res, 403, 'FORBIDDEN', 'Access denied');
+    }
     if (!req.file) return fail(res, 400, 'VALIDATION_ERROR', 'No file uploaded');
 
     let parsed: ParsedCandidate[] = [];
@@ -166,6 +169,9 @@ router.post('/jobs/:jobId/candidates/import/external-csv', requireAuth, requireR
   try {
     const job = await Job.findById(req.params.jobId).lean();
     if (!job) return fail(res, 404, 'NOT_FOUND', 'Job not found');
+    if (req.user.role !== 'admin' && String((job as any).organizationId) !== String(req.user.organizationId)) {
+      return fail(res, 403, 'FORBIDDEN', 'Access denied');
+    }
     if (!req.file) return fail(res, 400, 'VALIDATION_ERROR', 'No file uploaded');
 
     const mime = req.file.mimetype || '';
@@ -194,6 +200,9 @@ router.post('/jobs/:jobId/candidates/import/external-pdf', requireAuth, requireR
   try {
     const job = await Job.findById(req.params.jobId).lean();
     if (!job) return fail(res, 404, 'NOT_FOUND', 'Job not found');
+    if (req.user.role !== 'admin' && String((job as any).organizationId) !== String(req.user.organizationId)) {
+      return fail(res, 403, 'FORBIDDEN', 'Access denied');
+    }
 
     const files = (req.files as Express.Multer.File[]) || [];
     if (!files.length && (req as any).file) files.push((req as any).file);
@@ -409,6 +418,9 @@ router.post('/jobs/:jobId/analyze-applications', requireAuth, requireRole(['recr
   try {
     const job = await Job.findById(req.params.jobId).lean();
     if (!job) return fail(res, 404, 'NOT_FOUND', 'Job not found');
+    if (req.user.role !== 'admin' && String((job as any).organizationId) !== String(req.user.organizationId)) {
+      return fail(res, 403, 'FORBIDDEN', 'Access denied');
+    }
 
     const applications = await Application.find({
       jobId: job._id,
