@@ -2,35 +2,30 @@ import twilio from 'twilio';
 import nodemailer from 'nodemailer';
 import config from '../config';
 
-// ── Africa's Talking — direct REST API ───────────────────────────────────────
+// ── Africa's Talking — SDK ────────────────────────────────────────────────────
+
+let _atSms: any = null;
+
+function getAtSms() {
+  if (!_atSms) {
+    const AfricasTalking = require('africastalking')({
+      apiKey: config.atApiKey,
+      username: config.atUsername,
+    });
+    _atSms = AfricasTalking.SMS;
+  }
+  return _atSms;
+}
 
 async function atSmsSend(to: string, message: string): Promise<{ SMSMessageData: { Message: string; Recipients: any[] } }> {
-  // bulkSMSMode=1 (bulk/default) — premium mode (0) requires a registered shortcode we don't have
-  const params: Record<string, string> = {
-    username: config.atUsername,
-    to: normalizePhone(to),
+  const options: Record<string, any> = {
+    to: [normalizePhone(to)],
     message,
-    bulkSMSMode: '1',
   };
-  if (config.atUsername !== 'sandbox' && config.atSenderId) {
-    params.from = config.atSenderId;
+  if (config.atSenderId) {
+    options.from = config.atSenderId;
   }
-
-  const res = await fetch('https://api.africastalking.com/version1/messaging', {
-    method: 'POST',
-    headers: {
-      apiKey: config.atApiKey,
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Accept: 'application/json',
-    },
-    body: new URLSearchParams(params).toString(),
-  });
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => res.statusText);
-    throw new Error(`AT HTTP ${res.status}: ${text}`);
-  }
-  return res.json();
+  return getAtSms().send(options);
 }
 
 // ── Twilio client (fallback) ──────────────────────────────────────────────────
