@@ -391,7 +391,7 @@ export async function sendEmail(params: {
 // ── SMS (Africa's Talking → Twilio fallback) ──────────────────────────────────
 
 export async function sendSms(to: string, body: string): Promise<{ success: boolean; sid?: string; error?: string }> {
-  // Africa's Talking — preferred (direct REST API so we can set bulkSMSMode=0)
+  // Africa's Talking — preferred
   if (config.atApiKey) {
     try {
       console.log(
@@ -417,8 +417,8 @@ export async function sendSms(to: string, body: string): Promise<{ success: bool
       }
       throw new Error(`code ${code}: ${recipient?.status || 'unknown'} (network: ${recipient?.networkCode ?? 'n/a'})`);
     } catch (err: any) {
-      console.error('[AT SMS] error:', err?.message || err);
-      return { success: false, error: `AT: ${err?.message || 'SMS send failed'}` };
+      console.error('[AT SMS] failed, trying Twilio fallback. Error:', err?.message || err);
+      // fall through to Twilio
     }
   }
 
@@ -428,11 +428,13 @@ export async function sendSms(to: string, body: string): Promise<{ success: bool
   if (!config.twilioFromPhone) return { success: false, error: 'TWILIO_FROM_PHONE not set' };
 
   try {
+    console.log('[Twilio SMS] sending to', normalizePhone(to));
     const msg = await twilioClient.messages.create({
       body,
       from: config.twilioFromPhone,
       to: normalizePhone(to),
     });
+    console.log('[Twilio SMS] sent, sid:', msg.sid);
     return { success: true, sid: msg.sid };
   } catch (err: any) {
     return { success: false, error: err?.message || 'SMS send failed' };
